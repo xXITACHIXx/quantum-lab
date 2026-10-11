@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from functools import lru_cache
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -401,9 +402,79 @@ footer { visibility: hidden; }
 """.replace("FUENTE_TITULOS", FUENTE_TITULOS).replace("FUENTE_CIFRAS", FUENTE_CIFRAS)
 
 
+# ---------------------------------------------------------------------
+# Fuente de símbolos (compatibilidad con celulares)
+# ---------------------------------------------------------------------
+# Algunos teléfonos no tienen en sus fuentes los subíndices de letras (ₙ, ₗ, ₕ…), los corchetes ⟨ ⟩ o
+# ciertos operadores, y muestran un recuadro vacío. Para evitarlo se genera, una sola vez, una fuente
+# mínima con SOLO esos símbolos a partir de DejaVu (incluida en Matplotlib, licencia libre) y se
+# incrusta en la página. Con `unicode-range` el navegador la usa únicamente para esos caracteres;
+# el resto del texto sigue con las fuentes Source de Streamlit.
+_RANGOS_SIMBOLOS = [
+    (0x02E1, 0x02E1),   # ˡ
+    (0x1D43, 0x1D5B),   # superíndices de letras (ᵃ … ᵐ … ᵛ)
+    (0x2034, 0x2034),   # ‴
+    (0x2070, 0x209C),   # superíndices y subíndices (⁰…⁹ ⁺ ⁻ ⁿ ₀…₉ ₊ ₋ ₐ ₑ ₒ ₓ ₕ ₖ ₗ ₘ ₙ ₚ ₛ ₜ)
+    (0x210F, 0x210F),   # ℏ
+    (0x2190, 0x2194),   # ← ↑ → ↓ ↔
+    (0x21D2, 0x21D2),   # ⇒
+    (0x2202, 0x2202), (0x2207, 0x2208), (0x2211, 0x2212), (0x221A, 0x221E),   # ∂ ∇ ∈ ∑ − √ ∝ ∞
+    (0x222B, 0x222C), (0x2248, 0x2248), (0x2260, 0x2261), (0x2264, 0x2265),   # ∫ ∬ ≈ ≠ ≡ ≤ ≥
+    (0x25B6, 0x25B6), (0x26A0, 0x26A0), (0x275A, 0x275A),                     # ▶ ⚠ ❚
+    (0x27E8, 0x27E9),   # ⟨ ⟩
+]
+
+
+def _rango_css() -> str:
+    return ", ".join(f"U+{a:04X}" if a == b else f"U+{a:04X}-{b:04X}" for a, b in _RANGOS_SIMBOLOS)
+
+
+@lru_cache(maxsize=1)
+def css_fuente_simbolos() -> str:
+    """Reglas @font-face con la fuente de símbolos incrustada (base64). Cadena vacía si algo falla."""
+    try:
+        import base64
+        import io
+        import os
+
+        import matplotlib
+        from fontTools import subset
+        from fontTools.ttLib import TTFont
+
+        carpeta = os.path.join(os.path.dirname(matplotlib.__file__), "mpl-data", "fonts", "ttf")
+        codigos = [c for a, b in _RANGOS_SIMBOLOS for c in range(a, b + 1)]
+
+        def woff_b64(archivo: str) -> str:
+            opciones = subset.Options()
+            opciones.flavor = "woff"
+            opciones.notdef_outline = True
+            # La tabla MATH de DejaVu no sobrevive al recorte: el validador de fuentes del navegador la rechazaría.
+            opciones.drop_tables += ["MATH", "FFTM"]
+            fuente = TTFont(os.path.join(carpeta, archivo))
+            sub = subset.Subsetter(opciones)
+            sub.populate(unicodes=codigos)
+            sub.subset(fuente)
+            fuente.flavor = "woff"
+            datos = io.BytesIO()
+            fuente.save(datos)
+            return base64.b64encode(datos.getvalue()).decode("ascii")
+
+        logging.getLogger("fontTools").setLevel(logging.ERROR)
+        sans, mono = woff_b64("DejaVuSans.ttf"), woff_b64("DejaVuSansMono.ttf")
+        rango = _rango_css()
+        reglas = []
+        for familia, datos in (("Source Sans", sans), ("Source Code Pro", mono)):
+            reglas.append(f'@font-face {{ font-family: "{familia}"; src: url(data:font/woff;base64,{datos}) '
+                          f'format("woff"); font-weight: 100 900; font-style: normal; font-display: swap; '
+                          f'unicode-range: {rango}; }}')
+        return "<style>" + "\n".join(reglas) + "</style>"
+    except Exception:                       # sin fontTools o sin DejaVu: la app funciona igual
+        return ""
+
+
 def inyectar_css() -> None:
     import streamlit as st
-    st.markdown(CSS, unsafe_allow_html=True)
+    st.markdown(css_fuente_simbolos() + CSS, unsafe_allow_html=True)
 
 
 # =====================================================================
