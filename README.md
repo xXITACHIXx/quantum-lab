@@ -106,7 +106,7 @@ También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de c
   l y m permitidos, normalización con Gauss–Legendre, ortonormalidad, simetrías, paridad, nodos, transformación a
   cartesianas, ceros de Bessel, energías del modelo confinado.
 
-## 7. Limitaciones científicas (honestas)
+## 7. Limitaciones científicas
 
 * Es una herramienta **educativa** con modelos de una sola partícula, sin espín ni interacciones. No describe
   átomos reales (el hidrógeno necesitaría la parte radial de Laguerre, que no se implementa).
