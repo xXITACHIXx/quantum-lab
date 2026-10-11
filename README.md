@@ -1,6 +1,6 @@
 # QUANTUM LAB — Laboratorio interactivo de mecánica cuántica
 
-Tres simuladores independientes con una identidad visual común (tema oscuro, tipografía científica sin emojis), todo en español y
+Tres simuladores independientes con una identidad visual común (tema oscuro y tipografía científica), todo en español y
 **100 % local** (sin APIs externas, sin claves, sin Internet en ejecución).
 
 | Archivo | Contenido |
