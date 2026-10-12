@@ -25,5 +25,7 @@ toolbarMode = "minimal"
 [browser]
 gatherUsageStats = false
 
+# headless = true es imprescindible: con false, Streamlit pregunta un correo por teclado la primera vez y,
+# en un servidor (Streamlit Cloud), se queda esperando para siempre y la aplicación no arranca.
 [server]
-headless = false
+headless = true

@@ -80,8 +80,12 @@ Los simuladores 04 y 05 proceden de los cuadernos «Efecto_Fotoelectrico_Simulac
 python -m streamlit run quantum_lab.py
 ```
 
-Se abre el navegador en <http://localhost:8501>. Para cerrarlo: `Ctrl + C` en la terminal.
+Abre en el navegador <http://localhost:8501> (la aplicación no lo abre sola: ver la nota de abajo). Para cerrarla: `Ctrl + C` en la terminal.
 Cada simulador también se puede lanzar por separado, p. ej. `python -m streamlit run modelo_bohr.py`.
+
+> **Nota:** `.streamlit/config.toml` fija `headless = true`. Con `false`, Streamlit pide un correo por teclado la primera
+> vez y, en un servidor sin teclado (Streamlit Cloud), se queda esperando y la aplicación **no arranca**. Si prefieres
+> que el navegador se abra solo en tu ordenador, ejecuta `python -m streamlit run quantum_lab.py --server.headless false`.
 
 ### Publicación en la web (Streamlit Community Cloud)
 
@@ -218,5 +222,6 @@ el orbital **complejo** sí (L_z = mħ).
 | `ModuleNotFoundError: numpy` | Activa el entorno virtual e instala `requirements.txt` |
 | El puerto 8501 está ocupado | `python -m streamlit run quantum_lab.py --server.port 8502` |
 | Gráficos lentos | Reduce la resolución angular (esfera), los puntos (caja/oscilador) o el número de medidas (nube 3D) |
+| En Streamlit Cloud la app no arranca y el registro termina en «Welcome to Streamlit!» | Comprueba que `.streamlit/config.toml` tenga `headless = true` (con `false` se queda esperando un correo por teclado) |
 | Se ve el diseño antiguo o un aviso sobre `theme` | `python -m pip install -U -r requirements.txt` (Streamlit 1.50 o superior) y reinicia |
 | Símbolos como ₙ o ⟨⟩ salen como recuadros | La app incrusta una fuente de símbolos; si persiste, recarga la página sin caché (`Ctrl + F5`) |
