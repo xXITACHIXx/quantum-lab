@@ -1077,6 +1077,12 @@ def _pestana_3d(p: ParametrosEsfera):
         qc.aviso(f"Deformación artificial r = R(1 + α f/max|f|) con α = {p.alfa:.2f}, para apreciar el patrón. "
                  "La esfera real de radio R no cambia de forma.")
     qc.mostrar_plotly(figura, "esf_fig3d", archivo=f"esfera_Y_l{p.l}_m{p.m}.html")
+    T, P = malla_angular(p.n_theta)
+    Y = armonico_esferico(p.l, p.m, T, P)
+    qc.exportar_datos({"theta [rad]": T, "phi [rad]": P,
+                       "x [m]": p.radio * np.sin(T) * np.cos(P), "y [m]": p.radio * np.sin(T) * np.sin(P),
+                       "z [m]": p.radio * np.cos(T), "|Y|^2 [1/sr]": np.abs(Y) ** 2, "Y": Y},
+                      f"esfera_datos_l{p.l}_m{p.m}.csv", "Descargar |Y|² sobre la esfera, con x, y, z (CSV)")
     st.caption("Arrastra para rotar · rueda para ampliar · doble clic para restablecer la vista.")
     with st.expander("Valores numéricos detallados", expanded=False):
         nodos_txt = "ninguno" if len(lat) == 0 else ", ".join(f"{np.degrees(t):.3f}" for t in lat)

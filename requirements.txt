@@ -1,9 +1,10 @@
-# QUANTUM LAB — dependencias (Python 3.10 o superior)
-# scipy >= 1.11 (con SciPy >= 1.15 se usa sph_harm_y, con anteriores
-# el programa calibra automáticamente la firma antigua sph_harm).
-numpy>=1.26
-scipy>=1.11
-matplotlib>=3.8
-plotly>=5.20
-streamlit>=1.50
-pytest>=8.0
+# QUANTUM LAB — dependencias (Python 3.10 a 3.13; recomendado 3.12)
+# Los límites superiores evitan que una versión mayor futura rompa la aplicación sin aviso.
+# Las versiones exactas con las que se probó el proyecto están en requirements-lock.txt.
+# scipy >= 1.11 (con SciPy >= 1.15 se usa sph_harm_y; con anteriores el programa calibra solo la firma antigua sph_harm).
+numpy>=1.26,<3
+scipy>=1.11,<2
+matplotlib>=3.8,<4
+plotly>=5.20,<8
+streamlit>=1.50,<2
+pytest>=8.0,<10

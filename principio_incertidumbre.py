@@ -800,6 +800,10 @@ def _pestana_paquete(p: Paquete):
     qc.seccion("Posición y momento: el mismo paquete visto de dos maneras")
     qc.mostrar_plotly(_cache_compresion(p, qc.modo_compacto()), "inc_compresion",
                       archivo=f"incertidumbre_{p.tipo}.html")
+    qc.exportar_datos({"x [nm]": c["x"], "|psi|^2 [1/nm]": np.abs(c["psi"]) ** 2},
+                      f"incertidumbre_posicion_{p.tipo}.csv", "Descargar |ψ(x)|² (CSV)")
+    qc.exportar_datos({"k [1/nm]": c["k"], "|phi|^2 [nm]": np.abs(c["phi"]) ** 2},
+                      f"incertidumbre_momento_{p.tipo}.csv", "Descargar |φ(p)|² (CSV)")
     st.caption("Mueve el deslizador para cambiar el ancho del paquete: los ejes están fijos, así que se ve cómo al "
                "estrecharse |ψ(x)|² se ensancha |φ(p)|², y al revés. El deslizador solo cambia la figura; los "
                "resultados de arriba corresponden al ancho elegido en los parámetros. Líneas punteadas: ±Δx y ±Δp. "

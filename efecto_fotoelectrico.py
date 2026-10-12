@@ -564,6 +564,10 @@ def _pestana_experimento(p: ParametrosFoto):
                 f'{d["frecuencia"]:.4e} Hz · {d["region"]}</p>', unsafe_allow_html=True)
     qc.seccion("Visualización")
     qc.mostrar_pyplot(figura_experimento(p, d), archivo=f"fotoelectrico_{p.metal.lower()}_{d['longitud_nm']:.0f}nm.png")
+    v_iv = np.linspace(-(d["kmax_ev"] + 1.0), 3.0, 401)
+    qc.exportar_datos({"V [V]": v_iv, "I [A]": corriente_voltaje(v_iv, d["i_sat"], d["kmax_ev"])},
+                      f"fotoelectrico_curva_IV_{p.metal.lower()}_{d['longitud_nm']:.0f}nm.csv",
+                      "Descargar la curva corriente–voltaje (CSV)")
     with st.expander("Valores numéricos detallados", expanded=False):
         qc.tabla([
             ("Metal", p.metal, ""), ("Función de trabajo Φ", f"{p.phi:.6f}", "eV"),

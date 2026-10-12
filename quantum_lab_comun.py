@@ -350,6 +350,8 @@ def agregar_animacion(figura, nombres_cuadros: list[str], etiquetas: list[str],
 # Tipografía: se usan las tres familias que Streamlit ya trae incluidas
 # (funcionan sin Internet): «Source Serif» para títulos, «Source Sans» para
 # el texto y «Source Code Pro» para cifras y etiquetas técnicas.
+VERSION = "5.0"           # se muestra en la barra lateral: sirve para comprobar qué versión está publicada
+
 FUENTE_TITULOS = '"Source Serif", "Source Serif Pro", Georgia, "Times New Roman", serif'
 FUENTE_TEXTO = '"Source Sans", "Source Sans Pro", "Segoe UI", system-ui, sans-serif'
 FUENTE_CIFRAS = '"Source Code Pro", Consolas, "Courier New", monospace'
@@ -594,6 +596,33 @@ def boton_descarga(etiqueta: str, datos: bytes, archivo: str, mime: str) -> None
         st.download_button(etiqueta, datos, on_click="ignore", **kw)
     except Exception:
         st.download_button(etiqueta, datos, **kw)
+
+
+def csv_de_columnas(columnas: dict) -> bytes:
+    """
+    CSV (UTF-8 con BOM) a partir de columnas numéricas {nombre: matriz}. Los números complejos se separan en
+    parte real e imaginaria; los valores se escriben con 10 cifras significativas.
+    """
+    import numpy as np
+    cabecera, datos = [], []
+    for nombre, valores in columnas.items():
+        v = np.asarray(valores).ravel()
+        if np.iscomplexobj(v):
+            cabecera += [f"Re {nombre}", f"Im {nombre}"]
+            datos += [v.real, v.imag]
+        else:
+            cabecera.append(nombre)
+            datos.append(v)
+    n = {len(c) for c in datos}
+    if len(n) != 1:
+        raise ValueError("Todas las columnas deben tener el mismo número de filas.")
+    filas = [cabecera] + [[f"{float(c[i]):.10g}" for c in datos] for i in range(n.pop())]
+    return _csv(filas)
+
+
+def exportar_datos(columnas: dict, archivo: str, etiqueta: str = "Descargar datos de la gráfica (CSV)") -> None:
+    """Botón para descargar en CSV los datos numéricos que dibujan la gráfica (unidades SI en los nombres)."""
+    boton_descarga(etiqueta, csv_de_columnas(columnas), archivo, "text/csv")
 
 
 def tabla(filas, encabezados=("Magnitud", "Valor", "Unidad"), archivo: str | None = None) -> None:

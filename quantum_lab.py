@@ -29,6 +29,7 @@ import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import verificacion
 
 # Páginas: clave → (título en la barra lateral, icono monocromo, módulo o None)
 PAGINAS = {
@@ -40,12 +41,13 @@ PAGINAS = {
     "bohr": ("Átomo de hidrógeno", ":material/radio_button_checked:", modelo_bohr),
     "incertidumbre": ("Principio de incertidumbre", ":material/blur_on:", principio_incertidumbre),
     "intro": ("Introducción teórica", ":material/menu_book:", None),
+    "verificacion": ("Verificación", ":material/verified:", verificacion),
     "pruebas": ("Pruebas numéricas", ":material/fact_check:", None),
 }
 GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
-    ("Teoría y verificación", ["intro", "pruebas"], False),
+    ("Teoría y verificación", ["intro", "verificacion", "pruebas"], False),
 ]
 
 
@@ -56,7 +58,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -82,7 +84,8 @@ def _barra_lateral() -> None:
         st.markdown("")
         qc.interruptor_movil()
         st.markdown('<div class="ql-pie">Cálculo con NumPy y SciPy.<br>La dirección de la página guarda la '
-                    'configuración: cópiala para compartirla.</div>', unsafe_allow_html=True)
+                    f'configuración: cópiala para compartirla.<br><br>Versión {qc.VERSION} · 6 simuladores</div>',
+                    unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------
@@ -172,7 +175,7 @@ def _pagina_intro() -> None:
 
 def _pagina_pruebas() -> None:
     qc.encabezado_pagina("Verificación", "Pruebas numéricas globales",
-                         "Comprobaciones de los seis simuladores. También se ejecutan con «python quantum_lab.py» o con pytest.")
+                         "Comprobaciones de los seis simuladores y de la página de verificación. También se ejecutan con «python quantum_lab.py» o con pytest.")
     if st.button("Ejecutar todas las pruebas", type="primary", icon=":material/play_arrow:"):
         with st.spinner("Calculando…"):
             registros = ejecutar_todas_las_pruebas()
@@ -193,7 +196,7 @@ def main() -> None:
         st.session_state["ql_pagina"] = sim if sim in PAGINAS else "inicio"
     _barra_lateral()
     pagina = st.session_state["ql_pagina"]
-    if pagina in ("inicio", "intro", "pruebas"):
+    if pagina in ("inicio", "intro", "pruebas", "verificacion"):
         qc.escribir_en_url(None)
     if pagina == "inicio":
         _pagina_inicio()
@@ -201,6 +204,8 @@ def main() -> None:
         _pagina_intro()
     elif pagina == "pruebas":
         _pagina_pruebas()
+    elif pagina == "verificacion":
+        verificacion.interfaz()
     else:
         PAGINAS[pagina][2].interfaz()
 

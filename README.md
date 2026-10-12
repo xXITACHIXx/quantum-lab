@@ -1,6 +1,10 @@
 # QUANTUM LAB — Laboratorio interactivo de mecánica cuántica
 
-Seis simuladores con una identidad visual común (tema oscuro, tipografía científica sin emojis), todo en español.
+[![Pruebas](https://github.com/xXITACHIXx/quantum-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/xXITACHIXx/quantum-lab/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.10%20a%203.13-blue)
+![Versión](https://img.shields.io/badge/versi%C3%B3n-5.0-informational)
+
+Seis simuladores (más una página de verificación) con una identidad visual común (tema oscuro, tipografía científica sin emojis), todo en español.
 Cada simulador incluye resultados numéricos, visualización, interpretación, ecuaciones o **teoría**, **guía de
 práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace con NumPy y SciPy, sin APIs externas ni claves.
 
@@ -14,12 +18,28 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `modelo_bohr.py` | 05 · Átomo de hidrógeno: modelo de Bohr (transiciones, series, Rydberg, masa reducida) y **átomo cuántico en 3D** (nubes de probabilidad, orbitales, animación del salto), teoría |
 | `principio_incertidumbre.py` | 06 · Principio de incertidumbre: paquetes de ondas en x y p, límite ħ/2, evolución libre, difracción por una rendija, teoría |
 | `quantum_lab_comun.py` | Código compartido (constantes, unidades, estilo, componentes de interfaz, enlaces, descargas, guías, autoevaluación, pruebas). No contiene física de los simuladores |
-| `test_quantum_lab.py` | Pruebas con `pytest` |
-| `requirements.txt` | Dependencias |
+| `verificacion.py` | Página «Verificación»: compara cada simulador con una referencia independiente (diagonalización del hamiltoniano, diferencias finitas, integrales, valores tabulados) |
+| `test_quantum_lab.py` | Pruebas numéricas y de verificación con `pytest` |
+| `test_interfaz.py` | Pruebas de interfaz (cada página se ejecuta con `AppTest` sin excepciones) |
+| `requirements.txt` | Dependencias con límites de versión |
+| `requirements-lock.txt` | Versiones exactas con las que se probó el proyecto |
+| `colab/` | Los tres cuadernos de Google Colab (caja, oscilador, esfera): implementación independiente de la misma física |
+| `docs/img/` | Capturas usadas en este README |
+| `.github/workflows/tests.yml` | Integración continua: ejecuta `pytest` en cada subida y una vez por semana |
+| `.github/dependabot.yml` | Avisos semanales de actualización de dependencias |
 | `.streamlit/config.toml` | Tema visual (colores y tipografías Source Serif / Sans / Code incluidas en Streamlit) |
 
 Los simuladores 04 y 05 proceden de los cuadernos «Efecto_Fotoelectrico_Simulacion.ipynb» y
 «Modelo_Bohr_Simulacion.ipynb», adaptados a la interfaz interactiva y ampliados.
+
+## Vista previa
+
+| | |
+|---|---|
+| ![Portada](docs/img/inicio.png) **Portada** | ![Partícula en una caja](docs/img/caja.png) **01 · Partícula en una caja** |
+| ![Oscilador armónico](docs/img/oscilador.png) **02 · Oscilador armónico** | ![Partícula en una esfera](docs/img/esfera.png) **03 · Partícula en una esfera** |
+| ![Efecto fotoeléctrico](docs/img/fotoelectrico.png) **04 · Efecto fotoeléctrico** | ![Átomo de hidrógeno](docs/img/bohr.png) **05 · Átomo de hidrógeno** |
+| ![Principio de incertidumbre](docs/img/incertidumbre.png) **06 · Principio de incertidumbre** | ![Verificación](docs/img/verificacion.png) **Verificación** |
 
 ---
 
@@ -65,20 +85,32 @@ Cada simulador también se puede lanzar por separado, p. ej. `python -m streamli
 
 ### Publicación en la web (Streamlit Community Cloud)
 
-Sube **todos** los archivos de la tabla (incluida la carpeta `.streamlit`) a un repositorio de GitHub y despliega
+Sube **todos** los archivos de la tabla (incluidas las carpetas `.streamlit`, `.github`, `colab` y `docs`) a un repositorio de GitHub y despliega
 `quantum_lab.py` desde <https://share.streamlit.io> eligiendo **Python 3.12** en «Advanced settings». Para
 actualizar la web basta con subir los archivos modificados: la aplicación se redespliega sola.
 
-## 4. Pruebas
+## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 6 grupos de pruebas (uno por simulador)
+python -m pytest -q          # pruebas numéricas, verificación y de interfaz (unos 50 s)
+python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador
 ```
 
-También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de cada simulador y en la página
-**«Pruebas numéricas»** del menú.
+También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de cada simulador, en la página
+**«Pruebas numéricas»** del menú y la página **«Verificación»** (ver el apartado 6).
+
+**Integración continua.** El flujo `.github/workflows/tests.yml` ejecuta `pytest` en GitHub con Python 3.10, 3.12 y 3.13
+cada vez que se sube un cambio y cada lunes, para detectar a tiempo si una versión nueva de una dependencia rompe algo.
+La insignia de la parte superior de este archivo muestra el resultado. `dependabot.yml` propone cada semana las
+actualizaciones de dependencias.
+
+**Versiones.** `requirements.txt` fija solo límites (por ejemplo `streamlit>=1.50,<2`) para que una versión mayor
+futura no rompa la aplicación sin aviso; las versiones exactas probadas están en `requirements-lock.txt`
+(`python -m pip install -r requirements-lock.txt` reproduce ese entorno). Al actualizar la versión publicada en
+Streamlit Cloud hay que pulsar **«Reboot app»** (la nube conserva en memoria los módulos ya importados) y comprobar en
+la barra lateral que aparece el número de versión esperado.
 
 ## 5. Uso
 
@@ -89,6 +121,12 @@ También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de c
   copiar; al abrirlo se reproduce exactamente la misma configuración. Los parámetros no válidos se ignoran.
 * **Descargas:** debajo de cada gráfica y tabla hay un botón para descargarla: PNG (gráficas estáticas), HTML
   interactivo (gráficas 3D y animaciones) o CSV (tablas; se abre en Excel con tildes y símbolos correctos).
+* **Exportar los datos de las gráficas:** además de la imagen, los simuladores 01 (estado y superposición), 02
+  (estado), 03 (|Y|² con x, y, z sobre la esfera), 04 (curva I–V) y 06 (|ψ(x)|² y |φ(p)|²) ofrecen un CSV con los
+  números que dibujan la curva, en unidades SI y con el nombre y la unidad en la cabecera de cada columna. Los
+  números complejos se separan en parte real e imaginaria.
+* **Superposición en la caja:** la tabla admite hasta 10 estados; la **«Lista rápida»** admite hasta 200 estados
+  con el formato `n:A` o `n:A:φ` separados por «;» (por ejemplo `1:1; 2:0.5; 7:-0.3; 12:0.2:1.57`).
 * **Vista para celular:** se activa sola al abrir la página desde un teléfono (también hay un interruptor en la
   barra lateral). Muestra 2 indicadores por fila y apila los paneles de las gráficas en una columna.
 * **Guía de práctica:** experimentos con objetivo, procedimiento, una pregunta para predecir, un botón que carga la
@@ -99,10 +137,42 @@ También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de c
 * Los gráficos 3D se **rotan con el ratón**, se amplían con la rueda y se restablecen con doble clic.
 * Si introduces un valor no válido aparece un mensaje en rojo que explica el problema; la aplicación no se cae.
 
-## 6. Qué se calcula y cómo se comprueba
+## 6. Verificación y contraste con Google Colab
+
+La página **Verificación** (menú «Teoría y verificación») compara cada resultado con **otra forma de obtenerlo**, no
+con la misma fórmula:
+
+| Sistema | Se compara con |
+|---|---|
+| Caja y oscilador | Autovalores del hamiltoniano discretizado (`scipy.linalg.eigh_tridiagonal`), integrales y teorema del virial |
+| Esfera | El operador angular L² aplicado a Yₗᵐ con diferencias finitas; normalización y ortogonalidad por cuadratura de Gauss–Legendre; ceros de j_l |
+| Fotoeléctrico y Bohr | Valores tabulados (CODATA 2018), fórmula de Rydberg con masa reducida y ⟨r⟩ por integración numérica |
+| Incertidumbre | El valor exacto de Δx·Δp de cada tipo de paquete (ħ/2, ½√(1+β²)ħ, √0.3 ħ, πħ/6) |
+
+Cada fila muestra el valor del simulador, la referencia, el error relativo y su tolerancia, y la tabla se descarga
+en CSV. Son 29 comparaciones; también se ejecutan con `pytest`.
+
+**Contraste con los notebooks de Colab.** Los cuadernos de `colab/` son una implementación independiente de la misma
+física. Con los mismos parámetros, las cifras que ambos muestran deben coincidir:
+
+| Sistema | Parámetros | Resultado esperado |
+|---|---|---|
+| Caja 1D | electrón, L = 1 nm, n = 1 | E₁ = 0.37603 eV, λ = 2 nm |
+| Oscilador | electrón, ω = 10¹⁵ rad/s, n = 0 | ħω = 0.658212 eV, E₀ = 0.329106 eV, x₀ = 0.340246 nm |
+| Esfera | l = 2, m = 1 (orbital complejo) | L² = 6ħ², L_z = 1ħ |
+
+Valores iniciales comunes: caja con a = 1 nm, masa 1 mₑ y n = 1; oscilador con masa 1 mₑ, ω = 10¹⁵ rad/s y n = 0;
+esfera con R = 1 nm, l = 2, m = 1, orbital **complejo**, densidad |Y|², «lóbulos», α = 0.4 y 90 puntos en θ.
+
+Diferencias que **no** son errores: la web limita algunos rangos (n ≤ 200 en la caja, l ≤ 20 en la esfera) y rechaza lo
+que se sale, mientras que los notebooks aceptan cualquier valor y explican su validez física; la web usa tema oscuro
+y los notebooks fondo claro. En la esfera, un orbital **real** (pₓ, d_xy…) no tiene L_z definido (mezcla m y −m);
+el orbital **complejo** sí (L_z = mħ).
+
+## 7. Qué se calcula y cómo se comprueba
 
 * **Caja:** ψₙ = √(2/a) sin(nπx/a), Eₙ = n²π²ħ²/2ma², λ = 2a/n. Superposición Ψ = Σ cₙψₙe^{−iEₙt/ħ} con
-  ρ = |Ψ|² **desde la onda total**. 35 pruebas.
+  ρ = |Ψ|² **desde la onda total** (con la lista rápida, hasta 200 estados). 41 pruebas.
 * **Oscilador:** ψₙ con polinomios de Hermite; energía ∫(u_T+u_V)dx contra ħω(n+½), virial, nodos, zona prohibida,
   orden de convergencia. **Límite clásico:** P_cl(x) = 1/(π√(A²−x²)) con A = √(2n+1)x₀; se comparan las
   probabilidades acumuladas (distancia D, que disminuye con n) y ⟨x²⟩ (idéntico). 34 pruebas.
@@ -122,7 +192,7 @@ También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de c
   evolución libre exacta (σ(τ) = √2σ₀, enfoque del chirp negativo, Δp y norma constantes, velocidad de grupo);
   rendija: sinc² contra suma de ondas de Huygens y primer mínimo en sen θ = λ/a. 32 pruebas.
 
-## 7. Limitaciones científicas
+## 8. Limitaciones científicas
 
 * Herramienta **educativa** con modelos de una partícula, sin espín ni interacciones. El modelo de Bohr reproduce
   el espectro del hidrógeno pero no es la descripción moderna (no hay órbitas definidas) y no sirve para átomos de
@@ -138,7 +208,7 @@ También hay un botón de pruebas en la pestaña **«Pruebas numéricas»** de c
 * Los colores de las líneas espectrales son una aproximación visual, no una conversión colorimétrica exacta.
 * En la esfera, «deformación suave» y «lóbulos» son representaciones geométricas, no formas físicas.
 
-## 8. Solución de problemas
+## 9. Solución de problemas
 
 | Problema | Solución |
 |---|---|

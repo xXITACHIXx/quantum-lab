@@ -820,7 +820,7 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
 # 4. INTERFAZ (Streamlit)
 # =====================================================================
 VALORES_INICIALES = {
-    "osc_n": 2, "osc_masa": 1.0, "osc_omega": "1e15", "osc_sistema": "SI", "osc__sistema_previo": "SI",
+    "osc_n": 0, "osc_masa": 1.0, "osc_omega": "1e15", "osc_sistema": "SI", "osc__sistema_previo": "SI",
     "osc_rango": 9.0, "osc_resolucion": 3001, "osc_metodo": "numerica", "osc_zoom": True,
     "osc_niveles_n": 3, "osc_comp_n": [0, 1, 3], "osc_comp_exc": 3,
     "osc_clas_n": 20, "osc_dyn_n1": 0, "osc_dyn_n2": 1, "osc_dyn_peso": 0.5, "osc_dyn_fase": 0.0, "osc_dyn_modo": "Superposición n₁ + n₂",
@@ -996,6 +996,9 @@ def _pestana_individual(p_base: ParametrosOscilador):
     ])
     qc.seccion("Visualización")
     qc.mostrar_pyplot(figura_estado_individual(d, p, st.session_state["osc_zoom"]), archivo=f"oscilador_estado_n{p.n}.png")
+    qc.exportar_datos({"x [m]": d["x"], "psi [m^-1/2]": d["psi"], "rho = |psi|^2 [1/m]": d["rho"],
+                       "V [J]": d["V"], "u_T cinetica [J/m]": d["u_T"], "u_V potencial [J/m]": d["u_V"],
+                       "E_n [J]": np.full_like(d["x"], d["e_teo"])}, f"oscilador_datos_n{p.n}.csv")
 
     with st.expander("Valores numéricos detallados", expanded=False):
         nodos_txt = "ninguno" if not len(d["nodos"]) else ", ".join(f"{v / fx:.4g}" for v in d["nodos"])

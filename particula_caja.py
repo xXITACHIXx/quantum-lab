@@ -45,7 +45,7 @@ N_MAX = 200               # número cuántico máximo permitido
 PUNTOS_MIN = 200
 PUNTOS_MAX = 20000
 PUNTOS_POR_N = 20         # puntos mínimos por unidad de n para resolver las oscilaciones
-ESTADOS_MAX = 6           # máximo de estados en una superposición
+ESTADOS_MAX = 10          # filas de la tabla de superposición (la «lista rápida» admite hasta N_MAX estados)
 
 
 @dataclass(frozen=True)
@@ -169,8 +169,8 @@ def construir_superposicion(numeros, coeficientes_complejos, normalizar: bool = 
     numeros = np.asarray(numeros)
     if numeros.size == 0:
         raise ValueError("Selecciona al menos un estado.")
-    if numeros.size > ESTADOS_MAX:
-        raise ValueError(f"Se admiten como máximo {ESTADOS_MAX} estados.")
+    if numeros.size > N_MAX:
+        raise ValueError(f"Se admiten como máximo {N_MAX} estados distintos (n = 1 … {N_MAX}).")
     enteros = np.array([qc.entero_en_rango(v, "Cada número cuántico n", 1, N_MAX) for v in numeros])
     if len(np.unique(enteros)) != len(enteros):
         raise ValueError("No repitas el mismo número cuántico: suma los coeficientes en un único estado.")
@@ -199,6 +199,43 @@ def coeficientes_desde_amplitud_fase(amplitudes, fases) -> np.ndarray:
 def coeficientes_desde_re_im(partes_reales, partes_imaginarias) -> np.ndarray:
     """c_n = Re + i·Im."""
     return np.asarray(partes_reales, dtype=float) + 1j * np.asarray(partes_imaginarias, dtype=float)
+
+
+def leer_lista_estados(texto: str) -> tuple[list[int], np.ndarray]:
+    """
+    Interpreta la «lista rápida» de una superposición. Un estado por elemento, separados por «;» o por líneas:
+
+        n:A        coeficiente real A (amplitud) con fase 0
+        n:A:φ      cₙ = A·e^{iφ}, con φ en radianes
+
+    Se aceptan comas decimales (2,5) y notación científica (1e-3). Devuelve (números n, coeficientes complejos).
+    """
+    import re
+    numeros, amplitudes, fases = [], [], []
+    for k, item in enumerate((t.strip() for t in re.split(r"[;\n]+", texto or "")), 1):
+        if not item:
+            continue
+        partes = [p.strip() for p in item.split(":")]
+        if len(partes) > 3 or not partes[0]:
+            raise ValueError(f"Elemento {k} de la lista («{item}»): usa el formato n:A  o  n:A:φ.")
+        partes += ["1", "0"][len(partes) - 1:]
+        try:
+            n = float(partes[0].replace(",", "."))
+            A = float((partes[1] or "1").replace(",", "."))
+            fase = float((partes[2] or "0").replace(",", "."))
+        except ValueError:
+            raise ValueError(f"Elemento {k} de la lista («{item}»): n, A y φ deben ser números.")
+        if n != int(n):
+            raise ValueError(f"Elemento {k} de la lista: n debe ser entero (recibido: {partes[0]}).")
+        numeros.append(int(n))
+        amplitudes.append(A)
+        fases.append(fase)
+    if not numeros:
+        raise ValueError("La lista rápida está vacía.")
+    # una amplitud negativa equivale a sumar π a la fase
+    amplitudes = np.asarray(amplitudes, dtype=float)
+    fases = np.asarray(fases, dtype=float) + np.where(amplitudes < 0, np.pi, 0.0)
+    return numeros, coeficientes_desde_amplitud_fase(np.abs(amplitudes), fases)
 
 
 def todos_reales(coeficientes, tolerancia: float = 1e-12) -> bool:
@@ -687,6 +724,23 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
 
     # --- Validación de entradas
     v = validar_parametros_caja
+    # --- Lista rápida de estados (cantidad de estados libre hasta N_MAX)
+    ns_l, c_l = leer_lista_estados("1:1; 2:0.5; 7:-0.3\n12:0.2:1,57")
+    r.comprobar("Lista rápida: lee n, amplitud y fase (comas decimales, líneas y «;»)",
+                ns_l == [1, 2, 7, 12] and abs(c_l[2] + 0.3) < 1e-12 and abs(np.angle(c_l[3]) - 1.57) < 1e-12,
+                f"n = {ns_l}")
+    ns50 = list(range(1, 51))
+    sup50 = construir_superposicion(ns50, leer_lista_estados("; ".join(f"{k}:{1 / k}" for k in ns50))[1])
+    x50 = malla_caja(a, 4000)
+    rho50 = np.abs(onda_total(x50, sup50.numeros, sup50.coeficientes, a, 0.37)) ** 2
+    r.comprobar("Superposición de 50 estados: Σ|cₙ|² = 1 y ∫|Ψ|²dx = 1",
+                abs(np.sum(np.abs(sup50.coeficientes) ** 2) - 1) < 1e-12 and abs(integrar(x50, rho50) - 1) < 1e-5,
+                f"∫|Ψ|²dx = {integrar(x50, rho50):.8f}")
+    r.comprobar_error("Lista rápida: rechaza n no entero", leer_lista_estados, "2.5:1")
+    r.comprobar_error("Lista rápida: rechaza formato incorrecto", leer_lista_estados, "1:2:3:4")
+    r.comprobar_error("Lista rápida: rechaza texto no numérico", leer_lista_estados, "a:1")
+    r.comprobar_error("Lista rápida: rechaza lista vacía", leer_lista_estados, " ; ")
+
     r.comprobar_error("Rechaza n = 0", v, 0, 1.0, 1.0, "SI", 1000)
     r.comprobar_error("Rechaza n no entero (2.5)", v, 2.5, 1.0, 1.0, "SI", 1000)
     r.comprobar_error("Rechaza longitud negativa", v, 1, -1.0, 1.0, "SI", 1000)
@@ -704,10 +758,10 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
 # =====================================================================
 PREFIJO = "caja_"
 VALORES_INICIALES = {
-    "caja_n": 3, "caja_longitud": 1.0, "caja_masa": 1.0, "caja_sistema": "SI", "caja_puntos": 1500,
+    "caja_n": 1, "caja_longitud": 1.0, "caja_masa": 1.0, "caja_sistema": "SI", "caja_puntos": 1500,
     "caja_sup_cantidad": 2, "caja_sup_modo": "Amplitud y fase", "caja_sup_normalizar": True,
     "caja_sup_comparar": False, "caja_sup_extremos": True, "caja_sup_tau": 0.0,
-    "caja_sup_region": (0.25, 0.75),
+    "caja_sup_region": (0.25, 0.75), "caja_sup_lista": "",
 }
 for _i in range(1, ESTADOS_MAX + 1):
     VALORES_INICIALES.update({f"caja_sup_n{_i}": _i, f"caja_sup_A{_i}": 1.0, f"caja_sup_fase{_i}": 0.0,
@@ -872,6 +926,9 @@ def _pestana_individual(p_base: ParametrosCaja):
     ])
     qc.seccion("Visualización")
     qc.mostrar_pyplot(figura_estado_individual(d, p), archivo=f"caja_estado_n{p.n}.png")
+    qc.exportar_datos({"x [m]": d["x"], "psi [m^-1/2]": d["psi"], "rho = |psi|^2 [1/m]": d["rho"],
+                       "V [J]": np.zeros_like(d["x"]), "E_n [J]": np.full_like(d["x"], d["energia"])},
+                      f"caja_datos_n{p.n}.csv")
 
     with st.expander("Valores numéricos detallados", expanded=False):
         nodos_txt = "ninguno" if p.n == 1 else ", ".join(f"{v / fx:.5g}" for v in d["nodos"])
@@ -901,6 +958,13 @@ def _pestana_individual(p_base: ParametrosCaja):
 
 def _leer_superposicion():
     """Rejilla de estados a superponer (una fila por estado). Devuelve (numeros, coeficientes)."""
+    lista = st.text_area("Lista rápida de estados (opcional, hasta 200)", key="caja_sup_lista", height=68,
+                         placeholder="1:1; 2:0.5; 7:-0.3; 12:0.2:1.57",
+                         help="Un estado por elemento, separados por «;» o por líneas. Formato n:A (fase 0) o n:A:φ "
+                              "(φ en radianes): cₙ = A·e^{iφ}. Si no está vacía, sustituye a la tabla.")
+    if lista.strip():
+        st.caption("Se usa la lista rápida; la tabla de abajo está desactivada mientras la lista no esté vacía.")
+        return leer_lista_estados(lista)
     c1, c2, c3, _ = st.columns(4, vertical_alignment="bottom")
     cantidad = c1.slider("Número de estados", 1, ESTADOS_MAX, key="caja_sup_cantidad")
     modo = c2.radio("Coeficientes cₙ", ["Amplitud y fase", "Parte real e imaginaria"], key="caja_sup_modo",
@@ -967,7 +1031,11 @@ def _experimento_cacheado(longitud, masa, sistema, n_cuadros):
 def _pestana_superposicion(p_base: ParametrosCaja):
     with st.container(border=True):
         qc.seccion("Estados superpuestos")
-        numeros, coef_crudos = _leer_superposicion()
+        try:
+            numeros, coef_crudos = _leer_superposicion()
+        except ValueError as error:
+            numeros, coef_crudos = None, None
+            qc.error(error)
         qc.seccion("Tiempo y análisis")
         t1, t2 = st.columns(2)
         tau = t1.slider("Tiempo adimensional τ = E₁t/ħ", 0.0, float(2 * np.pi), step=0.01, format="%.3f",
@@ -976,6 +1044,8 @@ def _pestana_superposicion(p_base: ParametrosCaja):
         o1, o2 = st.columns(2)
         comparar = o1.toggle("Mostrar densidades individuales", key="caja_sup_comparar")
         extremos = o2.toggle("Marcar máximos, mínimos y zonas de alta probabilidad", key="caja_sup_extremos")
+    if numeros is None:
+        return
     normalizar = st.session_state["caja_sup_normalizar"]
     try:
         p = ParametrosCaja(1, p_base.longitud, p_base.masa, p_base.sistema, p_base.puntos)
@@ -1011,6 +1081,8 @@ def _pestana_superposicion(p_base: ParametrosCaja):
     ])
     qc.seccion("Visualización")
     qc.mostrar_pyplot(figura_superposicion(d, p, sup, region, comparar, extremos), archivo="caja_superposicion.png")
+    qc.exportar_datos({"x [m]": d["x"], "Psi [m^-1/2]": d["psi"], "rho = |Psi|^2 [1/m]": d["rho"]},
+                      "caja_superposicion_datos.csv", "Descargar Ψ y |Ψ|² en este instante (CSV)")
     if len(d["x_min"]) and not np.any(d["nodal"]):
         st.caption("Los mínimos locales de ρ no llegan a cero: en una superposición de energías distintas la "
                    "densidad generalmente no tiene nodos verdaderos (a diferencia de un estado estacionario).")
