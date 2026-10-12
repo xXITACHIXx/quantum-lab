@@ -1,3 +1,5 @@
+# Tema visual de QUANTUM LAB. Las tres familias tipográficas vienen incluidas en Streamlit
+# (funcionan sin Internet): títulos con serifa, texto sin serifa y cifras monoespaciadas.
 [theme]
 base = "dark"
 primaryColor = "#38BDF8"
@@ -22,3 +24,6 @@ toolbarMode = "minimal"
 
 [browser]
 gatherUsageStats = false
+
+[server]
+headless = false
