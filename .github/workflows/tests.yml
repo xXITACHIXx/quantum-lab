@@ -1,0 +1,31 @@
+name: Pruebas
+
+# Se ejecuta en cada subida, en cada solicitud de cambios y una vez por semana (para detectar a tiempo si una
+# nueva versión de una dependencia rompe algo).
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Pruebas numéricas, de verificación y de interfaz
+        run: python -m pytest -q
