@@ -1,0 +1,24 @@
+[theme]
+base = "dark"
+primaryColor = "#38BDF8"
+backgroundColor = "#0B1020"
+secondaryBackgroundColor = "#131B33"
+textColor = "#E6EAF5"
+font = "sans-serif"
+headingFont = "serif"
+codeFont = "monospace"
+baseFontSize = 15
+baseRadius = "small"
+borderColor = "#232C47"
+showWidgetBorder = true
+showSidebarBorder = true
+
+[theme.sidebar]
+backgroundColor = "#0E1428"
+secondaryBackgroundColor = "#131B33"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
