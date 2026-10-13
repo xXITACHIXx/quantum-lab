@@ -45,19 +45,14 @@ def test_esfera_valores_extremos_no_rompen():
     assert not at.exception, [e.value for e in at.exception]
 
 
-TEMAS_DISPONIBLES = ["introduccion", "fotoelectrico", "bohr", "incertidumbre", "caja", "oscilador", "esfera"]
+TEMAS_DISPONIBLES = ["cuerpo_negro", "fotoelectrico", "de_broglie", "bohr", "criterios", "ondas", "schrodinger", "operadores",
+                     "postulados", "libre_pared", "caja", "oscilador", "esfera", "conmutadores", "incertidumbre"]
 
 
 @pytest.mark.parametrize("tema", TEMAS_DISPONIBLES)
 def test_tema_de_teoria_se_muestra(tema):
     at = _abrir("teoria", ql_tema=tema)
     assert not at.exception, [e.value for e in at.exception]
-
-
-def test_tema_en_preparacion_se_explica():
-    at = _abrir("teoria", ql_tema="tunel")
-    assert not at.exception
-    assert any("en preparación" in w.value for w in at.warning)
 
 
 def test_enlace_de_simulador_lleva_a_su_teoria():
@@ -72,4 +67,11 @@ def test_enlace_antiguo_a_la_introduccion():
     at.query_params["sim"] = "intro"
     at.run()
     assert not at.exception
-    assert at.session_state["ql_pagina"] == "teoria" and at.session_state["ql_tema"] == "introduccion"
+    assert at.session_state["ql_pagina"] == "teoria" and at.session_state["ql_tema"] == "schrodinger"
+
+
+@pytest.mark.parametrize("tema", ["hidrogeno", "espin", "aproximados", "born_oppenheimer", "orbitales_moleculares", "espectroscopia"])
+def test_tema_en_preparacion_se_explica(tema):
+    at = _abrir("teoria", ql_tema=tema)
+    assert not at.exception, [e.value for e in at.exception]
+    assert any("en preparación" in w.value for w in at.warning)
