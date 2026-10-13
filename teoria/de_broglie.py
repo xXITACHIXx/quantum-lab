@@ -1,5 +1,5 @@
 """
-teoria/de_broglie.py — Teoría: Partículas con comportamiento ondulatorio (semana 1).
+teoria/de_broglie.py — Teoría: Partículas con comportamiento ondulatorio
 """
 
 import math

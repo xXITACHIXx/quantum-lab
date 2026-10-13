@@ -1,5 +1,5 @@
 """
-teoria/criterios.py — Teoría: ¿Por qué y cuándo usar la mecánica cuántica? (semana 1).
+teoria/criterios.py — Teoría: ¿Por qué y cuándo usar la mecánica cuántica?
 """
 
 import math
@@ -46,7 +46,7 @@ def mostrar() -> None:
         st.markdown(
             "La teoría no nació en el vacío: surgió de la tensión entre experimentos que la física clásica no podía explicar "
             "(radiación del cuerpo negro, efecto fotoeléctrico, espectros atómicos, difracción de electrones) y las "
-            "ideas nuevas que los explicaban. Los temas de esta semana recorren esos experimentos.")
+            "ideas nuevas que los explicaban. Los primeros temas del curso recorren esos experimentos.")
     with sub[1]:
         qc.seccion("¿Es comparable la longitud de onda con el tamaño del problema?")
         st.markdown(

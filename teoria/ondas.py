@@ -1,5 +1,5 @@
 """
-teoria/ondas.py — Teoría: Ondas clásicas y funciones complejas (semana 2).
+teoria/ondas.py — Teoría: Ondas clásicas y funciones complejas
 """
 
 import cmath

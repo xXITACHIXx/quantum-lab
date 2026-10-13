@@ -1,5 +1,5 @@
 """
-teoria/oscilador.py — Teoría: El oscilador armónico cuántico (semana 9).
+teoria/oscilador.py — Teoría: El oscilador armónico cuántico
 """
 
 import math

@@ -122,7 +122,7 @@ def test_estado_fundamental_de_la_caja():
     assert conmutadores.incertidumbres_caja(1)[2] == pytest.approx(0.568, abs=1e-3)
 
 
-# ---------------------------------------------------------------- semana 5: partícula libre y pared
+# ---------------------------------------------------------------- partícula libre y pared
 def test_pared_continuidad_y_reflexion_total():
     k = libre_pared.numero_de_onda(9.1093837e-31, 1 * EV)
     kap = libre_pared.kappa(9.1093837e-31, 3 * EV, 1 * EV)
@@ -143,7 +143,7 @@ def test_profundidad_de_penetracion():
         libre_pared.kappa(me, 1 * EV, 2 * EV)
 
 
-# ---------------------------------------------------------------- semana 6: caja
+# ---------------------------------------------------------------- caja
 def test_caja_probabilidades_y_energias():
     assert caja.probabilidad_en_intervalo(1, 1 / 3, 2 / 3) == pytest.approx(1 / 3 + math.sqrt(3) / (2 * math.pi), rel=1e-12)
     for n in (1, 3, 8):
@@ -162,7 +162,7 @@ def test_caja_3d_degeneraciones():
     assert all(g == 1 for _, g, _ in asim)                                    # sin simetría no hay degeneración
 
 
-# ---------------------------------------------------------------- semana 9: oscilador
+# ---------------------------------------------------------------- oscilador
 def test_oscilador_hermite_energias_y_virial():
     assert np.allclose(oscilador.nodos(4), [-1.6507, -0.5246, 0.5246, 1.6507], atol=1e-4)
     z = np.linspace(-14, 14, 40001)
@@ -188,7 +188,7 @@ def test_oscilador_moleculas_y_gaussiana():
     assert oscilador.energia(0, mu, k) == pytest.approx(0.5 * H * oscilador.frecuencia(mu, k))
 
 
-# ---------------------------------------------------------------- semana 10: rotación
+# ---------------------------------------------------------------- rotación
 @pytest.mark.parametrize("l,m", [(0, 0), (1, 0), (1, 1), (2, -1), (5, 3), (8, -8)])
 def test_armonicos_son_autofunciones_del_legendriano(l, m):
     assert esfera.autovalor_legendriano(l, m) == pytest.approx(l * (l + 1), abs=2e-3)

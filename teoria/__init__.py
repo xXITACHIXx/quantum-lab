@@ -14,7 +14,7 @@ Cómo añadir un tema nuevo (cuando el curso llegue a él):
     2. En la lista UNIDADES de abajo, cambiar su estado a DISPONIBLE y rellenar `modulo`
        (y `simulador`, `modulo_sim`, `prefijo` si ya existe un simulador con su guía y preguntas).
 
-Las unidades siguen las diapositivas del curso (semanas 1, 2, 3, 5, 6, 7, 9 y 10 recibidas). La unidad «Temas en
+Las unidades siguen las diapositivas del curso recibidas hasta ahora. La unidad «Temas en
 preparación» guarda títulos provisionales hasta que lleguen las diapositivas correspondientes.
 """
 
@@ -54,7 +54,7 @@ class Unidad:
 
 
 UNIDADES: tuple[Unidad, ...] = (
-    Unidad("semana1", "Semana 1 · De la mecánica clásica a la cuántica",
+    Unidad("clasica_cuantica", "De la mecánica clásica a la cuántica",
            "Por qué hace falta una física nueva: los experimentos que la clásica no explica y los primeros modelos.", (
         Tema("cuerpo_negro", "Radiación del cuerpo negro",
              "La catástrofe ultravioleta, la hipótesis de Planck y las leyes de Wien y Stefan–Boltzmann.",
@@ -72,7 +72,7 @@ UNIDADES: tuple[Unidad, ...] = (
              "Dos criterios: la longitud de onda frente al tamaño del sistema y el espaciado de energía frente a kT.",
              "nᵢ/nⱼ = (gᵢ/gⱼ) e^(−ΔE/kT)", DISPONIBLE, "criterios"),
     )),
-    Unidad("semana2", "Semana 2 · La ecuación de Schrödinger",
+    Unidad("schrodinger", "La ecuación de Schrödinger",
            "De las ondas clásicas a la ecuación fundamental, y el lenguaje de operadores y autofunciones.", (
         Tema("ondas", "Ondas clásicas y funciones complejas",
              "Ondas viajeras y estacionarias, la ecuación de onda y la representación con exponenciales complejas.",
@@ -84,25 +84,25 @@ UNIDADES: tuple[Unidad, ...] = (
              "Autofunciones y autovalores, funciones ortogonales, desarrollo en una base y normalización.",
              "∫ψᵢ*ψⱼ dx = δᵢⱼ", DISPONIBLE, "operadores"),
     )),
-    Unidad("semana3", "Semana 3 · Los postulados de la mecánica cuántica",
+    Unidad("postulados", "Los postulados de la mecánica cuántica",
            "Las cinco reglas con las que se interpreta cualquier cálculo cuántico.", (
         Tema("postulados", "Los cinco postulados",
              "Función de onda y probabilidad, operadores, resultado de una medida, valor esperado y evolución temporal.",
              "⟨a⟩ = Σ aₙ |bₙ|²", DISPONIBLE, "postulados"),
     )),
-    Unidad("semana5", "Semana 5 · Partícula libre y pared de potencial",
+    Unidad("libre_pared", "Partícula libre y pared de potencial",
            "El sistema sin fuerzas y el primer contacto con regiones clásicamente prohibidas.", (
         Tema("libre_pared", "Partícula libre y pared de potencial",
              "Ondas planas, momento y posición, y la penetración en una pared de espesor infinito.",
              "ψ = A e^(ikx)", DISPONIBLE, "libre_pared"),
     )),
-    Unidad("semana6", "Semana 6 · Modelos sencillos: la partícula en una caja",
+    Unidad("caja", "Modelos sencillos: la partícula en una caja",
            "Confinamiento, cuantización de la energía, correspondencia con la física clásica y cajas en 2D y 3D.", (
         Tema("caja", "Partícula en una caja",
              "Estados estacionarios, energías, nodos, probabilidades, correspondencia, cajas 2D/3D y superposición.",
              "Eₙ = h²n² / 8ma²", DISPONIBLE, "caja", "caja", "particula_caja", "caja"),
     )),
-    Unidad("semana7", "Semana 7 · Operadores que conmutan y que no conmutan",
+    Unidad("conmutacion", "Operadores que conmutan y que no conmutan",
            "Cuándo dos propiedades se pueden conocer a la vez y el principio de incertidumbre de Heisenberg.", (
         Tema("conmutadores", "Conmutadores e incertidumbre",
              "El conmutador, [x̂, p̂] = iħ, la forma general del principio y el ejemplo de la caja.",
@@ -111,13 +111,13 @@ UNIDADES: tuple[Unidad, ...] = (
              "Paquetes de ondas, el límite de Heisenberg, ensanchamiento libre y difracción por una rendija.",
              "Δx · Δp ≥ ħ / 2", DISPONIBLE, "incertidumbre", "incertidumbre", "principio_incertidumbre", "inc"),
     )),
-    Unidad("semana9", "Semana 9 · Un modelo cuántico para la vibración",
+    Unidad("vibracion", "Un modelo cuántico para la vibración",
            "El oscilador armónico: el modelo de la vibración de los enlaces.", (
         Tema("oscilador", "Oscilador armónico",
              "Hermite, energías (n + ½)hν, punto cero, nodos, teorema del virial y vibración de moléculas diatómicas.",
              "Eₙ = (n + ½) hν", DISPONIBLE, "oscilador", "oscilador", "oscilador_armonico", "osc"),
     )),
-    Unidad("semana10", "Semana 10 · Un modelo cuántico para la rotación",
+    Unidad("rotacion", "Un modelo cuántico para la rotación",
            "Rotación en el plano y en el espacio, y cuantización del momento angular.", (
         Tema("esfera", "Rotación y momento angular",
              "Partícula en un anillo y en una esfera, armónicos esféricos, momento angular y niveles de rotación molecular.",
@@ -190,8 +190,8 @@ def _vista_indice() -> None:
     listos = sum(t.estado == DISPONIBLE for _, t in todos)
     qc.metricas([("Temas disponibles", f"{listos}"), ("Temas en preparación", f"{len(todos) - listos}"),
                  ("Unidades", f"{len(UNIDADES)}")], columnas=3)
-    st.info("Organizado según las diapositivas del curso (semanas 1, 2, 3, 5, 6, 7, 9 y 10). Los temas «en preparación» tienen "
-            "títulos provisionales y se activan cuando llegue su material; cada semana nueva se añade a medida que avanza el curso.",
+    st.info("Organizado según las diapositivas del curso. Los temas «en preparación» tienen "
+            "títulos provisionales y se activan cuando llegue su material; los temas nuevos se añaden a medida que avanza el curso.",
             icon=":material/info:")
     for unidad in UNIDADES:
         qc.seccion(unidad.titulo)
@@ -312,7 +312,7 @@ def ejecutar_pruebas() -> "qc.RegistroPruebas":
     r.comprobar("Cada simulador enlazado tiene guía y preguntas",
                 all(importlib.import_module(t.modulo_sim).GUIA and importlib.import_module(t.modulo_sim).PREGUNTAS
                     for t in disponibles if t.simulador))
-    r.comprobar("Los 6 simuladores y los temas de las semanas 1, 2, 3 y 7 están en el índice",
+    r.comprobar("Los 6 simuladores y los temas del curso están en el índice",
                 {"caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "cuerpo_negro", "de_broglie", "criterios",
                  "ondas", "schrodinger", "operadores", "postulados", "conmutadores", "libre_pared"} <= set(ids))
     r.comprobar("Todo tema disponible sin simulador tiene autoevaluación propia (≥ 5 preguntas)",

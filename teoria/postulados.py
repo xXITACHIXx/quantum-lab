@@ -1,5 +1,5 @@
 """
-teoria/postulados.py — Teoría: Los postulados de la mecánica cuántica (semana 3).
+teoria/postulados.py — Teoría: Los postulados de la mecánica cuántica
 """
 
 import numpy as np

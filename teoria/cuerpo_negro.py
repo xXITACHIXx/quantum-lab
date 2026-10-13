@@ -1,7 +1,7 @@
 """
-teoria/cuerpo_negro.py — Teoría: Radiación del cuerpo negro (semana 1).
+teoria/cuerpo_negro.py — Teoría: Radiación del cuerpo negro
 
-Nota: el tema figura en la agenda de la semana 1, pero las diapositivas recibidas no lo desarrollan; esta página
+Nota: el tema figura en la agenda del curso, pero las diapositivas recibidas no lo desarrollan; esta página
 está escrita a partir de los textos de referencia del curso (Atkins; McQuarrie; Engel y Hehre).
 """
 
@@ -83,7 +83,7 @@ def mostrar() -> None:
             "- Si hν ≫ kT (frecuencias altas) ⟨ε⟩ es exponencialmente pequeña: a esa temperatura casi nunca hay "
             "energía térmica suficiente para excitar ni un solo cuanto. Esto elimina la catástrofe ultravioleta.")
         st.markdown(
-            "Es el primer ejemplo del criterio de la semana 1: la física cuántica es imprescindible cuando el "
+            "Es el primer ejemplo del primer criterio del curso: la física cuántica es imprescindible cuando el "
             "espaciado entre energías permitidas (aquí hν) no es pequeño frente a kT.")
         qc.seccion("La ley de Planck y sus consecuencias")
         st.latex(r"u(\lambda,T)=\frac{8\pi hc}{\lambda^5}\,\frac{1}{e^{hc/\lambda k_BT}-1}")

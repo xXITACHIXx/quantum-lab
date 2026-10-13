@@ -1,5 +1,5 @@
 """
-teoria/operadores.py — Teoría: Operadores, autofunciones, ortogonalidad y completitud (semana 2).
+teoria/operadores.py — Teoría: Operadores, autofunciones, ortogonalidad y completitud
 """
 
 import numpy as np
@@ -167,7 +167,7 @@ def mostrar() -> None:
             "Igual que cualquier vector se escribe como combinación de los tres vectores unitarios, cualquier función "
             "razonable ψ(x) se puede **desarrollar** en las autofunciones φₙ de un operador (conjunto **completo**):")
         st.latex(r"\psi(x)=\sum_{n=1}^{\infty}b_n\,\varphi_n(x),\qquad b_n=\int\varphi_n^*(x)\,\psi(x)\,dx")
-        st.markdown("El coeficiente bₙ mide cuánto «se parece» ψ a la autofunción n-ésima. En la semana siguiente se "
+        st.markdown("El coeficiente bₙ mide cuánto «se parece» ψ a la autofunción n-ésima. Más adelante se "
                     "verá que |bₙ|² es una probabilidad.")
         c1, c2 = st.columns(2)
         with c1:

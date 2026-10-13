@@ -1,5 +1,5 @@
 """
-teoria/schrodinger.py — Teoría: La ecuación de Schrödinger (semana 2).
+teoria/schrodinger.py — Teoría: La ecuación de Schrödinger
 """
 
 import numpy as np
@@ -42,7 +42,7 @@ def mostrar() -> None:
         st.markdown(
             "La ecuación de Schrödinger es un **postulado**: no se deduce de principios más básicos, se justifica porque "
             "sus predicciones coinciden con el experimento. Aun así, hay un camino que la hace natural y que combina dos "
-            "ingredientes de las semanas anteriores: la ecuación de onda clásica y la relación de De Broglie.")
+            "ingredientes de los temas anteriores: la ecuación de onda clásica y la relación de De Broglie.")
         st.markdown("**Paso 1.** Una onda estacionaria clásica se puede escribir Ψ(x, t) = ψ(x)θ(t). Al sustituirla en la "
                     "ecuación de onda y quedarnos con la parte espacial queda:")
         st.latex(r"\frac{d^2\psi}{dx^2}+\frac{4\pi^2}{\lambda^2}\,\psi=0")

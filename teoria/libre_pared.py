@@ -1,5 +1,5 @@
 """
-teoria/libre_pared.py — Teoría: Partícula libre y pared de potencial (semana 5).
+teoria/libre_pared.py — Teoría: Partícula libre y pared de potencial
 """
 
 import math
@@ -57,7 +57,7 @@ def mostrar() -> None:
         st.latex(r"\psi^{+}(x)=A_+e^{+ikx},\qquad \psi^{-}(x)=A_-e^{-ikx},\qquad k=\sqrt{\frac{2mE}{\hbar^2}}=\frac{2\pi}{\lambda}")
         st.markdown(
             "Como el movimiento no está confinado, **la energía no está cuantizada**: cualquier E ≥ 0 es posible. "
-            "La cuantización aparecerá cuando se confine la partícula (la caja de la semana 6).")
+            "La cuantización aparecerá cuando se confine la partícula (como en la partícula en una caja).")
         st.latex(r"E=\frac{p^2}{2m}=\frac{\hbar^2k^2}{2m}\ \Rightarrow\ p=\hbar k=\frac{h}{\lambda}")
         st.markdown("Se recupera la relación de De Broglie: una partícula con momento p = ħk tiene longitud de onda λ = 2π/k.")
     with sub[1]:
@@ -74,8 +74,7 @@ def mostrar() -> None:
         st.latex(r"P(x)\,dx=\frac{\psi^{+*}\psi^{+}\,dx}{\int_{-L}^{L}\psi^{+*}\psi^{+}dx}=\frac{dx}{2L}")
         st.markdown(
             "No depende de x: la partícula tiene la **misma probabilidad de estar en cualquier lugar**. Si se conoce "
-            "exactamente el momento (ħk o −ħk), no se sabe nada de la posición. Es el principio de incertidumbre de la "
-            "semana 7 en su caso extremo (Δp = 0, Δx → ∞).")
+            "exactamente el momento (ħk o −ħk), no se sabe nada de la posición. Es el principio de incertidumbre en su caso extremo (Δp = 0, Δx → ∞).")
         qc.seccion("Calculadora")
         c1, c2 = st.columns(2)
         with c1:

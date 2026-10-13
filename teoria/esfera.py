@@ -1,5 +1,5 @@
 """
-teoria/esfera.py — Teoría: Rotación y momento angular (semana 10).
+teoria/esfera.py — Teoría: Rotación y momento angular
 """
 
 import math
@@ -164,7 +164,7 @@ def mostrar() -> None:
         st.latex(r"|\vec l|=\sqrt{l(l+1)}\,\hbar")
         qc.seccion("Orientaciones permitidas")
         st.markdown("Con l y $m_l$ conocidos, el vector forma con el eje z un ángulo tal que cos θ = $m_l$/√(l(l+1)). Las "
-                    "componentes x e y **no** se pueden especificar (no conmutan con $\\hat l_z$, como se vio en la semana 7): el vector "
+                    "componentes x e y **no** se pueden especificar (no conmutan con $\\hat l_z$, como se vio en conmutadores e incertidumbre): el vector "
                     "está en algún punto de un cono.")
         l = st.slider("l (modelo vectorial)", 1, 6, 2, key="es_lv")
         fig, (a1, a2) = figura(10, 4.6, columnas=2)

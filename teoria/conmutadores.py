@@ -1,5 +1,5 @@
 """
-teoria/conmutadores.py — Teoría: Operadores que conmutan y que no conmutan; principio de incertidumbre (semana 7).
+teoria/conmutadores.py — Teoría: Operadores que conmutan y que no conmutan; principio de incertidumbre
 """
 
 import numpy as np

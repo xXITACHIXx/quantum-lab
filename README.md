@@ -11,7 +11,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | Archivo | Contenido |
 |---|---|
 | `quantum_lab.py` | Menú principal (portada, acceso a los seis simuladores y al Centro de teoría, pruebas globales) |
-| `teoria/` | **Centro de teoría**: `__init__.py` (índice por semanas y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
+| `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
 | `particula_esfera.py` | 03 · Armónicos esféricos Yₗᵐ en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
@@ -120,7 +120,7 @@ la barra lateral que aparece el número de versión esperado.
 ## 5. Uso
 
 * **Centro de teoría** (barra lateral → «Teoría y verificación»): toda la teoría del curso en un solo lugar, organizada
-  por semanas según las diapositivas (semanas 1, 2, 3, 5, 6, 7, 9 y 10; las semanas 4 y 8 llegarán cuando se reciban sus diapositivas). Los temas sin material aún aparecen como «en preparación». Cada tema
+  por unidades según las diapositivas. Los temas sin material aún aparecen como «en preparación». Cada tema
   tiene pestañas de *Teoría* (con calculadoras y gráficas interactivas), *Simulación y práctica* (cuando hay simulador)
   y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Un tema se enlaza con
   `?sim=teoria&tema=bohr`.

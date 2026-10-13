@@ -1,5 +1,5 @@
 """
-teoria/caja.py — Teoría: Partícula en una caja (semana 6).
+teoria/caja.py — Teoría: Partícula en una caja
 """
 
 import itertools
