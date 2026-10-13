@@ -46,7 +46,7 @@ def test_esfera_valores_extremos_no_rompen():
 
 
 TEMAS_DISPONIBLES = ["cuerpo_negro", "fotoelectrico", "de_broglie", "bohr", "criterios", "ondas", "schrodinger", "operadores",
-                     "postulados", "caja", "oscilador", "esfera", "conmutadores", "incertidumbre"]
+                     "postulados", "libre_pared", "caja", "oscilador", "esfera", "conmutadores", "incertidumbre"]
 
 
 @pytest.mark.parametrize("tema", TEMAS_DISPONIBLES)
@@ -68,3 +68,10 @@ def test_enlace_antiguo_a_la_introduccion():
     at.run()
     assert not at.exception
     assert at.session_state["ql_pagina"] == "teoria" and at.session_state["ql_tema"] == "schrodinger"
+
+
+@pytest.mark.parametrize("tema", ["hidrogeno", "espin", "aproximados", "born_oppenheimer", "orbitales_moleculares", "espectroscopia"])
+def test_tema_en_preparacion_se_explica(tema):
+    at = _abrir("teoria", ql_tema=tema)
+    assert not at.exception, [e.value for e in at.exception]
+    assert any("en preparación" in w.value for w in at.warning)

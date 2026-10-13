@@ -123,7 +123,7 @@ def mostrar() -> None:
             "- Si [Â, B̂] = 0, los operadores **conmutan**: los observables pueden conocerse a la vez, con exactitud.\n"
             "- Si [Â, B̂] ≠ 0, **no conmutan**: no pueden determinarse simultáneamente con exactitud.")
         st.markdown("Casos conocidos: las tres componentes de la posición (x, y, z) conmutan entre sí, y también las tres "
-                    "componentes del momento lineal (pₓ, p_y, p_z). Pero x y pₓ **no** conmutan.")
+                    "componentes del momento lineal (pₓ, $p_y$, $p_z$). Pero x y pₓ **no** conmutan.")
         qc.seccion("Calcúlalo numéricamente")
         st.markdown("Se aplica el conmutador a una función de prueba arbitraria y se compara con el resultado exacto "
                     "(con ħ = 1; las derivadas se calculan por diferencias finitas).")
@@ -222,7 +222,7 @@ PREGUNTAS = [
      "opciones": ["0.568 ħ", "0.25 ħ", "ħ", "0"],
      "correcta": 0, "explicacion": "ΔxΔp = ħ√((π² − 6)/12) ≈ 0.568 ħ, algo mayor que ħ/2."},
     {"enunciado": "¿Cuál de estas parejas de observables SÍ puede conocerse a la vez con exactitud?",
-     "opciones": ["x y p_x", "x e y", "x y la energía de una partícula en una caja", "p_x y x²"],
+     "opciones": ["x y $p_x$", "x e y", "x y la energía de una partícula en una caja", "$p_x$ y x²"],
      "correcta": 1, "explicacion": "Las tres componentes de la posición conmutan entre sí."},
     {"enunciado": "Si el momento de una partícula se conoce exactamente (Δp = 0), la posición...",
      "opciones": ["queda completamente indeterminada (Δx → ∞)", "es exacta", "es cero", "es la mitad"],

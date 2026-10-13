@@ -8,8 +8,8 @@ import numpy as np
 import pytest
 from scipy.integrate import trapezoid
 
-from teoria import (conmutadores, criterios, cuerpo_negro, de_broglie, ondas, operadores, postulados,
-                    schrodinger)
+from teoria import (caja, conmutadores, criterios, cuerpo_negro, de_broglie, esfera, libre_pared, ondas, operadores,
+                    oscilador, postulados, schrodinger)
 from teoria._util import C, EV, H, KB, SIGMA
 
 
@@ -120,3 +120,95 @@ def test_incertidumbre_en_la_caja(n):
 def test_estado_fundamental_de_la_caja():
     assert conmutadores.incertidumbres_caja(1)[2] == pytest.approx(math.sqrt((math.pi ** 2 - 6) / 12), rel=1e-12)
     assert conmutadores.incertidumbres_caja(1)[2] == pytest.approx(0.568, abs=1e-3)
+
+
+# ---------------------------------------------------------------- semana 5: partícula libre y pared
+def test_pared_continuidad_y_reflexion_total():
+    k = libre_pared.numero_de_onda(9.1093837e-31, 1 * EV)
+    kap = libre_pared.kappa(9.1093837e-31, 3 * EV, 1 * EV)
+    _, R, T = libre_pared.funcion_de_onda_pared(np.array([0.0]), k, kap)
+    assert abs(R) == pytest.approx(1.0, abs=1e-12)
+    assert abs(T) ** 2 == pytest.approx(4 * 1 / 3, rel=1e-12)                 # |T|² = 4E/V
+    h = 1e-15
+    f = lambda x: libre_pared.funcion_de_onda_pared(np.array([x]), k, kap)[0][0]
+    assert f(-h) == pytest.approx(f(h), rel=1e-4)                              # ψ continua en x = 0
+    assert (f(-h) - f(-2 * h)) / h == pytest.approx((f(2 * h) - f(h)) / h, rel=1e-4)   # ψ' continua
+
+
+def test_profundidad_de_penetracion():
+    me = 9.1093837e-31
+    assert libre_pared.profundidad_de_penetracion(me, 2 * EV, 1 * EV) == pytest.approx(0.1952e-9, rel=1e-3)
+    assert libre_pared.profundidad_de_penetracion(me, 5 * EV, 1 * EV) == pytest.approx(0.0976e-9, rel=1e-3)
+    with pytest.raises(ValueError):
+        libre_pared.kappa(me, 1 * EV, 2 * EV)
+
+
+# ---------------------------------------------------------------- semana 6: caja
+def test_caja_probabilidades_y_energias():
+    assert caja.probabilidad_en_intervalo(1, 1 / 3, 2 / 3) == pytest.approx(1 / 3 + math.sqrt(3) / (2 * math.pi), rel=1e-12)
+    for n in (1, 3, 8):
+        assert caja.probabilidad_en_intervalo(n, 0.2, 0.9) == pytest.approx(caja.probabilidad_numerica(n, 0.2, 0.9), rel=1e-9)
+        assert caja.probabilidad_en_intervalo(n, 0, 1) == pytest.approx(1.0)
+    assert caja.energia_caja(2, 9.1093837e-31, 1e-9) == pytest.approx(4 * caja.energia_caja(1, 9.1093837e-31, 1e-9))
+    assert caja.energia_caja(1, 9.1093837e-31, 1e-9) / EV == pytest.approx(0.3760, rel=1e-3)
+    assert caja.separacion_relativa(1000) == pytest.approx(2001 / 1e6)
+
+
+def test_caja_3d_degeneraciones():
+    cubo = {round(e, 6): g for e, g, _ in caja.niveles_caja_3d(1, 1, cuantos=8)}
+    assert cubo[3.0] == 1 and cubo[6.0] == 3 and cubo[9.0] == 3 and cubo[12.0] == 1 and cubo[14.0] == 6
+    assert all(g == 1 or g == 3 or g == 6 for g in cubo.values())
+    asim = caja.niveles_caja_3d(1.37, 1.91, cuantos=6)
+    assert all(g == 1 for _, g, _ in asim)                                    # sin simetría no hay degeneración
+
+
+# ---------------------------------------------------------------- semana 9: oscilador
+def test_oscilador_hermite_energias_y_virial():
+    assert np.allclose(oscilador.nodos(4), [-1.6507, -0.5246, 0.5246, 1.6507], atol=1e-4)
+    z = np.linspace(-14, 14, 40001)
+    for n in (0, 1, 4, 9):
+        assert trapezoid(oscilador.psi(n, z) ** 2, z) == pytest.approx(1.0, abs=1e-9)
+    assert trapezoid(oscilador.psi(2, z) * oscilador.psi(5, z), z) == pytest.approx(0.0, abs=1e-12)
+    for n in (0, 1, 2, 5):
+        T, V = oscilador.energias_medias_adimensionales(n)
+        assert T == pytest.approx(V, abs=1e-5)
+        assert T + V == pytest.approx(n + 0.5, abs=1e-4)
+
+
+def test_oscilador_moleculas_y_gaussiana():
+    for nombre, (mu_u, w) in oscilador.MOLECULAS.items():
+        mu = mu_u * oscilador.U_MASA
+        k = oscilador.constante_de_fuerza(mu, w)
+        assert oscilador.frecuencia(mu, k) / (C * 100) == pytest.approx(w, rel=1e-9)
+    assert oscilador.constante_de_fuerza(oscilador.MOLECULAS["HCl (H³⁵Cl)"][0] * oscilador.U_MASA, 2990.95) == pytest.approx(516, rel=2e-3)
+    mu = oscilador.MOLECULAS["CO"][0] * oscilador.U_MASA
+    k = oscilador.constante_de_fuerza(mu, 2169.81)
+    from teoria._util import HBAR
+    assert math.sqrt(k * mu) / (2 * HBAR) == pytest.approx(oscilador.alfa(mu, k) ** 2 / 2, rel=1e-12)
+    assert oscilador.energia(0, mu, k) == pytest.approx(0.5 * H * oscilador.frecuencia(mu, k))
+
+
+# ---------------------------------------------------------------- semana 10: rotación
+@pytest.mark.parametrize("l,m", [(0, 0), (1, 0), (1, 1), (2, -1), (5, 3), (8, -8)])
+def test_armonicos_son_autofunciones_del_legendriano(l, m):
+    assert esfera.autovalor_legendriano(l, m) == pytest.approx(l * (l + 1), abs=2e-3)
+
+
+def test_anillo_y_esfera():
+    I = esfera.momento_de_inercia(1.67e-27, 1e-10)
+    assert esfera.energia_anillo(2, I) == pytest.approx(4 * esfera.energia_anillo(1, I))
+    assert esfera.energia_esfera(1, I) == pytest.approx(2 * esfera.energia_anillo(1, I) )
+    phi = np.linspace(0, 2 * np.pi, 20001)
+    for m in (0, 1, -3):
+        assert trapezoid(np.abs(esfera.phi_anillo(m, phi)) ** 2, phi) == pytest.approx(1.0, abs=1e-9)
+    assert esfera.angulo_minimo(1000) == pytest.approx(1.8112, abs=1e-3)
+    assert len(esfera.angulos_permitidos(1000)) == 2001
+
+
+def test_constantes_rotacionales_conocidas():
+    from teoria._util import HBAR
+    esperadas = {"H₂": 60.85, "HCl (H³⁵Cl)": 10.59, "CO": 1.931, "N₂": 1.998, "O₂": 1.438}
+    for nombre, (mu_u, r_pm) in esfera.MOLECULAS.items():
+        I = esfera.momento_de_inercia(mu_u * esfera.U_MASA, r_pm * 1e-12)
+        B = HBAR / (4 * math.pi * C * 100 * I)
+        assert B == pytest.approx(esperadas[nombre], rel=6e-3)

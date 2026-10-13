@@ -120,7 +120,7 @@ la barra lateral que aparece el número de versión esperado.
 ## 5. Uso
 
 * **Centro de teoría** (barra lateral → «Teoría y verificación»): toda la teoría del curso en un solo lugar, organizada
-  por semanas según las diapositivas (semanas 1, 2, 3 y 7; las semanas 4 a 6 agrupan los sistemas modelo). Cada tema
+  por semanas según las diapositivas (semanas 1, 2, 3, 5, 6, 7, 9 y 10; las semanas 4 y 8 llegarán cuando se reciban sus diapositivas). Los temas sin material aún aparecen como «en preparación». Cada tema
   tiene pestañas de *Teoría* (con calculadoras y gráficas interactivas), *Simulación y práctica* (cuando hay simulador)
   y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Un tema se enlaza con
   `?sim=teoria&tema=bohr`.
