@@ -12,6 +12,7 @@ import particula_caja
 import particula_esfera
 import principio_incertidumbre
 import quantum_lab_comun as qc
+import teoria
 import verificacion
 
 MODULOS = [particula_caja, oscilador_armonico, particula_esfera, efecto_fotoelectrico, modelo_bohr,
@@ -61,3 +62,9 @@ def test_lista_rapida_de_estados():
     for malo in ("2.5:1", "1:2:3:4", "a:1", " ; "):
         with pytest.raises(ValueError):
             particula_caja.leer_lista_estados(malo)
+
+
+def test_centro_de_teoria_indice_consistente():
+    registro = teoria.ejecutar_pruebas()
+    fallos = [r["Prueba"] for r in registro.resultados if not r["ok"]]
+    assert not fallos, fallos

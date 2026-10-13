@@ -10,7 +10,8 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 
 | Archivo | Contenido |
 |---|---|
-| `quantum_lab.py` | Menú principal (portada, introducción, acceso a los seis simuladores, pruebas globales) |
+| `quantum_lab.py` | Menú principal (portada, acceso a los seis simuladores y al Centro de teoría, pruebas globales) |
+| `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas, estados «disponible» / «en preparación») y un archivo por tema con su teoría (`caja.py`, `bohr.py`…) |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
 | `particula_esfera.py` | 03 · Armónicos esféricos Yₗᵐ en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
@@ -118,6 +119,12 @@ la barra lateral que aparece el número de versión esperado.
 
 ## 5. Uso
 
+* **Centro de teoría** (barra lateral → «Teoría y verificación»): toda la teoría en un solo lugar, organizada por
+  unidades. Cada tema disponible tiene tres pestañas: *Teoría*, *Simulación y práctica* (botón al simulador y
+  experimentos) y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Los temas
+  «en preparación» muestran sus contenidos previstos. Un tema se enlaza con `?sim=teoria&tema=bohr`.
+* **Añadir un tema nuevo:** crear `teoria/<id>.py` con una función `mostrar()` y marcarlo como disponible en la lista
+  `UNIDADES` de `teoria/__init__.py` (las instrucciones están en la cabecera de ese archivo).
 * Los **parámetros** están arriba de cada simulador; los resultados se recalculan al instante.
 * «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al principio.
 * **Compartir configuración:** la dirección de la página guarda el simulador y los parámetros que difieren de los

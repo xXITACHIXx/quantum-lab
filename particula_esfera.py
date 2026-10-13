@@ -1231,26 +1231,6 @@ def _pestana_confinada():
             "- Se grafica el armónico **complejo**: |ψ|² tiene simetría axial alrededor de z (corte idéntico para ±m).")
 
 
-def _pestana_ecuaciones():
-    qc.seccion("Armónicos esféricos")
-    st.latex(r"Y_l^m(\theta,\varphi)=(-1)^m\sqrt{\frac{2l+1}{4\pi}\frac{(l-m)!}{(l+m)!}}\;P_l^m(\cos\theta)\,e^{im\varphi},\quad m\ge 0")
-    st.latex(r"Y_l^{-m}=(-1)^m\,\overline{Y_l^m}\qquad \hat L^2Y_l^m=\hbar^2l(l+1)Y_l^m\qquad \hat L_zY_l^m=\hbar mY_l^m")
-    st.latex(r"\int_0^{2\pi}\!\!\int_0^{\pi}\overline{Y_l^m}\,Y_{l'}^{m'}\sin\theta\,d\theta\,d\varphi=\delta_{ll'}\delta_{mm'}")
-    st.latex(r"x=r\sin\theta\cos\varphi,\quad y=r\sin\theta\sin\varphi,\quad z=r\cos\theta")
-    qc.seccion("Combinaciones reales")
-    st.latex(r"R^{c}_{lm}=\sqrt2\,(-1)^m\,\mathrm{Re}\,Y_l^{m}\propto\cos m\varphi,\qquad R^{s}_{lm}=\sqrt2\,(-1)^m\,\mathrm{Im}\,Y_l^{m}\propto\sin m\varphi")
-    st.markdown("Nodos latitudinales: raíces de $P_l^{|m|}(\\cos\\theta)$, hay $l-|m|$. Combinación real: además $|m|$ planos "
-                "verticales; en total $l$ superficies nodales.")
-    qc.seccion("Partícula en una esfera impenetrable")
-    st.latex(r"\psi_{nlm}=R_{nl}(r)\,Y_l^m,\qquad R_{nl}(r)=\sqrt{\frac{2}{R^3}}\,\frac{j_l(\alpha_{nl}r/R)}{|j_{l+1}(\alpha_{nl})|}")
-    st.latex(r"j_l(\alpha_{nl})=0,\qquad E_{nl}=\frac{\hbar^2\alpha_{nl}^2}{2mR^2},\qquad \int_0^R R_{nl}^2r^2dr=1")
-    qc.seccion("Limitaciones del modelo")
-    st.markdown("- La parte angular es la misma para cualquier potencial central; **el átomo de hidrógeno** requeriría otra "
-                "parte radial (Laguerre), que no se implementa aquí.\n"
-                "- El espín no se considera.\n"
-                "- Las superficies deformadas o de lóbulos son representaciones geométricas, no objetos físicos.")
-
-
 def interfaz() -> None:
     """Página completa del simulador 3 (se puede insertar dentro de quantum_lab.py)."""
     qc.iniciar_estado(VALORES_INICIALES)
@@ -1258,11 +1238,12 @@ def interfaz() -> None:
     qc.encabezado_pagina("Simulador 03", "Partícula en una esfera · armónicos esféricos",
                          "Armónicos Yₗᵐ sobre una esfera de radio fijo, sus nodos y simetrías, y el modelo opcional "
                          "de una partícula confinada en una esfera impenetrable.")
+    qc.enlace_teoria("esfera")
     p = _leer_parametros()
     if p is None:
         return
     tabs = st.tabs(["Armónico 3D", "Proyección 2D y cortes", "Comparación de orbitales", "Complejos y reales",
-                    "Partícula confinada", "Ecuaciones", "Guía de práctica", "Autoevaluación", "Pruebas numéricas"])
+                    "Partícula confinada", "Guía de práctica", "Autoevaluación", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_3d(p)
     with tabs[1]:
@@ -1274,12 +1255,10 @@ def interfaz() -> None:
     with tabs[4]:
         _pestana_confinada()
     with tabs[5]:
-        _pestana_ecuaciones()
-    with tabs[6]:
         qc.guia_practica(GUIA, "esf")
-    with tabs[7]:
+    with tabs[6]:
         qc.autoevaluacion(PREGUNTAS, "esf")
-    with tabs[8]:
+    with tabs[7]:
         qc.boton_pruebas(ejecutar_pruebas, "esf_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 

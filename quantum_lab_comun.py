@@ -919,7 +919,7 @@ def cargar_desde_url(valores_iniciales: dict) -> None:
             pass                              # parámetro manipulado o antiguo: se ignora
 
 
-def escribir_en_url(valores_iniciales: dict | None) -> None:
+def escribir_en_url(valores_iniciales: dict | None, extra: dict | None = None) -> None:
     """
     Refleja en la barra de direcciones los parámetros que difieren de los valores iniciales, de modo que
     copiar la dirección comparte exactamente la configuración que se está viendo.
@@ -929,6 +929,7 @@ def escribir_en_url(valores_iniciales: dict | None) -> None:
     pagina = st.session_state.get("ql_pagina")
     if pagina and pagina != "inicio":
         datos["sim"] = pagina
+    datos.update({k: v for k, v in (extra or {}).items() if v})
     for clave in _claves_compartibles(valores_iniciales or {}):
         valor = st.session_state.get(clave)
         if valor is None:
@@ -941,6 +942,26 @@ def escribir_en_url(valores_iniciales: dict | None) -> None:
             st.query_params.from_dict(datos)
     except Exception:
         pass
+
+
+def ir_a_tema(tema: str) -> None:
+    """Callback: abre el Centro de teoría en el tema indicado."""
+    import streamlit as st
+    st.session_state["ql_pagina"] = "teoria"
+    st.session_state["ql_tema"] = tema
+
+
+def enlace_teoria(tema: str) -> None:
+    """
+    Botón «Ver la teoría de este tema» de cada simulador. Solo existe dentro del laboratorio completo
+    (quantum_lab.py); si el simulador se abre solo, se avisa de dónde está la teoría.
+    """
+    import streamlit as st
+    if "ql_pagina" in st.session_state:
+        st.button("Ver la teoría de este tema", key=f"ql_teoria_{tema}", icon=":material/menu_book:",
+                  on_click=ir_a_tema, args=(tema,))
+    else:
+        st.caption("La teoría de este tema está en el Centro de teoría del laboratorio completo (quantum_lab.py).")
 
 
 def boton_compartir(valores_iniciales: dict) -> None:

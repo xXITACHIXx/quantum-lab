@@ -29,6 +29,7 @@ import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import teoria
 import verificacion
 
 # Páginas: clave → (título en la barra lateral, icono monocromo, módulo o None)
@@ -40,14 +41,14 @@ PAGINAS = {
     "fotoelectrico": ("Efecto fotoeléctrico", ":material/wb_incandescent:", efecto_fotoelectrico),
     "bohr": ("Átomo de hidrógeno", ":material/radio_button_checked:", modelo_bohr),
     "incertidumbre": ("Principio de incertidumbre", ":material/blur_on:", principio_incertidumbre),
-    "intro": ("Introducción teórica", ":material/menu_book:", None),
+    "teoria": ("Centro de teoría", ":material/menu_book:", teoria),
     "verificacion": ("Verificación", ":material/verified:", verificacion),
     "pruebas": ("Pruebas numéricas", ":material/fact_check:", None),
 }
 GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
-    ("Teoría y verificación", ["intro", "verificacion", "pruebas"], False),
+    ("Teoría y verificación", ["teoria", "verificacion", "pruebas"], True),
 ]
 
 
@@ -58,7 +59,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -129,15 +130,20 @@ def _pagina_inicio() -> None:
                             f'<p>{texto}</p><div class="ql-ecuacion">{ecuacion}</div></div>', unsafe_allow_html=True)
                 st.button("Abrir simulador", key=f"ql_abrir_{clave}", on_click=_ir_a, args=(clave,),
                           icon=":material/arrow_forward:", width="stretch")
+    qc.seccion("Teoría del curso")
+    st.markdown("El **Centro de teoría** reúne en un solo lugar la teoría de cada tema, con enlaces a su simulador, "
+                "experimentos guiados y autoevaluación. Los temas que el curso aún no cubre ya tienen su lugar.")
+    st.button("Abrir el Centro de teoría", key="ql_abrir_teoria", on_click=_ir_a, args=("teoria",),
+              icon=":material/menu_book:")
     st.markdown("")
     c1, c2 = st.columns(2, gap="large")
     with c1:
         qc.seccion("Uso")
-        st.markdown("1. Elige un simulador en la barra lateral o en las tarjetas.\n"
+        st.markdown("1. Elige un simulador o el **Centro de teoría** en la barra lateral o en las tarjetas.\n"
                     "2. Ajusta los **parámetros del sistema** en el panel superior; los resultados se recalculan al instante.\n"
                     "3. Recorre las **pestañas**: resultados, visualización, valores detallados e interpretación.\n"
                     "4. «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al comienzo.\n"
-                    "5. **Guía de práctica** propone experimentos con predicción y resultado; **Autoevaluación** "
+                    "5. **Ver la teoría de este tema** abre su explicación; **Guía de práctica** propone experimentos con predicción y resultado; **Autoevaluación** "
                     "corrige preguntas de opción múltiple; **Pruebas numéricas** verifica los cálculos.\n"
                     "6. Las gráficas y tablas se pueden **descargar** (PNG, HTML o CSV) y «Compartir configuración» "
                     "da un enlace con los parámetros exactos.")
@@ -147,30 +153,6 @@ def _pagina_inicio() -> None:
                     "en mallas numéricas con el error documentado en cada simulador.\n"
                     "- Las deformaciones y «lóbulos» de la esfera son recursos geométricos, no objetos físicos.\n"
                     "- Herramienta **educativa**: una partícula, sin espín ni interacciones; no describe átomos reales.")
-
-
-def _pagina_intro() -> None:
-    qc.encabezado_pagina("Teoría", "Introducción a la mecánica cuántica",
-                         "Ideas mínimas para interpretar los resultados del laboratorio con criterio.")
-    with st.expander("1. Función de onda y probabilidad", expanded=True):
-        st.markdown("El estado de una partícula se describe con la **función de onda** ψ(x), en general compleja. "
-                    "Lo medible es la **densidad de probabilidad** ρ = |ψ|²; la probabilidad de encontrarla en [x₁, x₂] "
-                    "es ∫ρ dx y la total vale 1 (**normalización**).")
-        st.latex(r"\int_{-\infty}^{\infty}|\psi(x)|^2\,dx = 1")
-    with st.expander("2. Ecuación de Schrödinger y estados estacionarios", expanded=True):
-        st.latex(r"i\hbar\,\partial_t\Psi=\hat H\Psi,\qquad \hat H\psi_n=E_n\psi_n\ \Rightarrow\ \Psi_n(x,t)=\psi_n(x)\,e^{-iE_nt/\hbar}")
-        st.markdown("En un estado estacionario la fase gira pero **|Ψ|² no cambia**. La energía está **cuantizada** por las "
-                    "condiciones de contorno (caja: ψ = 0 en las paredes; oscilador: ψ → 0 en el infinito).")
-    with st.expander("3. Superposición e interferencia", expanded=False):
-        st.latex(r"\Psi=\sum_n c_n\psi_n e^{-iE_nt/\hbar},\qquad |\Psi|^2=\sum_n|c_n|^2|\psi_n|^2+\text{(términos cruzados)}")
-        st.markdown("Los términos cruzados dependen de las **fases relativas** y oscilan a las frecuencias (Eₙ − Eₘ)/ħ: "
-                    "son la interferencia cuántica.")
-    with st.expander("4. Momento angular y armónicos esféricos", expanded=False):
-        st.markdown("En un potencial central la parte angular de ψ son los armónicos esféricos Yₗᵐ(θ, φ): autoestados de L² "
-                    "(ħ²l(l+1)) y L_z (ħm), con l = 0, 1, 2… y −l ≤ m ≤ l.")
-    with st.expander("5. Unidades", expanded=False):
-        st.markdown("Internamente todo se calcula en **SI**. Puedes introducir y ver los resultados en SI (nm, eV, rad/s) o en "
-                    "**unidades atómicas** (a₀, Eₕ, ħ/Eₕ), donde ħ = mₑ = e = 1.")
 
 
 def _pagina_pruebas() -> None:
@@ -193,15 +175,16 @@ def main() -> None:
     qc.preparar_sesion()
     if "ql_pagina" not in st.session_state:          # primera carga: la página puede venir en el enlace (?sim=…)
         sim = st.query_params.get("sim")
+        if sim == "intro":                            # enlaces antiguos a la «Introducción teórica»
+            sim = "teoria"
+            st.session_state["ql_tema"] = "introduccion"
         st.session_state["ql_pagina"] = sim if sim in PAGINAS else "inicio"
     _barra_lateral()
     pagina = st.session_state["ql_pagina"]
-    if pagina in ("inicio", "intro", "pruebas", "verificacion"):
+    if pagina in ("inicio", "pruebas", "verificacion"):
         qc.escribir_en_url(None)
     if pagina == "inicio":
         _pagina_inicio()
-    elif pagina == "intro":
-        _pagina_intro()
     elif pagina == "pruebas":
         _pagina_pruebas()
     elif pagina == "verificacion":
