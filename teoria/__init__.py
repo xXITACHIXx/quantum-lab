@@ -14,7 +14,8 @@ Cómo añadir un tema nuevo (cuando el curso llegue a él):
     2. En la lista UNIDADES de abajo, cambiar su estado a DISPONIBLE y rellenar `modulo`
        (y `simulador`, `modulo_sim`, `prefijo` si ya existe un simulador con su guía y preguntas).
 
-El orden y los nombres de las unidades son PROVISIONALES: se ajustarán al temario real del curso.
+Las unidades siguen las diapositivas del curso (semanas 1, 2, 3 y 7 recibidas). Las semanas 4 a 6 agrupan los sistemas
+modelo ya disponibles y se reordenarán cuando llegue el cronograma.
 """
 
 from __future__ import annotations
@@ -53,38 +54,44 @@ class Unidad:
 
 
 UNIDADES: tuple[Unidad, ...] = (
-    Unidad("origenes", "Orígenes de la teoría cuántica",
-           "De los fallos de la física clásica a los primeros modelos con energía cuantizada.", (
+    Unidad("semana1", "Semana 1 · De la mecánica clásica a la cuántica",
+           "Por qué hace falta una física nueva: los experimentos que la clásica no explica y los primeros modelos.", (
         Tema("cuerpo_negro", "Radiación del cuerpo negro",
-             "La catástrofe ultravioleta y la hipótesis de Planck.", "E = hν",
-             previsto=("Ley de Planck frente a Rayleigh–Jeans", "Leyes de Wien y de Stefan–Boltzmann",
-                       "Simulador de espectros a distintas temperaturas")),
+             "La catástrofe ultravioleta, la hipótesis de Planck y las leyes de Wien y Stefan–Boltzmann.",
+             "E = hν", DISPONIBLE, "cuerpo_negro"),
         Tema("fotoelectrico", "Efecto fotoeléctrico",
              "Frecuencia umbral, ecuación de Einstein y la constante de Planck al estilo de Millikan.",
              "Kmáx = hν − Φ", DISPONIBLE, "fotoelectrico", "fotoelectrico", "efecto_fotoelectrico", "foto"),
-        Tema("bohr", "Modelo de Bohr y átomo de hidrógeno",
+        Tema("de_broglie", "Partículas con comportamiento ondulatorio",
+             "Ondas de materia de De Broglie, difracción de electrones y ondas estacionarias de Bohr.",
+             "λ = h / p", DISPONIBLE, "de_broglie"),
+        Tema("bohr", "Espectros atómicos y modelo de Bohr",
              "Niveles de energía, transiciones, series espectrales y el átomo cuántico en 3D.",
              "Eₙ = −13.6 eV / n²", DISPONIBLE, "bohr", "bohr", "modelo_bohr", "bohr"),
-        Tema("de_broglie", "Dualidad onda–partícula",
-             "Ondas de materia de De Broglie y difracción de electrones.", "λ = h / p",
-             previsto=("Longitud de onda de De Broglie de partículas y objetos", "Experimento de la doble rendija",
-                       "Condición de Bohr como onda estacionaria")),
+        Tema("criterios", "¿Cuándo usar la mecánica cuántica?",
+             "Dos criterios: la longitud de onda frente al tamaño del sistema y el espaciado de energía frente a kT.",
+             "nᵢ/nⱼ = (gᵢ/gⱼ) e^(−ΔE/kT)", DISPONIBLE, "criterios"),
     )),
-    Unidad("fundamentos", "Fundamentos de la mecánica cuántica",
-           "Las ideas y herramientas con las que se interpreta cualquier resultado posterior.", (
-        Tema("introduccion", "Introducción a la mecánica cuántica",
-             "Función de onda, ecuación de Schrödinger, superposición, momento angular y unidades.",
-             "iħ ∂ₜΨ = ĤΨ", DISPONIBLE, "introduccion"),
-        Tema("incertidumbre", "Principio de incertidumbre",
-             "Paquetes de ondas, el límite de Heisenberg, ensanchamiento libre y difracción por una rendija.",
-             "Δx · Δp ≥ ħ / 2", DISPONIBLE, "incertidumbre", "incertidumbre", "principio_incertidumbre", "inc"),
-        Tema("postulados", "Postulados y operadores",
-             "Observables, operadores hermíticos, valores esperados y conmutadores.", "[x̂, p̂] = iħ",
-             previsto=("Valores esperados y desviaciones", "Conmutadores e incertidumbre generalizada",
-                       "Medida y colapso")),
+    Unidad("semana2", "Semana 2 · La ecuación de Schrödinger",
+           "De las ondas clásicas a la ecuación fundamental, y el lenguaje de operadores y autofunciones.", (
+        Tema("ondas", "Ondas clásicas y funciones complejas",
+             "Ondas viajeras y estacionarias, la ecuación de onda y la representación con exponenciales complejas.",
+             "Ψ = A e^(i(kx − ωt))", DISPONIBLE, "ondas"),
+        Tema("schrodinger", "La ecuación de Schrödinger",
+             "Justificación, versión dependiente del tiempo, estados estacionarios y solución numérica.",
+             "Ĥψ = Eψ", DISPONIBLE, "schrodinger"),
+        Tema("operadores", "Operadores, ortogonalidad y completitud",
+             "Autofunciones y autovalores, funciones ortogonales, desarrollo en una base y normalización.",
+             "∫ψᵢ*ψⱼ dx = δᵢⱼ", DISPONIBLE, "operadores"),
     )),
-    Unidad("modelos", "Sistemas modelo",
-           "Problemas resolubles de forma exacta que sirven de laboratorio para entender la cuantización.", (
+    Unidad("semana3", "Semana 3 · Los postulados de la mecánica cuántica",
+           "Las cinco reglas con las que se interpreta cualquier cálculo cuántico.", (
+        Tema("postulados", "Los cinco postulados",
+             "Función de onda y probabilidad, operadores, resultado de una medida, valor esperado y evolución temporal.",
+             "⟨a⟩ = Σ aₙ |bₙ|²", DISPONIBLE, "postulados"),
+    )),
+    Unidad("sistemas", "Semanas 4 a 6 · Sistemas modelo",
+           "Problemas con solución exacta (orden por confirmar con el cronograma del curso).", (
         Tema("caja", "Partícula en una caja",
              "Estados estacionarios, energías, nodos, superposición e interferencia.",
              "Eₙ = n²π²ħ² / 2ma²", DISPONIBLE, "caja", "caja", "particula_caja", "caja"),
@@ -94,40 +101,18 @@ UNIDADES: tuple[Unidad, ...] = (
         Tema("esfera", "Momento angular y partícula en una esfera",
              "Armónicos esféricos, orbitales complejos y reales y partícula confinada.",
              "L² Yₗᵐ = ħ² l(l+1) Yₗᵐ", DISPONIBLE, "esfera", "esfera", "particula_esfera", "esf"),
-        Tema("tunel", "Efecto túnel y barreras",
-             "Penetración en regiones prohibidas y transmisión a través de una barrera.", "T ≈ e^(−2κa)",
-             previsto=("Barrera rectangular: transmisión y reflexión", "Pozo finito", "Aplicaciones: STM, desintegración α")),
-        Tema("rotor", "Rotor rígido",
-             "Rotación molecular y espectros rotacionales.", "E_J = ħ² J(J+1) / 2I",
-             previsto=("Niveles rotacionales y reglas de selección", "Espectro de rotación de moléculas diatómicas")),
     )),
-    Unidad("atomos", "Átomos hidrogenoides y polielectrónicos",
-           "Del átomo de hidrógeno exacto a los métodos aproximados para varios electrones.", (
-        Tema("hidrogeno", "Átomo de hidrógeno (ecuación radial)",
-             "Funciones radiales, números cuánticos y orbitales.", "ψₙₗₘ = Rₙₗ(r) Yₗᵐ(θ, φ)",
-             previsto=("Funciones de onda radiales y distribuciones radiales", "Orbitales s, p, d en 3D",
-                       "Degeneración y niveles de energía")),
-        Tema("espin", "Espín y principio de exclusión",
-             "Momento angular de espín, estados de dos electrones y configuraciones electrónicas.", "s = ½",
-             previsto=("Espín del electrón", "Principio de Pauli y configuraciones", "Acoplamiento de momentos angulares")),
-        Tema("aproximados", "Métodos aproximados",
-             "Teoría de perturbaciones y método variacional.", "E_var ≥ E₀",
-             previsto=("Método variacional con funciones de prueba", "Perturbaciones independientes del tiempo",
-                       "Átomo de helio")),
-    )),
-    Unidad("moleculas", "Estructura molecular",
-           "Cómo se enlazan los átomos: de Born–Oppenheimer a los orbitales moleculares.", (
-        Tema("born_oppenheimer", "Aproximación de Born–Oppenheimer",
-             "Separación del movimiento nuclear y electrónico; superficies de energía potencial.", "V(R)",
-             previsto=("Curvas de energía potencial", "Vibración de moléculas diatómicas")),
-        Tema("orbitales_moleculares", "Orbitales moleculares",
-             "Combinación lineal de orbitales atómicos, enlace y antienlace.", "ψ_MO = Σ cᵢ φᵢ",
-             previsto=("Ión molecular H₂⁺", "Molécula H₂", "Diagramas de orbitales moleculares")),
-        Tema("espectroscopia", "Espectroscopía molecular",
-             "Transiciones rotacionales, vibracionales y electrónicas.", "ΔE = hν",
-             previsto=("Espectros rotovibracionales", "Regla de selección y principio de Franck–Condon")),
+    Unidad("semana7", "Semana 7 · Operadores que conmutan y que no conmutan",
+           "Cuándo dos propiedades se pueden conocer a la vez y el principio de incertidumbre de Heisenberg.", (
+        Tema("conmutadores", "Conmutadores e incertidumbre",
+             "El conmutador, [x̂, p̂] = iħ, la forma general del principio y el ejemplo de la caja.",
+             "[x̂, p̂] = iħ", DISPONIBLE, "conmutadores"),
+        Tema("incertidumbre", "Paquetes de ondas y principio de incertidumbre",
+             "Paquetes de ondas, el límite de Heisenberg, ensanchamiento libre y difracción por una rendija.",
+             "Δx · Δp ≥ ħ / 2", DISPONIBLE, "incertidumbre", "incertidumbre", "principio_incertidumbre", "inc"),
     )),
 )
+
 
 def todos_los_temas() -> list[tuple[Unidad, Tema]]:
     return [(u, t) for u in UNIDADES for t in u.temas]
@@ -168,10 +153,10 @@ def _vista_indice() -> None:
                          "guiados y la autoevaluación de cada tema.")
     todos = todos_los_temas()
     listos = sum(t.estado == DISPONIBLE for _, t in todos)
-    qc.metricas([("Temas disponibles", f"{listos}"), ("Temas en preparación", f"{len(todos) - listos}"),
-                 ("Unidades", f"{len(UNIDADES)}")], columnas=3)
-    st.info("El orden de las unidades es **provisional**: se ajustará al temario real del curso. Los temas «en preparación» "
-            "ya tienen su lugar y se activan cuando el curso llegue a ellos.", icon=":material/info:")
+    qc.metricas([("Temas disponibles", f"{listos}"), ("Unidades", f"{len(UNIDADES)}")], columnas=2)
+    st.info("Organizado según las diapositivas del curso. Las semanas 4 a 6 reúnen los sistemas modelo ya disponibles y se "
+            "reordenarán con el cronograma; cada semana nueva se añade a medida que avanza el curso.",
+            icon=":material/info:")
     for unidad in UNIDADES:
         qc.seccion(unidad.titulo)
         st.caption(unidad.descripcion)
@@ -205,6 +190,13 @@ def _practica(tema: Tema) -> None:
                "del simulador.")
 
 
+def _preguntas(tema: Tema):
+    """Preguntas de autoevaluación: las del simulador si lo hay y, si no, las del propio módulo de teoría."""
+    if tema.simulador:
+        return importlib.import_module(tema.modulo_sim).PREGUNTAS
+    return getattr(importlib.import_module(f"teoria.{tema.modulo}"), "PREGUNTAS", None)
+
+
 def _vista_tema(tema_id: str) -> None:
     hallado = buscar(tema_id)
     if hallado is None:
@@ -226,17 +218,23 @@ def _vista_tema(tema_id: str) -> None:
             st.markdown("\n".join(f"- {p}" for p in tema.previsto))
         return
 
+    preguntas = _preguntas(tema)
     nombres = ["Teoría"]
     if tema.simulador:
-        nombres += ["Simulación y práctica", "Autoevaluación"]
+        nombres.append("Simulación y práctica")
+    if preguntas:
+        nombres.append("Autoevaluación")
     tabs = st.tabs(nombres)
     with tabs[0]:
         mostrar()
+    k = 1
     if tema.simulador:
-        with tabs[1]:
+        with tabs[k]:
             _practica(tema)
-        with tabs[2]:
-            qc.autoevaluacion(importlib.import_module(tema.modulo_sim).PREGUNTAS, tema.prefijo)
+        k += 1
+    if preguntas:
+        with tabs[k]:
+            qc.autoevaluacion(preguntas, tema.prefijo or f"tq_{tema.id}")
 
 
 def interfaz() -> None:
@@ -270,6 +268,11 @@ def ejecutar_pruebas() -> "qc.RegistroPruebas":
     r.comprobar("Cada simulador enlazado tiene guía y preguntas",
                 all(importlib.import_module(t.modulo_sim).GUIA and importlib.import_module(t.modulo_sim).PREGUNTAS
                     for t in disponibles if t.simulador))
-    r.comprobar("Los 6 simuladores y la introducción están en el índice",
-                {"caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "introduccion"} <= set(ids))
+    r.comprobar("Los 6 simuladores y los temas de las semanas 1, 2, 3 y 7 están en el índice",
+                {"caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "cuerpo_negro", "de_broglie", "criterios",
+                 "ondas", "schrodinger", "operadores", "postulados", "conmutadores"} <= set(ids))
+    r.comprobar("Todo tema disponible sin simulador tiene autoevaluación propia (≥ 5 preguntas)",
+                all(len(_preguntas(t) or []) >= 5 for t in disponibles if not t.simulador))
+    r.comprobar("Las preguntas de autoevaluación tienen la respuesta correcta dentro de las opciones",
+                all(0 <= p["correcta"] < len(p["opciones"]) for t in disponibles for p in (_preguntas(t) or [])))
     return r

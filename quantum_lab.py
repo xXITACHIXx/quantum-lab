@@ -175,9 +175,9 @@ def main() -> None:
     qc.preparar_sesion()
     if "ql_pagina" not in st.session_state:          # primera carga: la página puede venir en el enlace (?sim=…)
         sim = st.query_params.get("sim")
-        if sim == "intro":                            # enlaces antiguos a la «Introducción teórica»
+        if sim == "intro":                            # enlaces antiguos a la «Introducción teórica» (ahora, el tema de Schrödinger)
             sim = "teoria"
-            st.session_state["ql_tema"] = "introduccion"
+            st.session_state["ql_tema"] = "schrodinger"
         st.session_state["ql_pagina"] = sim if sim in PAGINAS else "inicio"
     _barra_lateral()
     pagina = st.session_state["ql_pagina"]

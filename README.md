@@ -11,7 +11,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | Archivo | Contenido |
 |---|---|
 | `quantum_lab.py` | Menú principal (portada, acceso a los seis simuladores y al Centro de teoría, pruebas globales) |
-| `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas, estados «disponible» / «en preparación») y un archivo por tema con su teoría (`caja.py`, `bohr.py`…) |
+| `teoria/` | **Centro de teoría**: `__init__.py` (índice por semanas y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
 | `particula_esfera.py` | 03 · Armónicos esféricos Yₗᵐ en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
@@ -119,12 +119,13 @@ la barra lateral que aparece el número de versión esperado.
 
 ## 5. Uso
 
-* **Centro de teoría** (barra lateral → «Teoría y verificación»): toda la teoría en un solo lugar, organizada por
-  unidades. Cada tema disponible tiene tres pestañas: *Teoría*, *Simulación y práctica* (botón al simulador y
-  experimentos) y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Los temas
-  «en preparación» muestran sus contenidos previstos. Un tema se enlaza con `?sim=teoria&tema=bohr`.
-* **Añadir un tema nuevo:** crear `teoria/<id>.py` con una función `mostrar()` y marcarlo como disponible en la lista
-  `UNIDADES` de `teoria/__init__.py` (las instrucciones están en la cabecera de ese archivo).
+* **Centro de teoría** (barra lateral → «Teoría y verificación»): toda la teoría del curso en un solo lugar, organizada
+  por semanas según las diapositivas (semanas 1, 2, 3 y 7; las semanas 4 a 6 agrupan los sistemas modelo). Cada tema
+  tiene pestañas de *Teoría* (con calculadoras y gráficas interactivas), *Simulación y práctica* (cuando hay simulador)
+  y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Un tema se enlaza con
+  `?sim=teoria&tema=bohr`.
+* **Añadir un tema nuevo:** crear `teoria/<id>.py` con una función `mostrar()` (y, opcionalmente, una lista `PREGUNTAS`) y
+  registrarlo en la lista `UNIDADES` de `teoria/__init__.py` (las instrucciones están en la cabecera de ese archivo).
 * Los **parámetros** están arriba de cada simulador; los resultados se recalculan al instante.
 * «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al principio.
 * **Compartir configuración:** la dirección de la página guarda el simulador y los parámetros que difieren de los
