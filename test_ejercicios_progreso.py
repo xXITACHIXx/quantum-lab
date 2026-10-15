@@ -189,7 +189,7 @@ def test_y20_nodos_y_caja():
     assert crit == pytest.approx(_esperado("l07_y20_nodos", "t1"), abs=0.01)
     assert 180 - crit == pytest.approx(_esperado("l07_y20_nodos", "t2"), abs=0.01)
     p = quad(lambda x: 2 * math.sin(math.pi * x) ** 2, 1 / 3, 2 / 3)[0]
-    assert "P = %.3f" % p in [t.name for t in _figuras.fig_caja_tercio().data]
+    assert any("P = %.3f" % p in t.name for t in _figuras.fig_caja_tercio().data)
     assert p == pytest.approx(_esperado("s6_prob_tercio", "P"))
 
 
