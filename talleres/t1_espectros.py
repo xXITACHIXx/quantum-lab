@@ -7,6 +7,7 @@ from __future__ import annotations
 import math
 
 from talleres import _fisica as f
+from talleres import _soluciones as _s
 from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
 
 NOMBRES = {"HF": r"HF ($^{1}$H y $^{19}$F)", "HCl": r"HCl ($^{1}$H y $^{35}$Cl)", "HBr": r"HBr ($^{1}$H y $^{79}$Br)"}
@@ -43,16 +44,7 @@ def _q1(d: Datos) -> Pregunta:
                            (0.25, "ese es $B$; la segunda transición $l=1\\to2$ cae en $4B$"),
                            (1.5, "revisa cuáles son los niveles: $E_l=hB\\,l(l+1)$ y la transición $l=1\\to2$ vale $4B$")),
               explicacion="La transición $l\\to l+1$ tiene frecuencia $2B(l+1)$; para $l=1\\to2$ resulta $4B$."))
-    sol = (f"**Datos.** $\\mu=\\dfrac{{m_1m_2}}{{m_1+m_2}}={tex(mu)}$ u $={tex(mu * f.U)}$ kg;  "
-           f"$I=\\mu r^2={tex(I)}$ kg m².\n\n"
-           f"**a) Vibración.** Los niveles del oscilador armónico están igualmente espaciados, $E_n=h\\nu(n+\\tfrac12)$, y la regla "
-           f"$\\Delta n=\\pm1$ hace que *todas* las transiciones puras caigan en la misma frecuencia:\n\n"
-           f"$$\\nu=\\frac1{{2\\pi}}\\sqrt{{\\frac k\\mu}}=\\frac1{{2\\pi}}\\sqrt{{\\frac{{{k:g}}}{{{tex(mu * f.U)}}}}}={tex(nu_v)}\\ \\text{{Hz}}$$\n\n"
-           f"La segunda transición ($1\\to2$) es igual a la primera ($0\\to1$).\n\n"
-           f"**b) Rotación.** $E_l=\\dfrac{{\\hbar^2}}{{2I}}\\,l(l+1)$ y $\\Delta l=+1$ da $\\Delta E=\\dfrac{{\\hbar^2}}{{I}}(l+1)$, es decir "
-           f"$\\nu_{{l\\to l+1}}=\\dfrac{{h}}{{4\\pi^2I}}(l+1)=2B(l+1)$ con $B=\\dfrac h{{8\\pi^2I}}={tex(f.constante_rotacional_hz(I))}$ Hz. "
-           f"La primera transición ($0\\to1$) cae en $2B={tex(nu_r1)}$ Hz y la **segunda** ($1\\to2$) en\n\n"
-           f"$$\\nu=4B={tex(nu_r)}\\ \\text{{Hz}}$$")
+    sol = _s.vibracion_rotacion(mol, a, b, k, R, mu, I, nu_v, nu_r, nu_r1)
     return Pregunta("q1", enun, 2.0, partes, sol, tema="espectroscopia",
                     nota="La vibración cae en el infrarrojo y la rotación en microondas: la frecuencia de vibración es decenas de veces mayor.")
 
@@ -72,11 +64,7 @@ def _q2(d: Datos) -> Pregunta:
         Parte("AE", f"Afinidad electrónica del {IONES[Z]} (en eV)", NUM, -E1, "eV", tol_rel=0.01, peso=0.6,
               confusiones=((-1.0, "la afinidad es la energía que se *libera*, así que es positiva"),),
               explicacion="El electrón libre en reposo tiene energía 0; al caer a $n=1$ se libera $0-E_1=-E_1$."))
-    sol = (f"El ion {IONES[Z]} no tiene electrones; al capturar uno se forma {FORMADOS[Z]}, de un solo electrón con $Z={Z}$. "
-           f"En su estado fundamental ($n=1$):\n\n$$E_1=-\\frac{{Z^2e^2}}{{8\\pi\\varepsilon_0a_0}}=-{Z}^2\\cdot13.606\\text{{ eV}}={tex(E1)}\\text{{ eV}}$$\n\n"
-           f"El electrón libre en reposo tiene energía 0, de modo que la energía liberada (la afinidad electrónica) es\n\n"
-           f"$$\\text{{AE}}=0-E_1=+{tex(-E1)}\\text{{ eV}}$$\n\n"
-           "Es la misma magnitud que la energía de ionización del ion hidrogenoide formado: capturar y ionizar son procesos inversos.")
+    sol = _s.afinidad(Z, IONES[Z], FORMADOS[Z], E1)
     return Pregunta("q2", enun, 1.0, partes, sol, tema="hidrogeno")
 
 

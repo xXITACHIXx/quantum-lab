@@ -7,6 +7,7 @@ from __future__ import annotations
 import numpy as np
 
 from talleres import _fisica as f
+from talleres import _soluciones as _s
 from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
 from talleres.t1_espectros import NOMBRES
 
@@ -23,13 +24,7 @@ def _q1(d: Datos) -> Pregunta:
     partes = (
         Parte("x", "$\\langle x\\rangle$ (en unidades de $x_0$)", NUM, 0.0, "x₀", tol_rel=0.0, tol_abs=0.01, peso=1.0,
               explicacion="$\\langle x\\rangle=\\int\\psi_n^*\\,x\\,\\psi_n\\,dx=0$ porque el integrando es impar."),)
-    sol = (f"El valor esperado de la posición es\n\n"
-           f"$$\\langle x\\rangle=\\int_{{-\\infty}}^{{\\infty}}\\psi_{{{n}}}^*(x)\\,x\\,\\psi_{{{n}}}(x)\\,dx=\\int_{{-\\infty}}^{{\\infty}}x\\,|\\psi_{{{n}}}(x)|^2\\,dx$$\n\n"
-           f"Las funciones del oscilador armónico tienen paridad definida, $\\psi_n(-x)=(-1)^n\\psi_n(x)$, de modo que $|\\psi_n|^2$ es una función **par**. "
-           f"El integrando $x\\,|\\psi_n|^2$ es entonces **impar** y su integral sobre un intervalo simétrico es cero:\n\n"
-           f"$$\\langle x\\rangle=0$$\n\n"
-           f"La molécula pasa tanto tiempo a un lado como al otro de la distancia de equilibrio. Esto no significa que esté quieta: "
-           f"la dispersión de la posición no es cero (por eso $\\langle x^2\\rangle\\neq0$).")
+    sol = _s.x_esperado(n)
     return Pregunta("q1", enun, 1.0, partes, sol, tema="oscilador")
 
 
@@ -52,10 +47,7 @@ def _q2(d: Datos) -> Pregunta:
               confusiones=((1e12, "diste el resultado en metros: pásalo a pm"), (1e10, "diste el resultado en ángstrom: 1 Å = 100 pm"),
                            (1e-3, "diste el resultado en nm: 1 nm = 1000 pm")),
               explicacion="$r_e=\\sqrt{I/\\mu}$ con $\\mu$ en kg y el resultado pasado a pm."))
-    sol = (f"La transición de menor energía es $l=0\\to1$, cuya frecuencia es $\\nu=2B$ con $B=\\dfrac{{h}}{{8\\pi^2I}}$. Entonces\n\n"
-           f"$$I=\\frac{{h}}{{4\\pi^2\\nu}}=\\frac{{{tex(f.H)}}}{{4\\pi^2\\,({tex(nu)})}}={tex(I)}\\ \\text{{kg m}}^2$$\n\n"
-           f"La masa reducida es $\\mu=\\dfrac{{m_1m_2}}{{m_1+m_2}}={tex(mu)}$ u $={tex(mu * f.U)}$ kg y $I=\\mu r_e^2$, de modo que\n\n"
-           f"$$r_e=\\sqrt{{\\frac I\\mu}}=\\sqrt{{\\frac{{{tex(I)}}}{{{tex(mu * f.U)}}}}}={tex(R_pm * 1e-12)}\\ \\text{{m}}={R_pm:.2f}\\ \\text{{pm}}$$")
+    sol = _s.longitud_desde_nu(mol, a, b, nu, mu, I, R_pm)
     return Pregunta("q2", enun, 1.0, partes, sol, tema="esfera")
 
 
@@ -86,18 +78,7 @@ def _q3(d: Datos) -> Pregunta:
               tol_rel=0.0, tol_abs=0.6, peso=0.25,
               confusiones=((90.0 / theta_nodal, "90° es el plano $xy$, donde la densidad no se anula para este orbital"),),
               explicacion="Las raíces de $P_2(\\cos\\theta)=\\tfrac12(3\\cos^2\\theta-1)$ dan $\\cos\\theta=\\pm1/\\sqrt3$."))
-    maxtxt = ", ".join(f"{r:.2f}" for r in maximos)
-    nodotxt = "ninguno" if not nodos else ", ".join(f"$r={x:.2f}\\,a_0$" for x in nodos)
-    sol = (f"**a) Parte radial.** Para {nombre} ($n={n}$, $l={l}$) la distribución radial $P(r)=r^2R_{{{n}{l}}}^2$ tiene "
-           f"$n-l-1={n - l - 1}$ nodos radiales ({nodotxt}). Sus máximos están en $r={maxtxt}\\,a_0$; el mayor, que es la zona de "
-           f"**mayor densidad radial**, está en $r={r_max:.2f}\\,a_0$"
-           + (f" (en general, para $l=n-1$ el máximo está en $r=n^2a_0$)" if l == n - 1 else "") + ". "
-           "La **menor** densidad radial se da en $r=0$, donde $P\\to0$ por el factor $r^2$ (y de nuevo $r\\to\\infty$), y en los nodos.\n\n"
-           "**b) Parte angular.** Con $m=0$, $d_{z^2}$ tiene\n\n"
-           "$$|Y_2^0|^2=\\frac{5}{16\\pi}\\left(3\\cos^2\\theta-1\\right)^2$$\n\n"
-           f"La densidad es **máxima en el eje $z$** ($\\theta=0^\\circ$ y $180^\\circ$, valor $5/4\\pi$) y se anula en los conos $\\cos\\theta=\\pm1/\\sqrt3$, es decir "
-           f"$\\theta={theta_nodal:.2f}^\\circ$ y ${180 - theta_nodal:.2f}^\\circ$. En el plano $xy$ ($\\theta=90^\\circ$) hay un máximo local más pequeño "
-           "(un cuarto del máximo): es el «anillo» característico del $d_{z^2}$.")
+    sol = _s.orbital_d(n, l, nombre, list(maximos), list(nodos), r_max, theta_nodal, P)
     return Pregunta("q3", enun, 2.0, partes, sol, tema="hidrogeno",
                     nota="Orbitales del átomo de hidrógeno ($Z=1$): las distancias se dan en unidades del radio de Bohr $a_0$.")
 
@@ -118,14 +99,7 @@ def _q4(d: Datos) -> Pregunta:
               explicacion="Hay tres electrones: un determinante 3×3. $1s\\alpha,1s\\beta$ llenan el 1s y el tercero va al $2s$."),
         Parte("exc", "b) Estado excitado ($2s\\to2p$)", OPC, opciones=op_b, correcta=0, peso=0.5,
               explicacion="Se sustituye el espín-orbital del tercer electrón: $2s\\alpha\\to2p\\alpha$."))
-    sol = ("Un estado de varios electrones debe ser **antisimétrico** frente al intercambio de dos electrones. La forma de lograrlo con espín-orbitales "
-           "(orbital espacial × espín) es el **determinante de Slater**, que además cumple el principio de exclusión de Pauli (dos filas iguales dan determinante nulo).\n\n"
-           "**a) Fundamental ($1s^22s^1$):**\n\n"
-           "$$\\Psi_0=\\frac1{\\sqrt{3!}}\\begin{vmatrix}1s\\alpha(1)&1s\\beta(1)&2s\\alpha(1)\\\\1s\\alpha(2)&1s\\beta(2)&2s\\alpha(2)\\\\1s\\alpha(3)&1s\\beta(3)&2s\\alpha(3)\\end{vmatrix}$$\n\n"
-           "**b) Excitado ($1s^22p^1$):** el mismo determinante cambiando $2s\\alpha$ por $2p\\alpha$:\n\n"
-           "$$\\Psi_1=\\frac1{\\sqrt{3!}}\\begin{vmatrix}1s\\alpha(1)&1s\\beta(1)&2p\\alpha(1)\\\\1s\\alpha(2)&1s\\beta(2)&2p\\alpha(2)\\\\1s\\alpha(3)&1s\\beta(3)&2p\\alpha(3)\\end{vmatrix}$$\n\n"
-           "Los otros candidatos fallan: un producto simple no es antisimétrico; un determinante con un espín-orbital repetido vale cero; "
-           "y un determinante 2×2 describe solo dos electrones.")
+    sol = _s.litio()
     return Pregunta("q4", enun, 1.0, partes, sol, tema="espin")
 
 

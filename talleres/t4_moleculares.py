@@ -7,6 +7,7 @@ from __future__ import annotations
 import math
 
 from talleres import _fisica as f
+from talleres import _soluciones as _s
 from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
 
 ESPECIES = {"CN⁻": "el ion cianuro (CN⁻)", "CO": "la molécula de monóxido de carbono (CO)", "NO⁺": "el catión nitrosonio (NO⁺)"}
@@ -37,17 +38,7 @@ def _q1(d: Datos) -> Pregunta:
               explicacion="Configuración $(\\sigma_{2s})^2(\\sigma^*_{2s})^2(\\pi_{2p})^4(\\sigma_{2p})^2$: $\\text{OE}=\\tfrac12(8-2)=3$."),
         Parte("pi", "c) Función de onda de los electrones $\\pi$", OPC, opciones=pi, correcta=0, peso=0.3,
               explicacion="Cuatro electrones en $\\pi_x$ y $\\pi_y$ (dos orbitales con ambos espines): determinante 4×4 con los cuatro espín-orbitales."))
-    sol = (f"{esp} tiene **10 electrones de valencia** (es isoelectrónico con el N₂).\n\n"
-           "**a) Diagrama.** Por la mezcla $2s$–$2p$, el orden es\n\n"
-           "$$\\sigma_{2s}<\\sigma^*_{2s}<\\pi_{2p}\\,(\\pi_x,\\pi_y)<\\sigma_{2p}<\\pi^*_{2p}<\\sigma^*_{2p}$$\n\n"
-           "**b) Configuración.** $(\\sigma_{2s})^2(\\sigma^*_{2s})^2(\\pi_{2p})^4(\\sigma_{2p})^2$. Hay 8 electrones enlazantes y 2 antienlazantes:\n\n"
-           "$$\\text{OE}=\\frac{8-2}{2}=3\\ \\text{(un triple enlace)}$$\n\n"
-           "La molécula es diamagnética (todos los electrones apareados).\n\n"
-           "**c) Función de onda de los 4 electrones $\\pi$.** Se usa un determinante de Slater con los espín-orbitales ocupados:\n\n"
-           "$$\\Psi_\\pi=\\frac1{\\sqrt{4!}}\\begin{vmatrix}\\pi_x\\alpha(1)&\\pi_x\\beta(1)&\\pi_y\\alpha(1)&\\pi_y\\beta(1)\\\\"
-           "\\pi_x\\alpha(2)&\\pi_x\\beta(2)&\\pi_y\\alpha(2)&\\pi_y\\beta(2)\\\\"
-           "\\pi_x\\alpha(3)&\\pi_x\\beta(3)&\\pi_y\\alpha(3)&\\pi_y\\beta(3)\\\\"
-           "\\pi_x\\alpha(4)&\\pi_x\\beta(4)&\\pi_y\\alpha(4)&\\pi_y\\beta(4)\\end{vmatrix}$$")
+    sol = _s.moleculares_cn(esp)
     return Pregunta("q1", enun, 2.0, partes, sol, tema="orbitales_moleculares",
                     nota="Los apartados a) y c) son de opción múltiple porque un diagrama o un determinante no se califican como texto libre.")
 
@@ -79,17 +70,7 @@ def _q2(d: Datos) -> Pregunta:
               explicacion="Normalización con solapamiento: $c_1^2+c_2^2+2c_1c_2S=1\\Rightarrow c=1/\\sqrt{2(1+S)}$."),
         Parte("ca", "Coeficiente $|c_1|=|c_2|$ del antienlazante", NUM, r["c_antienlazante"], "", tol_rel=0.01, peso=0.15,
               explicacion="Con $c_2=-c_1$: $c=1/\\sqrt{2(1-S)}$."))
-    sol = ("Se resuelve la ecuación secular de dos orbitales con solapamiento:\n\n"
-           "$$\\begin{vmatrix}H_{11}-E&H_{12}-ES\\\\H_{12}-ES&H_{22}-E\\end{vmatrix}=0$$\n\n"
-           f"Con $H_{{11}}=H_{{22}}$ las raíces son $E_\\pm=\\dfrac{{H_{{11}}\\pm H_{{12}}}}{{1\\pm S}}$. Primero\n\n"
-           f"$$H_{{12}}=-{K}\\cdot{S}\\cdot\\sqrt{{({H11})({H11})}}={r['H12']:.4g}\\ \\text{{eV}}$$\n\n"
-           f"$$E_+=\\frac{{{H11}+({r['H12']:.4g})}}{{1+{S}}}={r['E_enlazante']:.4g}\\ \\text{{eV}},\\qquad "
-           f"E_-=\\frac{{{H11}-({r['H12']:.4g})}}{{1-{S}}}={r['E_antienlazante']:.4g}\\ \\text{{eV}}$$\n\n"
-           f"El enlazante queda **{abs(r['E_enlazante'] - H11):.3g} eV por debajo** del orbital atómico y el antienlazante **{abs(r['E_antienlazante'] - H11):.3g} eV por encima**: "
-           "el antienlazante sube más de lo que baja el enlazante porque el solapamiento ($S>0$) desestabiliza más al antienlazante.\n\n"
-           "**Coeficientes.** Por simetría $c_2=\\pm c_1$ y la normalización $c_1^2+c_2^2+2c_1c_2S=1$ da\n\n"
-           f"$$\\psi_+=\\frac{{\\phi_1+\\phi_2}}{{\\sqrt{{2(1+S)}}}}={r['c_enlazante']:.4f}(\\phi_1+\\phi_2),\\qquad "
-           f"\\psi_-=\\frac{{\\phi_1-\\phi_2}}{{\\sqrt{{2(1-S)}}}}={r['c_antienlazante']:.4f}(\\phi_1-\\phi_2)$$")
+    sol = _s.lcao(S, H11, K, r)
     return Pregunta("q2", enun, 1.5, partes, sol, tema="orbitales_moleculares")
 
 
@@ -115,18 +96,7 @@ def _q3(d: Datos) -> Pregunta:
         Parte("c1", "Coeficiente de cada carbono extremo en el orbital más bajo", NUM, float(C[0, 0]), "", tol_rel=0.01, peso=0.15,
               confusiones=((C[1, 0] / C[0, 0], "ese es el coeficiente del carbono central ($1/\\sqrt2$); los extremos valen $\\tfrac12$"),),
               explicacion="$c_1=c_3=\\tfrac12$; normalización: $\\tfrac14+\\tfrac12+\\tfrac14=1$."))
-    energia = {2: "2\\alpha+2\\sqrt2\\beta", 3: "3\\alpha+2\\sqrt2\\beta", 4: "4\\alpha+2\\sqrt2\\beta"}[ne]
-    sol = ("**Hückel para tres carbonos.** Con $x=(\\alpha-E)/\\beta$... escrito como $E=\\alpha+x\\beta$, la ecuación secular de la cadena $C_1-C_2-C_3$ es\n\n"
-           "$$\\begin{vmatrix}-x&1&0\\\\1&-x&1\\\\0&1&-x\\end{vmatrix}=-x^3+2x=0\\;\\Rightarrow\\;x=\\sqrt2,\\;0,\\;-\\sqrt2$$\n\n"
-           "Como $\\beta<0$, el orden de energía es\n\n"
-           "$$E_1=\\alpha+\\sqrt2\\beta\\ (\\text{enlazante}),\\quad E_2=\\alpha\\ (\\text{no enlazante}),\\quad E_3=\\alpha-\\sqrt2\\beta\\ (\\text{antienlazante})$$\n\n"
-           f"**a)** Con {ne} electrones se llenan primero $E_1$ (2 electrones) y luego $E_2$:\n\n"
-           f"$$E_\\pi=2(\\alpha+\\sqrt2\\beta)" + ("" if ne == 2 else (" + \\alpha" if ne == 3 else " + 2\\alpha")) + f"={energia}\\approx {ne}\\alpha+{2 * x[0]:.3f}\\beta$$\n\n"
-           "(Los electrones del orbital no enlazante no cambian el coeficiente de $\\beta$: por eso catión, radical y anión comparten $2\\sqrt2\\beta$.)\n\n"
-           "**b)** Sustituyendo $x=\\sqrt2$ en las ecuaciones seculares y normalizando:\n\n"
-           "$$\\psi_1=\\tfrac12\\phi_1+\\tfrac1{\\sqrt2}\\phi_2+\\tfrac12\\phi_3$$\n\n"
-           "Los otros dos son $\\psi_2=\\frac1{\\sqrt2}(\\phi_1-\\phi_3)$ (nodo en el carbono central) y $\\psi_3=\\tfrac12\\phi_1-\\tfrac1{\\sqrt2}\\phi_2+\\tfrac12\\phi_3$ (dos nodos).")
-    sol = sol.replace("Con $x=(\\alpha-E)/\\beta$... escrito como $E=\\alpha+x\\beta$, la", "Escribiendo $E=\\alpha+x\\beta$, la")
+    sol = _s.alilo(ne, nombre, formula, x, C)
     return Pregunta("q3", enun, 1.5, partes, sol, tema="orbitales_moleculares",
                     nota="La especie del enunciado original es el anión alilo, CH₂CHCH₂⁻, con 4 electrones $\\pi$ (2 del doble enlace y 2 del carbanión). "
                          "Con «datos nuevos» también aparecen el catión (2 electrones) y el radical (3): solo cambia $n_\\alpha$.")

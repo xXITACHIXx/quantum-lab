@@ -9,6 +9,7 @@ import math
 import numpy as np
 
 from talleres import _fisica as f
+from talleres import _soluciones as _s
 from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
 
 # molécula: (masa reducida [u], longitud de enlace [pm], nombre con formato)
@@ -41,13 +42,9 @@ def _q1(d: Datos) -> Pregunta:
                         "Uniforme en todas las direcciones"),
               correcta=0, peso=0.35,
               explicacion="$|Y_1^0|^2=\\frac3{4\\pi}\\cos^2\\theta$: máximo en $\\theta=0^\\circ,180^\\circ$ y nulo en $\\theta=90^\\circ$ (plano nodal $xy$)."))
-    sol = (f"**a) Parte radial.** $R_{{31}}(r)\\propto r\\left(1-\\dfrac r{{6a_0}}\\right)e^{{-r/3a_0}}$. Tiene $n-l-1=1$ nodo en $r=6a_0$. "
-           f"La distribución radial $P(r)=r^2R_{{31}}^2$ tiene dos máximos: uno interno en $r={r_interno:.2f}\\,a_0$ y el principal, más alto, en "
-           f"$r={r_principal:.2f}\\,a_0$. Las zonas de **mayor densidad radial** son esas dos regiones (la externa domina); "
-           "la **menor** es el nodo $r=6a_0$ (donde vale exactamente cero) y el origen $r=0$.\n\n"
-           "**b) Parte angular.** Con $m=0$,\n\n$$|Y_1^0|^2=\\frac3{4\\pi}\\cos^2\\theta$$\n\n"
-           "es **máxima** a lo largo del eje $z$ ($\\theta=0^\\circ$ y $180^\\circ$: dos lóbulos) y **nula** en el plano $xy$ ($\\theta=90^\\circ$), "
-           "que es el plano nodal del 3p$_z$.")
+    p_in = r_interno ** 4 * (1 - r_interno / 6) ** 2 * math.exp(-2 * r_interno / 3)
+    p_out = r_principal ** 4 * (1 - r_principal / 6) ** 2 * math.exp(-2 * r_principal / 3)
+    sol = _s.orbital_3p(r_interno, r_principal, nodo, p_in, p_out)
     return Pregunta("q1", enun, 1.0, partes, sol, tema="hidrogeno",
                     nota="Orbitales del átomo de hidrógeno ($Z=1$): las distancias se dan en unidades de $a_0$.")
 
@@ -74,15 +71,7 @@ def _q2(d: Datos) -> Pregunta:
         Parte("E", "c) Energía rotacional $E$ (en unidades de $\\hbar^2/I$)", NUM, E, "ħ²/I", tol_rel=0.01, peso=0.4,
               confusiones=((2.0, "$E=L^2/2I$: te falta el factor ½"),),
               explicacion="$E=\\dfrac{|\\vec L|^2}{2I}=\\dfrac{l(l+1)\\hbar^2}{2I}$."))
-    sol = (f"El enunciado da el número cuántico $l={l}$ y la función de onda $\\Phi(\\varphi)=\\dfrac1{{\\sqrt{{2\\pi}}}}e^{{i{m}\\varphi}}$.\n\n"
-           f"**a)** El operador de la componente $z$ es $\\hat L_z=-i\\hbar\\dfrac{{\\partial}}{{\\partial\\varphi}}$. Al aplicarlo a la función dada,\n\n"
-           f"$$\\hat L_z\\Phi=-i\\hbar\\,(i{m})\\,\\Phi={m}\\hbar\\,\\Phi\\;\\Rightarrow\\;L_z={m}\\hbar$$\n\n"
-           f"(el signo indica el sentido de giro alrededor de $z$).\n\n"
-           f"**b)** La magnitud del momento angular depende del número cuántico $l$ (valor propio de $\\hat L^2$):\n\n"
-           f"$$|\\vec L|=\\sqrt{{l(l+1)}}\\,\\hbar=\\sqrt{{{l}\\cdot{l + 1}}}\\,\\hbar={L:.4f}\\,\\hbar$$\n\n"
-           f"**c)** La energía de rotación es la cinética, $E=\\dfrac{{|\\vec L|^2}}{{2I}}$:\n\n"
-           f"$$E=\\frac{{l(l+1)\\hbar^2}}{{2I}}=\\frac{{{l * (l + 1)}}}{{2}}\\frac{{\\hbar^2}}{{I}}={E:g}\\,\\frac{{\\hbar^2}}{{I}}$$\n\n"
-           f"El enunciado no da la longitud de enlace, por eso la energía se expresa en unidades de $\\hbar^2/I$ con $I=\\mu r_e^2$.")
+    sol = _s.rotor(l, m, L, E)
     return Pregunta("q2", enun, 1.0, partes, sol, tema="esfera",
                     nota="Se resuelve solo con los datos del enunciado: el número cuántico $l$ y la función $\\Phi$.")
 
