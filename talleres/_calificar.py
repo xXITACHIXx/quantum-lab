@@ -27,7 +27,7 @@ def leer_numero(texto) -> float:
     else:
         t = str(texto).strip().lower().replace("−", "-").replace("–", "-").replace(" ", "")
         if not t:
-            raise ValueError("Escribe un número.")
+            raise ValueError("Ingrese un valor numérico.")
         t = t.replace(",", ".")
         # ×10¹² y x10^12 y *10**12 y ·10^-3  →  e12
         t = re.sub(r"([\d.])(?:×|x|\*|·)10(?:\^|\*\*)?([+-]?[\d⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]+)",
@@ -36,7 +36,7 @@ def leer_numero(texto) -> float:
         try:
             valor = float(t)
         except ValueError:
-            raise ValueError("No entendí el número. Usa por ejemplo 1.256e12 o 1,256 x 10^12.") from None
+            raise ValueError("No fue posible interpretar el valor ingresado. Formatos admitidos: 1.256e12 o 1,256 x 10^12.") from None
     if not math.isfinite(valor):
         raise ValueError("El número debe ser finito.")
     return valor
@@ -53,15 +53,15 @@ class Resultado:
 
 
 def _factores_comunes() -> list[tuple[float, str]]:
-    f = [(2 * math.pi, "te falta dividir entre 2π (o confundiste ω con ν, o h con ħ)"),
-         (1 / (2 * math.pi), "te sobra dividir entre 2π: revisa si debías usar ħ en lugar de h, o ν en lugar de ω"),
-         (2.0, "tu resultado es el doble: revisa un factor 2 (por ejemplo ½ en la energía o 2B frente a B)"),
-         (0.5, "tu resultado es la mitad: revisa un factor 2 (por ejemplo ½ en la energía o 2B frente a B)"),
-         (4.0, "tu resultado es 4 veces el esperado: revisa un cuadrado o un factor 2²"),
-         (0.25, "tu resultado es la cuarta parte: revisa un cuadrado o un factor 2²")]
+    f = [(2 * math.pi, "falta dividir entre 2π (posible confusión entre ω y ν, o entre h y ħ)"),
+         (1 / (2 * math.pi), "se dividió de más entre 2π: verificar si correspondía usar ħ en lugar de h, o ν en lugar de ω"),
+         (2.0, "el resultado es el doble del esperado: verificar un factor 2 (por ejemplo ½ en la energía o 2B frente a B)"),
+         (0.5, "el resultado es la mitad del esperado: verificar un factor 2 (por ejemplo ½ en la energía o 2B frente a B)"),
+         (4.0, "el resultado es 4 veces el esperado: verificar un cuadrado o un factor 2²"),
+         (0.25, "el resultado es la cuarta parte del esperado: verificar un cuadrado o un factor 2²")]
     for n in (3, 6, 9, 12, 2, 1):
-        f.append((10.0 ** n, f"parece un problema de unidades: tu valor es 10^{n} veces el esperado"))
-        f.append((10.0 ** -n, f"parece un problema de unidades: tu valor es 10^-{n} veces el esperado"))
+        f.append((10.0 ** n, f"posible error de unidades: el valor ingresado es 10^{n} veces el esperado"))
+        f.append((10.0 ** -n, f"posible error de unidades: el valor ingresado es 10^-{n} veces el esperado"))
     return f
 
 

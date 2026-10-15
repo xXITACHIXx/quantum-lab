@@ -92,7 +92,7 @@ def validar_parametros_oscilador(n, masa_usuario, omega_usuario, sistema, rango,
     if puntos_por_lambda < PUNTOS_POR_LONGITUD_ONDA:
         raise ValueError(
             f"Resolución insuficiente para n = {n}: solo {puntos_por_lambda:.1f} puntos por longitud de onda "
-            f"(mínimo {PUNTOS_POR_LONGITUD_ONDA}). Aumenta la resolución o reduce el intervalo.")
+            f"(mínimo {PUNTOS_POR_LONGITUD_ONDA}). Aumentar la resolución o reduce el intervalo.")
     return ParametrosOscilador(n, masa, omega, sistema, rango, resolucion, metodo)
 
 
@@ -300,7 +300,7 @@ def calcular_estado(p: ParametrosOscilador) -> dict:
         advertencias.append(
             f"La normalización difiere de 1 en {abs(norma - 1):.2e}: el intervalo "
             f"(±{p.rango:g} x₀) recorta la función de onda de n = {p.n}, que se extiende hasta "
-            f"≈ {np.sqrt(2 * p.n + 1) + 4:.1f} x₀. Aumenta el intervalo.")
+            f"≈ {np.sqrt(2 * p.n + 1) + 4:.1f} x₀. Aumentar el intervalo.")
     return {
         "x0": x0, "xi": xi, "x": x, "psi": psi, "rho": rho, "V": V, "u_V": u_V, "u_T": u_T,
         "dpsi": dpsi, "e_teo": e_teo, "e_num": e_num, "t_media": t_media, "v_media": v_media,
@@ -842,8 +842,8 @@ DEMOS = {
 GUIA = [
     {"titulo": "Teorema del virial",
      "objetivo": "Comprobar que en todo estado estacionario la energía se reparte por igual entre cinética y potencial.",
-     "pasos": ["Carga la configuración (n = 3).", "Anota ⟨T⟩/E y ⟨V⟩/E en «Resultados».",
-               "Cambia n a 0, 7 y 15, y después la masa o ω. Anota de nuevo ambos cocientes."],
+     "pasos": ["Cargar la configuración (n = 3).", "Registrar ⟨T⟩/E y ⟨V⟩/E en «Resultados».",
+               "Cambiar n a 0, 7 y 15, y después la masa o ω. Registrar de nuevo ambos cocientes."],
      "pregunta": "¿Depende el reparto de n, de la masa o de ω?",
      "resultado": "Siempre ⟨T⟩/E = ⟨V⟩/E = 0.5 (salvo el error numérico, ~10⁻⁵). Es el teorema del virial para "
                   "un potencial cuadrático: 2⟨T⟩ = 2⟨V⟩. No depende de n, m ni ω. El panel 6 muestra cómo se "
@@ -852,17 +852,17 @@ GUIA = [
                                                 "osc__sistema_previo": "SI"}},
     {"titulo": "Efecto túnel",
      "objetivo": "Medir la probabilidad de encontrar la partícula donde la física clásica lo prohíbe.",
-     "pasos": ["Carga la configuración (n = 0).", "Anota «P en zona prohibida».",
+     "pasos": ["Cargar la configuración (n = 0).", "Registrar «P en zona prohibida».",
                "Repite con n = 1, 5 y 20."],
      "pregunta": "¿Es cero la probabilidad fuera de los puntos de retorno? ¿Cómo cambia con n?",
-     "resultado": "Para n = 0 vale erfc(1) ≈ 15.7 %: la onda penetra en la región donde E < V(x). Disminuye al "
+     "resultado": "Para n = 0 vale erfc(1) ≈ 15.7 %: la onda penetra en la región donde E < V(x). Disminuir al "
                   "aumentar n (≈ 11 % para n = 1, ≈ 7 % para n = 5, ≈ 5 % para n = 20): el sistema se acerca al "
                   "comportamiento clásico.",
      "pestana": "Estado individual", "config": {"osc_n": 0}},
     {"titulo": "Principio de correspondencia",
      "objetivo": "Ver cómo la distribución cuántica se aproxima a la clásica al crecer n.",
-     "pasos": ["Carga la configuración (n = 0).", "Compara la curva cuántica con la clásica (línea discontinua).",
-               "Sube n a 5, 20 y 60 y anota la distancia D entre las distribuciones acumuladas."],
+     "pasos": ["Cargar la configuración (n = 0).", "Comparar la curva cuántica con la clásica (línea discontinua).",
+               "Aumentar n a 5, 20 y 60 y registrar la distancia D entre las distribuciones acumuladas."],
      "pregunta": "¿Dónde es más probable encontrar la partícula clásica? ¿Y la cuántica para n grande?",
      "resultado": "La partícula clásica pasa más tiempo cerca de los puntos de retorno (donde se frena), por eso P(x) "
                   "crece hacia ±A. Para n = 0 la cuántica es máxima en el centro (lo opuesto). Al crecer n, la "
@@ -870,17 +870,17 @@ GUIA = [
      "pestana": "Límite clásico", "config": {"osc_clas_n": 0}},
     {"titulo": "Error de discretización",
      "objetivo": "Comprobar que el error de la derivada numérica es de orden 2.",
-     "pasos": ["Carga la configuración (n = 2, resolución 801).", "Anota el error relativo de E.",
-               "Sube la resolución a 1601 y a 3201. Abre «Error de discretización de la derivada».",
-               "Cambia el método a «Analítica (Hermite)»."],
+     "pasos": ["Cargar la configuración (n = 2, resolución 801).", "Registrar el error relativo de E.",
+               "Aumentar la resolución a 1601 y a 3201. Abrir «Error de discretización de la derivada».",
+               "Cambiar el método a «Analítica (Hermite)»."],
      "pregunta": "Al duplicar el número de puntos, ¿por cuánto se divide el error?",
      "resultado": "Aproximadamente por 4 (orden observado ≈ 2), como corresponde a diferencias centrales de orden 2. "
                   "Con la derivada analítica el error baja varios órdenes: lo que queda es el error de la integral.",
      "pestana": "Estado individual", "config": {"osc_n": 2, "osc_resolucion": 801, "osc_metodo": "numerica"}},
     {"titulo": "Estado estacionario frente a superposición",
      "objetivo": "Distinguir una fase global (sin movimiento) de una interferencia real.",
-     "pasos": ["Carga la configuración (superposición de n = 0 y n = 1).", "Reproduce la animación y observa ⟨x⟩.",
-               "Cambia a «Estado estacionario único» y reprodúcela de nuevo."],
+     "pasos": ["Cargar la configuración (superposición de n = 0 y n = 1).", "Reproducir la animación y observar ⟨x⟩.",
+               "Cambiar a «Estado estacionario único» y reprodúcela de nuevo."],
      "pregunta": "¿En cuál de los dos casos se mueve la densidad |Ψ|²? ¿Con qué periodo?",
      "resultado": "En la superposición ⟨x⟩ oscila como x₀cos(ωt)/√2 con periodo T = 2π/ω (el del oscilador clásico). "
                   "En el estado estacionario Re Ψ e Im Ψ cambian, pero |Ψ|² y ⟨x⟩ = 0 permanecen fijos.",
@@ -890,7 +890,7 @@ GUIA = [
 
 PREGUNTAS = [
     {"enunciado": "¿Cuánto vale la separación entre dos niveles consecutivos del oscilador armónico?",
-     "opciones": ["ħω, igual para todos los niveles", "Crece como n²", "Disminuye como 1/n²", "Es cero"],
+     "opciones": ["ħω, igual para todos los niveles", "Crece como n²", "Disminuir como 1/n²", "Es cero"],
      "correcta": 0, "explicacion": "Eₙ = ħω(n + ½), así que Eₙ₊₁ − Eₙ = ħω: los niveles están equiespaciados."},
     {"enunciado": "¿Cuál es la energía del estado fundamental?",
      "opciones": ["0", "ħω/2", "ħω", "−ħω/2"],
@@ -1076,7 +1076,7 @@ def _pestana_comparacion(p_base: ParametrosOscilador):
         exc = c2.number_input("Estado excitado n", min_value=1, max_value=N_MAX, step=1, key="osc_comp_exc")
         lista = [0, int(exc)]
     if not lista:
-        qc.nota("Selecciona al menos un estado.")
+        qc.nota("Seleccionar al menos un estado.")
         return
     try:
         datos = []
@@ -1115,7 +1115,7 @@ def _pestana_limite_clasico(p_base: ParametrosOscilador):
     c1, c2, _, _ = st.columns(4, vertical_alignment="bottom")
     n = int(c1.slider("Número cuántico n", 0, 60, key="osc_clas_n"))
     curva = c2.toggle("Mostrar D frente a n", key="osc_clas_curva", value=True,
-                      help="Calcula la distancia cuántica–clásica para n = 0…60 (tarda unos segundos la primera vez).")
+                      help="Calcular la distancia cuántica–clásica para n = 0…60 (tarda unos segundos la primera vez).")
     d = calcular_limite_clasico(n, p_base.masa, p_base.omega)
     u = qc.obtener_unidades(p_base.sistema)
     fx, L = u["factor_longitud"], u["nombre_longitud"]
@@ -1171,7 +1171,7 @@ def _pestana_dinamica(p_base: ParametrosOscilador):
                          key="osc_dyn_fase")
     estacionario = modo.startswith("Estado")
     if not estacionario and n1 == n2:
-        qc.error("Elige dos números cuánticos distintos (n₁ ≠ n₂).")
+        qc.error("Seleccionar dos números cuánticos distintos (n₁ ≠ n₂).")
         return
     try:
         _con_n(p_base, max(n1, n2))

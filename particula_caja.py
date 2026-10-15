@@ -73,7 +73,7 @@ def validar_parametros_caja(n, longitud_usuario, masa_usuario, sistema, puntos) 
     if puntos < PUNTOS_POR_N * n:
         raise ValueError(
             f"Con n = {n} se necesitan al menos {PUNTOS_POR_N * n} puntos para resolver las "
-            f"oscilaciones (hay {puntos}). Aumenta el número de puntos o reduce n.")
+            f"oscilaciones (hay {puntos}). Aumentar el número de puntos o reduce n.")
     return ParametrosCaja(n, longitud, masa, sistema, puntos)
 
 
@@ -168,7 +168,7 @@ def construir_superposicion(numeros, coeficientes_complejos, normalizar: bool = 
     """
     numeros = np.asarray(numeros)
     if numeros.size == 0:
-        raise ValueError("Selecciona al menos un estado.")
+        raise ValueError("Seleccionar al menos un estado.")
     if numeros.size > N_MAX:
         raise ValueError(f"Se admiten como máximo {N_MAX} estados distintos (n = 1 … {N_MAX}).")
     enteros = np.array([qc.entero_en_rango(v, "Cada número cuántico n", 1, N_MAX) for v in numeros])
@@ -790,8 +790,8 @@ EXPERIMENTO_EN_SUPERPOSICION = {
 GUIA = [
     {"titulo": "La energía crece como n²",
      "objetivo": "Comprobar la cuantización Eₙ = n²E₁.",
-     "pasos": ["Carga la configuración (electrón en una caja de 1 nm, n = 1).", "Anota E₁.",
-               "Cambia n a 2, 3 y 4 y anota cada energía.", "Calcula los cocientes Eₙ/E₁."],
+     "pasos": ["Cargar la configuración (electrón en una caja de 1 nm, n = 1).", "Registrar E₁.",
+               "Cambiar n a 2, 3 y 4 y registrar cada energía.", "Calcular los cocientes Eₙ/E₁."],
      "pregunta": "Antes de medir: si n se duplica, ¿cuánto cambia la energía?",
      "resultado": "Los cocientes son 1 : 4 : 9 : 16. Con a = 1 nm y la masa del electrón, E₁ ≈ 0.376 eV. "
                   "Los niveles se separan cada vez más, a diferencia del oscilador (equiespaciado).",
@@ -799,7 +799,7 @@ GUIA = [
                                                 "caja_sistema": "SI", "caja_puntos": 1500}},
     {"titulo": "Confinamiento y energía de punto cero",
      "objetivo": "Medir cómo depende E₁ del tamaño de la caja.",
-     "pasos": ["Carga la configuración (a = 1 nm, n = 1).", "Anota E₁.", "Cambia a a 2 nm y después a 0.5 nm."],
+     "pasos": ["Cargar la configuración (a = 1 nm, n = 1).", "Registrar E₁.", "Cambiar a a 2 nm y después a 0.5 nm."],
      "pregunta": "¿Qué ocurre con la energía mínima al hacer la caja más pequeña? ¿Puede ser cero?",
      "resultado": "E ∝ 1/a²: con 2 nm la energía se divide por 4 (≈ 0.094 eV) y con 0.5 nm se multiplica por 4 "
                   "(≈ 1.50 eV). Nunca es cero: confinar la partícula exige una incertidumbre en el momento "
@@ -807,18 +807,18 @@ GUIA = [
      "pestana": "Estado individual", "config": {"caja_n": 1, "caja_longitud": 1.0, "caja_masa": 1.0, "caja_sistema": "SI"}},
     {"titulo": "Nodos y longitud de onda de De Broglie",
      "objetivo": "Relacionar n con el número de nodos y con λ.",
-     "pasos": ["Carga la configuración (n = 4).", "Cuenta los nodos interiores en la gráfica de |ψ|².",
-               "Anota λ y compárala con a."],
+     "pasos": ["Cargar la configuración (n = 4).", "Contar los nodos interiores en la gráfica de |ψ|².",
+               "Registrar λ y compararla con a."],
      "pregunta": "¿Cuántos nodos tiene el estado n = 4? ¿Cuántas semilongitudes de onda caben en la caja?",
      "resultado": "Tiene n − 1 = 3 nodos interiores (en a/4, a/2 y 3a/4) y caben n = 4 semilongitudes de onda: "
                   "λ = 2a/n = 0.5 nm para a = 1 nm.",
      "pestana": "Estado individual", "config": {"caja_n": 4, "caja_longitud": 1.0}},
     {"titulo": "Interferencia de dos estados",
      "objetivo": "Ver que la densidad de una superposición se mueve y medir la probabilidad en media caja.",
-     "pasos": ["Carga la configuración (estados 1 y 2 con el mismo peso, región [0, 0.5]a).",
-               "Anota P en [0, 0.5a] para τ = 0.", "Mueve τ hasta ≈ 1.05 (= π/3) y anota de nuevo.",
-               "Reproduce la animación."],
-     "pregunta": "¿Puede la probabilidad de estar en la mitad izquierda ser distinta de 50 %? ¿Cambia con el tiempo?",
+     "pasos": ["Cargar la configuración (estados 1 y 2 con el mismo peso, región [0, 0.5]a).",
+               "Registrar P en [0, 0.5a] para τ = 0.", "Mover τ hasta ≈ 1.05 (= π/3) y registrar de nuevo.",
+               "Reproducir la animación."],
+     "pregunta": "¿Puede la probabilidad de estar en la mitad izquierda ser distinta de 50 %? ¿Cambiar con el tiempo?",
      "resultado": "Sí: en τ = 0 vale ≈ 92.4 % (= ½ + 4/(3π)) porque la interferencia concentra la densidad a la "
                   "izquierda; en τ = π/3 pasa a ≈ 7.6 %. La densidad oscila de un lado a otro con periodo Δτ = 2π/3. "
                   "Con un solo estado siempre sería 50 %.",
@@ -828,8 +828,8 @@ GUIA = [
                 "caja_sup_fase1": 0.0, "caja_sup_fase2": 0.0, "caja_sup_tau": 0.0, "caja_sup_region": (0.0, 0.5)}},
     {"titulo": "Reaparición cuántica",
      "objetivo": "Comprobar que cualquier superposición vuelve a su forma inicial.",
-     "pasos": ["Carga la configuración (estados 1, 2 y 3).", "Observa |Ψ|² en τ = 0.",
-               "Lleva τ a 3.14 (= π) y después al final, τ = 2π."],
+     "pasos": ["Cargar la configuración (estados 1, 2 y 3).", "Observar |Ψ|² en τ = 0.",
+               "Llevar τ a 3.14 (= π) y después al final, τ = 2π."],
      "pregunta": "¿Por qué el estado vuelve a ser exactamente el mismo en τ = 2π?",
      "resultado": "Porque Eₙ = n²E₁: todas las fases e^(−in²τ) valen 1 a la vez cuando τ = 2π. En τ = π las fases valen "
                   "(−1)ⁿ y, como ψₙ(a − x) = (−1)ⁿ⁺¹ψₙ(x), la densidad aparece reflejada respecto al centro de la caja.",
@@ -1098,7 +1098,7 @@ def _pestana_superposicion(p_base: ParametrosCaja):
                    numericas=("n", "cₙ", "|cₙ|²", "arg cₙ [rad]", f"Eₙ [{U}]"), archivo="caja_coeficientes.csv")
 
     with st.expander("Animación temporal de la interferencia (un periodo completo)", expanded=True):
-        st.caption("Pulsa «Reproducir». La animación se ejecuta en el navegador y no bloquea la aplicación. "
+        st.caption("Pulsar «Reproducir». La animación se ejecuta en el navegador y no bloquea la aplicación. "
                    "Se muestra la función de onda compleja (Re y Im) y la densidad |Ψ|².")
         try:
             figura = _animacion_cacheada(tuple(int(k) for k in sup.numeros),
@@ -1112,8 +1112,8 @@ def _pestana_superposicion(p_base: ParametrosCaja):
 
 def _pestana_experimento(p_base: ParametrosCaja):
     c1, _, c3 = st.columns([3, 0.2, 1], vertical_alignment="center")
-    c1.markdown("Compara el estado **n = 1**, el estado **n = 2** y la **superposición 1 + 2** con coeficientes "
-                "iguales (c₁ = c₂ = 1/√2). Pulsa «Reproducir» para ver evolucionar el tiempo.")
+    c1.markdown("Comparar el estado **n = 1**, el estado **n = 2** y la **superposición 1 + 2** con coeficientes "
+                "iguales (c₁ = c₂ = 1/√2). Pulsar «Reproducir» para ver evolucionar el tiempo.")
     c3.button("Abrir en «Superposición»", on_click=qc.fijar_estado, args=(EXPERIMENTO_EN_SUPERPOSICION,),
               icon=":material/open_in_new:", width="stretch", key="caja_exp_cargar")
     qc.seccion("Visualización")

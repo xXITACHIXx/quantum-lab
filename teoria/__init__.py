@@ -213,7 +213,7 @@ def _vista_indice() -> None:
 
 def _practica(tema: Tema) -> None:
     sim = importlib.import_module(tema.modulo_sim)
-    st.markdown("Pon a prueba la teoría con el simulador de este tema: cambia los parámetros y compara con lo que predice "
+    st.markdown("Establecer a prueba la teoría con el simulador de este tema: cambia los parámetros y compara con lo que predice "
                 "la teoría.")
     st.button("Abrir el simulador", key=f"tc_sim_{tema.id}", icon=":material/arrow_forward:", type="primary",
               on_click=_ir_a_simulador, args=(tema.simulador,))

@@ -273,7 +273,7 @@ def fig_caja_tercio(_=None) -> go.Figure:
 FIGURAS: dict[str, tuple[Figura, ...]] = {
     "s9_nodos": (Figura(
         "Los nodos de ψ_n",
-        "Mueve el deslizador: ψ_n tiene exactamente **n nodos**, los ceros del polinomio de Hermite. "
+        "Mover el deslizador: ψ_n tiene exactamente **n nodos**, los ceros del polinomio de Hermite. "
         "Con n = 4 son los cuatro puntos que calculaste (±0.5246 y ±1.6507 en αx). Pasa el cursor sobre las cruces rojas.",
         fig_oscilador_nodos, ("Número cuántico n", 0, 8, 4)),),
     "s10_conos": (Figura(
@@ -281,7 +281,7 @@ FIGURAS: dict[str, tuple[Figura, ...]] = {
         "Para l grande el ángulo mínimo tiende a 0: el vector L puede apuntar casi a lo largo de z, como en la física clásica.",
         fig_cono_minimo),),
     "l04_conos_l5": (
-        Figura("Los 2l + 1 conos", "Cada línea es una orientación permitida de L (cada m). Cambia l con el deslizador y observa cómo se reparten los ángulos.",
+        Figura("Los 2l + 1 conos", "Cada línea es una orientación permitida de L (cada m). Variar l con el deslizador permite observar cómo se reparten los ángulos.",
                fig_conos, ("Número cuántico l", 1, 10, 5)),
         Figura("Ángulo mínimo según l", "El punto de l = 5 es el que se pide; compara con l = 1000.", fig_cono_minimo)),
     "s11_nodos3s": (Figura(

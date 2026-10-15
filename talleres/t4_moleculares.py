@@ -18,8 +18,8 @@ def _q1(d: Datos) -> Pregunta:
     esp = d.elegir("CN⁻", list(ESPECIES))
     enun = (f"Marco teórico del orbital molecular para {ESPECIES[esp]}:\n\n"
             "**a)** Genera su diagrama de orbitales moleculares: ¿cuál es el orden de energía de los orbitales de valencia?\n\n"
-            "**b)** Escribe su configuración electrónica: ¿cuántos electrones de valencia hay y cuál es el orden de enlace?\n\n"
-            "**c)** Escribe una función de onda aceptable considerando solamente los electrones del orbital $\\pi$.")
+            "**b)** Escribir su configuración electrónica: ¿cuántos electrones de valencia hay y cuál es el orden de enlace?\n\n"
+            "**c)** Escribir una función de onda aceptable considerando solamente los electrones del orbital $\\pi$.")
     orden = ("$\\sigma_{2s}<\\sigma^*_{2s}<\\pi_{2p}$ (dos, degenerados) $<\\sigma_{2p}<\\pi^*_{2p}$ (dos) $<\\sigma^*_{2p}$",
              "$\\sigma_{2s}<\\sigma^*_{2s}<\\sigma_{2p}<\\pi_{2p}$ (dos) $<\\pi^*_{2p}$ (dos) $<\\sigma^*_{2p}$",
              "$\\sigma_{2s}<\\sigma_{2p}<\\pi_{2p}<\\pi^*_{2p}<\\sigma^*_{2p}<\\sigma^*_{2s}$",
@@ -51,7 +51,7 @@ def _q2(d: Datos) -> Pregunta:
     enun = ("Se combinan dos orbitales atómicos $2p_z$ (uno de cada átomo de O) para formar los dos orbitales moleculares del O₂ de este enlace $\\sigma$. "
             f"Se conocen el solapamiento $S_{{12}}={S}$, las energías de los orbitales atómicos $H_{{11}}=H_{{22}}={H11}$ eV y "
             f"$H_{{12}}=-{K}\\,S_{{12}}\\,(H_{{11}}H_{{22}})^{{1/2}}$.\n\n"
-            "Evalúa la energía de los dos orbitales moleculares que se generan y sus coeficientes (en la forma $\\psi=c_1\\phi_1+c_2\\phi_2$, normalizada).")
+            "Evaluar la energía de los dos orbitales moleculares que se generan y sus coeficientes (en la forma $\\psi=c_1\\phi_1+c_2\\phi_2$, normalizada).")
     partes = (
         Parte("H12", "Paso previo: $H_{12}$ (en eV)", NUM, r["H12"], "eV", tol_rel=0.01, peso=0.2,
               confusiones=((-1.0, "$H_{12}$ es negativo: $-1.75\\,S_{12}\\sqrt{H_{11}H_{22}}$ y la raíz es positiva"),
@@ -66,7 +66,7 @@ def _q2(d: Datos) -> Pregunta:
                            ((H11 - r["H12"]) / r["E_antienlazante"], "no olvides dividir entre $(1-S)$")),
               explicacion="$E_-=\\dfrac{H_{11}-H_{12}}{1-S_{12}}$."),
         Parte("cb", "Coeficiente $c_1=c_2$ del enlazante", NUM, r["c_enlazante"], "", tol_rel=0.01, peso=0.15,
-              confusiones=((math.sqrt(2) * r["c_enlazante"], "te falta el solapamiento en la normalización: $c=1/\\sqrt{2(1+S)}$, no $1/\\sqrt2$"),),
+              confusiones=((math.sqrt(2) * r["c_enlazante"], "se omitió el solapamiento en la normalización: $c=1/\\sqrt{2(1+S)}$, no $1/\\sqrt2$"),),
               explicacion="Normalización con solapamiento: $c_1^2+c_2^2+2c_1c_2S=1\\Rightarrow c=1/\\sqrt{2(1+S)}$."),
         Parte("ca", "Coeficiente $|c_1|=|c_2|$ del antienlazante", NUM, r["c_antienlazante"], "", tol_rel=0.01, peso=0.15,
               explicacion="Con $c_2=-c_1$: $c=1/\\sqrt{2(1-S)}$."))
@@ -79,8 +79,8 @@ def _q3(d: Datos) -> Pregunta:
     nombre, formula = ALILO[ne]
     x, C = f.huckel_alilo()
     enun = (f"El {nombre} ({formula}) es un sistema $\\pi$ conjugado de tres carbonos con **{ne} electrones $\\pi$**.\n\n"
-            "**a)** Calcula la energía de los electrones $\\pi$ con la aproximación de Hückel, escrita como $E_\\pi=n_\\alpha\\,\\alpha+n_\\beta\\,\\beta$ "
-            "(recuerda que $\\beta<0$).\n\n"
+            "**a)** Calcular la energía de los electrones $\\pi$ con la aproximación de Hückel, escrita como $E_\\pi=n_\\alpha\\,\\alpha+n_\\beta\\,\\beta$ "
+            "(recuérdese que $\\beta<0$).\n\n"
             "**b)** Indica la expresión del orbital molecular $\\pi$ de menor energía con los coeficientes calculados.")
     partes = (
         Parte("e1", "Energía del orbital más bajo: coeficiente de $\\beta$ en $E_1=\\alpha+x\\beta$ ($x$ =)", NUM, float(x[0]), "", tol_rel=0.01, peso=0.2,

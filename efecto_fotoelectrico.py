@@ -377,7 +377,7 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     r.comprobar("La corriente es proporcional a la potencia", abs(d2["i_sat"] / d["i_sat"] - 5.0) < 1e-12)
     r.comprobar("I_sat = η·e·P/(hν)", abs(d["i_sat"] - 0.1 * E * 1e-3 / (H * p.frecuencia)) < 1e-18)
     pr = validar_parametros_foto("Cesio", 0, "longitud", 700.0, 1000.0, 100.0)
-    r.comprobar("Sin emisión no hay corriente aunque la potencia sea enorme", calcular_foto(pr)["i_sat"] == 0.0)
+    r.comprobar("Sin emisión no hay corriente aunque la potencia sea muy elevada", calcular_foto(pr)["i_sat"] == 0.0)
     vv = np.array([-d["kmax_ev"], -0.5 * d["kmax_ev"], 0.0, 2.0])
     iv = corriente_voltaje(vv, d["i_sat"], d["kmax_ev"])
     r.comprobar("Curva I–V: I(−V₀) = 0, I(−V₀/2) = I_sat/2, saturación para V ≥ 0",
@@ -432,8 +432,8 @@ DEMOS = {
 GUIA = [
     {"titulo": "Existe una frecuencia umbral",
      "objetivo": "Comprobar que por debajo de ν₀ no hay emisión, sea cual sea la intensidad.",
-     "pasos": ["Carga la configuración (cesio, luz roja de 700 nm).", "Anota K_max y la corriente.",
-               "Sube la potencia a 100 mW.", "Baja la longitud de onda a 550 nm y después a 450 nm."],
+     "pasos": ["Cargar la configuración (cesio, luz roja de 700 nm).", "Registrar K_max y la corriente.",
+               "Aumentar la potencia a 100 mW.", "Disminuir la longitud de onda a 550 nm y después a 450 nm."],
      "pregunta": "¿Puede una luz roja muy intensa arrancar electrones del cesio?",
      "resultado": "No: con 700 nm, hν ≈ 1.77 eV < Φ = 2.14 eV y la corriente es cero para cualquier potencia. "
                   "La emisión empieza por debajo de λ₀ ≈ 579 nm. Esto contradice la teoría ondulatoria clásica, "
@@ -442,8 +442,8 @@ GUIA = [
                                          "foto_potencia": 1.0}},
     {"titulo": "La intensidad cambia el número de electrones, no su energía",
      "objetivo": "Separar los efectos de la intensidad y de la frecuencia.",
-     "pasos": ["Carga la configuración (cesio, 400 nm, 1 mW).", "Anota K_max, V₀ y la corriente de saturación.",
-               "Multiplica la potencia por 5.", "Vuelve a 1 mW y cambia λ a 300 nm."],
+     "pasos": ["Cargar la configuración (cesio, 400 nm, 1 mW).", "Registrar K_max, V₀ y la corriente de saturación.",
+               "Multiplicar la potencia por 5.", "Volver a 1 mW y cambiar λ a 300 nm."],
      "pregunta": "¿Qué magnitudes cambian al aumentar la potencia? ¿Y al disminuir λ?",
      "resultado": "Con más potencia la corriente se multiplica por 5 pero K_max y V₀ no cambian (en la curva I–V "
                   "las dos curvas cortan el eje en el mismo −V₀). Al bajar λ aumenta K_max (de ≈ 0.96 a ≈ 1.99 eV) "
@@ -452,17 +452,17 @@ GUIA = [
                                          "foto_potencia": 1.0, "foto_eficiencia": 10.0}},
     {"titulo": "Pendiente universal h",
      "objetivo": "Comparar metales distintos.",
-     "pasos": ["Carga la configuración.", "Observa las rectas K_max(ν) de los metales seleccionados.",
-               "Compara su pendiente y su corte con el eje horizontal."],
+     "pasos": ["Cargar la configuración.", "Observar las rectas K_max(ν) de los metales seleccionados.",
+               "Comparar su pendiente y su corte con el eje horizontal."],
      "pregunta": "¿Qué propiedad depende del metal y cuál es universal?",
      "resultado": "Todas las rectas son paralelas: la pendiente es h para cualquier metal. Lo que cambia es la "
                   "función de trabajo Φ, que desplaza la recta y fija la frecuencia umbral ν₀ = Φ/h.",
      "pestana": "Comparación de metales", "config": {"foto_comp": ["Cesio", "Sodio", "Aluminio", "Zinc", "Platino"]}},
     {"titulo": "Medir la constante de Planck",
      "objetivo": "Reproducir el método de Millikan: ajustar V₀ frente a ν.",
-     "pasos": ["Carga la configuración (cesio, ruido de 20 mV).", "Anota h estimada y su error.",
-               "Pon el ruido a 0 mV y después a 100 mV. Cambia la semilla para repetir la medida.",
-               "Cambia el metal a sodio: ¿cuántas líneas quedan por encima del umbral?"],
+     "pasos": ["Cargar la configuración (cesio, ruido de 20 mV).", "Registrar h estimada y su error.",
+               "Establecer el ruido a 0 mV y después a 100 mV. Cambiar la semilla para repetir la medida.",
+               "Cambiar el metal a sodio: ¿cuántas líneas quedan por encima del umbral?"],
      "pregunta": "¿Qué parte de la recta da h y cuál da Φ? ¿Cómo influye el ruido?",
      "resultado": "La pendiente es h/e y la ordenada en el origen es −Φ/e. Sin ruido se recupera h exactamente; "
                   "con ruido el error crece y la incertidumbre del ajuste lo refleja. Con sodio (λ₀ ≈ 544 nm) solo "
@@ -496,7 +496,7 @@ PREGUNTAS = [
      "explicacion": "Clásicamente, una onda intensa de cualquier frecuencia acabaría arrancando electrones. El umbral "
                     "solo se explica si la luz llega en cuantos de energía hν (Einstein, 1905)."},
     {"enunciado": "Para un mismo metal, ¿cómo cambia K_max si la longitud de onda disminuye?",
-     "opciones": ["Aumenta", "Disminuye", "No cambia", "Se hace negativa"], "correcta": 0,
+     "opciones": ["Aumentar", "Disminuir", "No cambia", "Se hace negativa"], "correcta": 0,
      "explicacion": "λ menor ⇒ ν = c/λ mayor ⇒ hν mayor ⇒ K_max = hν − Φ mayor."},
 ]
 
@@ -526,7 +526,7 @@ def _leer_parametros():
         qc.seccion("Fuente de luz y detector")
         d1, d2, _, _ = st.columns(4)
         d1.number_input("Potencia luminosa P [mW]", min_value=0.0, step=0.5, format="%.3g", key="foto_potencia",
-                        help="Potencia que llega al metal. Determina el número de fotones por segundo.")
+                        help="Potencia que llega al metal. Determinar el número de fotones por segundo.")
         d2.slider("Eficiencia cuántica η [%]", 0.0, 100.0, step=1.0, key="foto_eficiencia",
                   help="Fracción de fotones absorbidos que arrancan un electrón.")
         qc.pie_de_parametros(DEMOS, "foto_demo", _aplicar_demo, VALORES_INICIALES, "foto_reset")
@@ -597,7 +597,7 @@ def _pestana_experimento(p: ParametrosFoto):
 def _pestana_metales(p: ParametrosFoto):
     sel = st.multiselect("Metales a comparar", list(METALES), key="foto_comp")
     if not sel:
-        qc.nota("Selecciona al menos un metal.")
+        qc.nota("Seleccionar al menos un metal.")
         return
     qc.seccion("Visualización")
     qc.mostrar_pyplot(figura_metales(sel, p.frecuencia), archivo="fotoelectrico_metales.png")
@@ -630,7 +630,7 @@ def _pestana_millikan():
         qc.aviso(f"{descartadas} línea(s) del mercurio no superan el umbral de este metal (λ₀ = "
                  f"{longitud_umbral_nm(METALES[metal]):.0f} nm) y no producen corriente: se descartan.")
     if not res.get("ajuste"):
-        qc.error("Hacen falta al menos dos líneas por encima del umbral para ajustar una recta. Elige otro metal.")
+        qc.error("Hacen falta al menos dos líneas por encima del umbral para ajustar una recta. Seleccionar otro metal.")
         if res["n"] == 0:
             return
     else:

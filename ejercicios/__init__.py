@@ -25,7 +25,7 @@ import streamlit as st
 
 import quantum_lab_comun as qc
 import teoria
-from ejercicios import _calidad, _figuras, _progreso, clase_s1_s5, clase_s6_s13, cuaderno, libro
+from ejercicios import _calidad, _estado, _figuras, _progreso, clase_s1_s5, clase_s6_s13, cuaderno, libro
 from ejercicios._modelo import CLASE, CUADERNO, FUENTES, LIBRO, TEMAS, Ejercicio, calificar
 from talleres._calificar import CASI, INVALIDA, OK, VACIA
 from talleres._modelo import NUM, OPC
@@ -62,26 +62,9 @@ def _resultados() -> dict:
     return st.session_state.setdefault("ej_res", {})
 
 
-def _hechos() -> set:
-    """Ejercicios marcados como resueltos. Al abrir la página se recuperan del parámetro `prog` de la dirección."""
-    if "ej_hechos" not in st.session_state:
-        codigo = st.session_state.get("ql_fijo_prog") or st.query_params.get("prog")
-        st.session_state["ej_hechos"] = _progreso.decodificar(codigo, IDS)
-    return st.session_state["ej_hechos"]
-
-
-def _guardar_progreso() -> None:
-    """Refleja el progreso en la dirección de la página (sobrevive a recargar o guardar en favoritos)."""
-    st.session_state["ql_fijo_prog"] = _progreso.codificar(_hechos(), IDS)
-
-
 def _marcar(ej_id: str) -> None:
-    """Callback de la casilla «Ya lo resolví»."""
-    if st.session_state.get(f"ej_hecho_{ej_id}"):
-        _hechos().add(ej_id)
-    else:
-        _hechos().discard(ej_id)
-    _guardar_progreso()
+    """Callback de la casilla «Marcar como resuelto»."""
+    _estado.marcar(ej_id, bool(st.session_state.get(f"ej_hecho_{ej_id}")))
 
 
 def _clave(ej: Ejercicio, parte: str) -> str:
@@ -92,9 +75,13 @@ def _comprobar(ej_id: str) -> None:
     ej = buscar(ej_id)
     respuestas = {p.clave: st.session_state.get(_clave(ej, p.clave)) for p in ej.partes}
     cal = _resultados()[ej_id] = calificar(ej, respuestas)
-    if cal.fraccion >= 0.999:                      # acertar todo cuenta como resuelto
-        _hechos().add(ej_id)
-        _guardar_progreso()
+    _estado.registrar_calificacion(ej_id, cal)
+
+
+def _ver_solucion(ej_id: str) -> None:
+    """Callback del interruptor de la solución: abrirla sin haber resuelto el ejercicio lo deja por repasar."""
+    if st.session_state.get(f"ej_sol_{ej_id}"):
+        _estado.registrar_solucion(ej_id)
 
 
 def _ir(ej_id: str) -> None:
@@ -106,27 +93,20 @@ def _siguiente_pendiente(ids: list, actual: str) -> None:
     inicio = ids.index(actual) if actual in ids else -1
     for k in range(1, len(ids) + 1):
         candidato = ids[(inicio + k) % len(ids)]
-        if candidato not in _hechos():
+        if candidato not in _estado.hechos():
             st.session_state["ej_sel"] = candidato
             return
 
 
 def _borrar_progreso() -> None:
-    _hechos().clear()
-    _resultados().clear()
-    _guardar_progreso()
+    _estado.borrar_todo()
 
 
 def _cargar_progreso(archivo) -> None:
     try:
-        nuevos = _progreso.desde_json(archivo.getvalue(), IDS)
+        st.session_state["ej_bk_msg"] = ("ok", _estado.cargar_copia(archivo.getvalue()))
     except ValueError as exc:
         st.session_state["ej_bk_msg"] = ("error", str(exc))
-        return
-    antes = len(_hechos())
-    _hechos().update(nuevos)
-    _guardar_progreso()
-    st.session_state["ej_bk_msg"] = ("ok", f"Se cargaron {len(nuevos)} ejercicios resueltos ({len(_hechos()) - antes} nuevos).")
 
 
 def _limpiar_filtros() -> None:
@@ -152,7 +132,7 @@ def _mensaje(parte, res) -> None:
         elif res.estado == VACIA:
             st.warning("Sin responder.", icon=":material/help:")
         else:
-            st.error("No es esa. Revisa la pista o abre la solución paso a paso.", icon=":material/cancel:")
+            st.error("No es esa. Se recomienda revisar la pista o consultar la solución paso a paso.", icon=":material/cancel:")
         return
     if res.estado == OK:
         st.success(f"Correcto (≈ {_formato_esperado(parte)}).", icon=":material/check_circle:")
@@ -161,7 +141,7 @@ def _mensaje(parte, res) -> None:
     elif res.estado in (VACIA, INVALIDA):
         st.warning(res.mensaje, icon=":material/help:")
     else:
-        st.error("No coincide. Revisa la pista o abre la solución paso a paso.", icon=":material/cancel:")
+        st.error("No coincide. Se recomienda revisar la pista o consultar la solución paso a paso.", icon=":material/cancel:")
 
 
 def _tema_relacionado(ej: Ejercicio) -> None:
@@ -196,14 +176,14 @@ def _vista_ejercicio(ej: Ejercicio, numero: int, total: int) -> None:
             st.info(ej.nota, icon=":material/info:")
 
         if ej.comprobable:
-            st.markdown("**Comprueba tu resultado** (opcional: puedes ver la solución sin responder)")
+            st.markdown("**Comprobar el resultado** (opcional; la solución puede consultarse sin responder)")
             for p in ej.partes:
                 clave = _clave(ej, p.clave)
                 if p.tipo == OPC:
                     st.radio(p.etiqueta, p.opciones, index=None, key=clave)
                 else:
                     etiqueta = p.etiqueta + (f"  [{p.unidad}]" if p.unidad and "(" not in p.etiqueta else "")
-                    st.text_input(etiqueta, key=clave, placeholder="Escribe un número, por ejemplo 3.00e-19 o 3,00 x 10^-19")
+                    st.text_input(etiqueta, key=clave, placeholder="Escribir un número, por ejemplo 3.00e-19 o 3,00 x 10^-19")
                 if cal is not None:
                     _mensaje(p, cal.resultados[p.clave])
             c1, c2 = st.columns([1, 3], vertical_alignment="center")
@@ -217,12 +197,15 @@ def _vista_ejercicio(ej: Ejercicio, numero: int, total: int) -> None:
             with st.expander("Pistas (sin revelar la solución)", icon=":material/lightbulb:"):
                 for i, pista in enumerate(ej.pistas, 1):
                     st.markdown(f"**Pista {i}.** {pista}")
-        with st.expander("Ver la solución paso a paso", icon=":material/menu_book:"):
-            st.markdown(ej.solucion)
+        st.toggle("Mostrar la solución paso a paso", key=f"ej_sol_{ej.id}", on_change=_ver_solucion, args=(ej.id,),
+                  help="Al abrir la solución sin haber resuelto el ejercicio, este queda en «Mi repaso».")
+        if st.session_state.get(f"ej_sol_{ej.id}"):
+            with st.container(border=True):
+                st.markdown(ej.solucion)
         _figuras_del_ejercicio(ej)
         clave_hecho = f"ej_hecho_{ej.id}"
-        st.session_state[clave_hecho] = ej.id in _hechos()
-        st.checkbox("Ya lo resolví (marcar en mi progreso)", key=clave_hecho, on_change=_marcar, args=(ej.id,))
+        st.session_state[clave_hecho] = ej.id in _estado.hechos()
+        st.checkbox("Marcar como resuelto", key=clave_hecho, on_change=_marcar, args=(ej.id,))
         _tema_relacionado(ej)
 
 
@@ -231,7 +214,7 @@ def _navegacion(lista: list[Ejercicio], indice: int) -> None:
     anterior = lista[indice - 1].id if indice > 0 else None
     siguiente = lista[indice + 1].id if indice < len(lista) - 1 else None
     ids = [e.id for e in lista]
-    pendientes = [i for i in ids if i not in _hechos()]
+    pendientes = [i for i in ids if i not in _estado.hechos()]
     c1.button("Anterior", key="ej_ant", icon=":material/arrow_back:", width="stretch", disabled=anterior is None,
               on_click=_ir, args=(anterior,))
     c2.button("Siguiente", key="ej_sig", icon=":material/arrow_forward:", width="stretch", disabled=siguiente is None,
@@ -241,34 +224,30 @@ def _navegacion(lista: list[Ejercicio], indice: int) -> None:
 
 
 def _tabla(lista: list[Ejercicio]) -> list[dict]:
-    resultados = _resultados()
+    bit = _estado.bitacora()
     filas = []
     for i, e in enumerate(lista, 1):
-        cal = resultados.get(e.id)
-        if e.id in _hechos():
-            estado = "Resuelto"
-        elif not e.comprobable:
-            estado = "Pendiente"
-        else:
-            estado = "Pendiente" if cal is None else f"{100 * cal.fraccion:.0f} % (sin completar)"
+        reg = bit.get(e.id, {"intentos": 0, "aciertos": 0})
         filas.append({"N.º": i, "Ejercicio": e.titulo, "Fuente": e.fuente, "Referencia": e.referencia,
-                      "Tema": TEMAS.get(e.tema, e.tema), "Nivel": e.dificultad, "Mi resultado": estado})
+                      "Tema": TEMAS.get(e.tema, e.tema), "Nivel": e.dificultad, "Estado": _estado.estado_de(e.id),
+                      "Comprobaciones": reg["intentos"], "Aciertos": reg["aciertos"]})
     return filas
 
 
-def _copia_de_seguridad() -> None:
+def copia_de_seguridad(clave: str = "ej") -> None:
+    """Descarga, carga y borrado del progreso (se usa en Ejercicios y en Mi repaso)."""
     with st.expander("Copia de seguridad de mi progreso", icon=":material/save:"):
-        st.markdown("Descarga tu progreso para guardarlo o pasarlo a otro dispositivo, y cárgalo cuando quieras. "
-                    "No se envía a ningún servidor: queda en tu archivo y en la dirección de la página.")
-        qc.boton_descarga("Descargar mi progreso (JSON)", _progreso.a_json(_hechos(), IDS).encode("utf-8"),
+        st.markdown("El archivo contiene los ejercicios resueltos, los pendientes de repaso, el registro de intentos y el historial de "
+                    "exámenes. No se envía a ningún servidor: queda en su dispositivo. Permite continuar en otro navegador o dispositivo.")
+        qc.boton_descarga("Descargar mi progreso (JSON)", _estado.copia_json().encode("utf-8"),
                           "progreso_ejercicios.json", "application/json")
-        archivo = st.file_uploader("Cargar un progreso guardado", type=["json"], key="ej_bk_sub")
+        archivo = st.file_uploader("Cargar un progreso guardado", type=["json"], key=f"{clave}_bk_sub")
         if archivo is not None:
-            st.button("Combinar con mi progreso", key="ej_bk_cargar", icon=":material/upload:", on_click=_cargar_progreso, args=(archivo,))
+            st.button("Combinar con mi progreso", key=f"{clave}_bk_cargar", icon=":material/upload:", on_click=_cargar_progreso, args=(archivo,))
         mensaje = st.session_state.pop("ej_bk_msg", None)
         if mensaje:
             (st.success if mensaje[0] == "ok" else st.error)(mensaje[1])
-        st.button("Borrar mi progreso", key="ej_bk_borrar", icon=":material/delete:", on_click=_borrar_progreso)
+        st.button("Borrar todo mi progreso", key=f"{clave}_bk_borrar", icon=":material/delete:", on_click=_borrar_progreso)
 
 
 def interfaz() -> None:
@@ -279,14 +258,15 @@ def interfaz() -> None:
 
     qc.encabezado_pagina("Repaso", "Ejercicios de práctica",
                          "Los ejercicios de las diapositivas de clase y del libro, con su solución explicada paso a paso. "
-                         "Intenta resolverlos; si te atascas, abre una pista o la solución completa.")
-    hechos = _hechos()
+                         "Se recomienda intentar la resolución antes de consultar una pista o la solución completa.")
+    hechos = _estado.hechos()
     qc.metricas([("Ejercicios", f"{len(EJERCICIOS)}"),
                  ("De las diapositivas", f"{sum(e.fuente == CLASE for e in EJERCICIOS)}"),
                  ("Del libro y el cuaderno", f"{sum(e.fuente in (LIBRO, CUADERNO) for e in EJERCICIOS)}"),
-                 ("Mi progreso", f"{len(hechos)} de {len(EJERCICIOS)}")], columnas=4)
-    st.progress(len(hechos) / len(EJERCICIOS), text=f"Llevas {len(hechos)} de {len(EJERCICIOS)} ejercicios resueltos. "
-                "Tu progreso queda en la dirección de esta página: guárdala en favoritos para continuar después.")
+                 ("Resueltos", f"{len(hechos)} de {len(EJERCICIOS)}"),
+                 ("Por repasar", f"{len(_estado.repasar())}")], columnas=5)
+    st.progress(len(hechos) / len(EJERCICIOS), text=f"{len(hechos)} de {len(EJERCICIOS)} ejercicios resueltos. "
+                "El progreso se conserva en la dirección de esta página: guárdela en favoritos para continuar posteriormente.")
 
     c1, c2, c3, c4 = st.columns([2, 2, 2, 1], vertical_alignment="bottom")
     with c1:
@@ -317,7 +297,7 @@ def interfaz() -> None:
     _vista_ejercicio(ej, indice + 1, len(lista))
     with st.expander(f"Lista de los {len(lista)} ejercicios de esta selección", icon=":material/list:"):
         st.dataframe(_tabla(lista), hide_index=True, width="stretch")
-    _copia_de_seguridad()
+    copia_de_seguridad()
 
 
 # ---------------------------------------------------------------------

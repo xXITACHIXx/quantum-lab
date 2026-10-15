@@ -467,7 +467,7 @@ def figura_nube_3d(n: int, l: int, m: int, real: bool, puntos: int, semilla: int
                      thickness=12, len=0.4)
 
     def nube(k):
-        # Con pocas medidas cada punto se dibuja más grande y opaco para que se vea; con miles, pequeño y translúcido.
+        # Con pocas medidas cada punto se dibuja más grande y opaco para facilitar su visualización; con miles, pequeño y translúcido.
         tam = float(np.clip(6.5 - 1.25 * np.log10(max(k, 1)), 2.1, 6.0))
         opa = float(np.clip(1.15 - 0.15 * np.log10(max(k, 1)), 0.55, 1.0))
         return go.Scatter3d(x=mst["x"][:k], y=mst["y"][:k], z=mst["z"][:k], mode="markers", name="medidas",
@@ -815,9 +815,9 @@ N_ORBITAS_3D = 12
 
 GUIA = [
     {"titulo": "Las líneas visibles del hidrógeno",
-     "objetivo": "Identificar las cuatro líneas de Balmer que se ven con un espectroscopio.",
-     "pasos": ["Carga la configuración ($n_f$ = 2, nᵢ hasta 6).", "Anota λ para nᵢ = 3, 4, 5 y 6 y su color.",
-               "Sube nᵢ máximo a 30 y observa el límite de la serie."],
+     "objetivo": "Identificar las cuatro líneas de Balmer observables con un espectroscopio.",
+     "pasos": ["Cargar la configuración ($n_f$ = 2, nᵢ hasta 6).", "Registrar λ para nᵢ = 3, 4, 5 y 6 y su color.",
+               "Aumentar nᵢ máximo a 30 y observar el límite de la serie."],
      "pregunta": "¿Por qué las líneas se juntan hacia longitudes de onda cortas?",
      "resultado": "Hα 656.5 nm (rojo), Hβ 486.3 nm (azul verdoso), Hγ 434.2 nm y Hδ 410.3 nm (violeta). Al subir nᵢ "
                   "los niveles se acercan entre sí (Eₙ ∝ −1/n²), así que las energías de los fotones tienden a "
@@ -825,25 +825,25 @@ GUIA = [
      "pestana": "Series y espectro", "config": {"bohr_nucleo": "H", "bohr_serie_nf": 2, "bohr_serie_nmax": 6, "bohr_mu": True}},
     {"titulo": "Emisión y absorción",
      "objetivo": "Comparar una transición con su inversa.",
-     "pasos": ["Carga la configuración (3 → 2).", "Anota ΔE y λ.", "Intercambia los niveles (2 → 3)."],
+     "pasos": ["Cargar la configuración (3 → 2).", "Registrar ΔE y λ.", "Intercambia los niveles (2 → 3)."],
      "pregunta": "¿Qué cambia y qué se conserva al invertir la transición?",
-     "resultado": "Cambia el signo de ΔE del átomo (pierde energía al emitir, la gana al absorber) y el sentido de la "
+     "resultado": "Cambiar el signo de ΔE del átomo (pierde energía al emitir, la gana al absorber) y el sentido de la "
                   "flecha; la energía y la longitud de onda del fotón son idénticas (656.47 nm). Por eso un gas frío "
                   "absorbe exactamente las mismas líneas que emite caliente.",
      "pestana": "Transición", "config": {"bohr_nucleo": "H", "bohr_ni": 3, "bohr_nf": 2}},
     {"titulo": "Corrección de masa reducida",
      "objetivo": "Explicar la pequeña diferencia entre Bohr y la fórmula de Rydberg medida.",
-     "pasos": ["Carga la configuración (3 → 2, sin masa reducida).", "Anota la diferencia Bohr–Rydberg.",
-               "Activa «Corrección de masa reducida» y vuelve a mirarla."],
-     "pregunta": "¿De dónde sale una diferencia de ≈ 0.05 %?",
+     "pasos": ["Cargar la configuración (3 → 2, sin masa reducida).", "Registrar la diferencia Bohr–Rydberg.",
+               "Activar «Corrección de masa reducida» y vuelve a mirarla."],
+     "pregunta": "¿Cuál es el origen de una diferencia de ≈ 0.05 %?",
      "resultado": "Sin corrección la diferencia es ≈ 5.4×10⁻⁴ = mₑ/m_p: el modelo supone el núcleo inmóvil. Con la "
                   "masa reducida μ = mₑm_p/(mₑ + m_p) ambos cálculos coinciden (diferencia < 10⁻¹⁰). Este efecto "
                   "permitió descubrir el deuterio en 1931.",
      "pestana": "Transición", "config": {"bohr_nucleo": "H", "bohr_ni": 3, "bohr_nf": 2, "bohr_mu": False}},
     {"titulo": "Iones hidrogenoides",
      "objetivo": "Ver el efecto de la carga nuclear Z.",
-     "pasos": ["Carga la configuración (He⁺, 4 → 2).", "Compara λ con la de Hβ (4 → 2 en el hidrógeno).",
-               "Mira el radio de las órbitas."],
+     "pasos": ["Cargar la configuración (He⁺, 4 → 2).", "Comparar λ con la de Hβ (4 → 2 en el hidrógeno).",
+               "Observar el radio de las órbitas."],
      "pregunta": "¿Cómo escalan las energías, las longitudes de onda y los radios con Z?",
      "resultado": "Eₙ ∝ Z², así que λ ∝ 1/Z²: la línea 4 → 2 del He⁺ (≈ 121.5 nm) es casi exactamente Hβ/4, y "
                   "coincide casi con Lyman α del hidrógeno (la diferencia viene de la masa reducida, base de la "
@@ -851,13 +851,13 @@ GUIA = [
      "pestana": "Transición", "config": {"bohr_nucleo": "He+", "bohr_ni": 4, "bohr_nf": 2, "bohr_mu": True}},
     {"titulo": "La nube de probabilidad se construye medida a medida",
      "objetivo": "Ver cómo la forma del orbital aparece solo al repetir muchas veces la medida de la posición.",
-     "pasos": ["Carga la configuración (orbital 1s) y abre «Átomo en 3D».",
-               "Pulsa «Reproducir» y observa las primeras 10 o 20 medidas.",
+     "pasos": ["Cargar la configuración (orbital 1s) y abre «Átomo en 3D».",
+               "Pulsar «Reproducir» y observar las primeras 10 o 20 medidas.",
                "Deja que se acumulen todas y compara la nube con la órbita de Bohr (círculo blanco).",
-               "Cambia la semilla: el experimento se repite con otras medidas."],
-     "pregunta": "¿Puedes predecir dónde aparecerá la próxima medida? ¿Qué sí puedes predecir?",
+               "Cambiar la semilla: el experimento se repite con otras medidas."],
+     "pregunta": "¿Es posible predecir dónde aparecerá la próxima medida? ¿Qué magnitudes sí son predecibles?",
      "resultado": "No: cada medida cae en un lugar distinto y al azar. Lo que es predecible es la DISTRIBUCIÓN de "
-                  "muchas medidas, |ψ|². Con unas pocas medidas no se ve ninguna forma; con miles aparece la esfera "
+                  "muchas medidas, |ψ|². Con pocas medidas no se distingue ninguna forma; con miles aparece la esfera "
                   "difusa del 1s. El electrón no recorre el círculo de Bohr: se encuentra a cualquier distancia, "
                   "aunque la más probable es justamente a₀ (r más probable = 1.00 a₀).",
      "pestana": "Átomo en 3D",
@@ -865,8 +865,8 @@ GUIA = [
                 "bohr_nucleo": "H"}},
     {"titulo": "¿Cuándo coincide Bohr con la mecánica cuántica?",
      "objetivo": "Comparar el radio más probable de cada orbital con el radio de Bohr del mismo n.",
-     "pasos": ["Carga la configuración (n = 3, orbital 3s).", "Anota el radio más probable y el de Bohr (9 a₀).",
-               "Cambia a l = 1 (3p) y a l = 2 (3d) y vuelve a comparar.", "Mira el número de nodos radiales."],
+     "pasos": ["Cargar la configuración (n = 3, orbital 3s).", "Registrar el radio más probable y el de Bohr (9 a₀).",
+               "Cambiar a l = 1 (3p) y a l = 2 (3d) y vuelve a comparar.", "Observar el número de nodos radiales."],
      "pregunta": "¿Con qué valor de l coinciden los dos radios?",
      "resultado": "Solo con l = n − 1 (el 3d): su radio más probable es exactamente n²a₀ = 9 a₀, el de Bohr, y no "
                   "tiene nodos radiales (es la «órbita circular» cuántica). El 3s tiene 2 nodos radiales y su máximo "
@@ -877,7 +877,7 @@ GUIA = [
                 "bohr_nucleo": "H"}},
     {"titulo": "El principio de incertidumbre dentro del átomo",
      "objetivo": "Comprobar que el estado fundamental cumple Δx·Δpₓ ≥ ħ/2 y entender por qué el átomo no colapsa.",
-     "pasos": ["Carga la configuración (1s).", "Anota Δx·Δpₓ.", "Repite con 2s y 3s."],
+     "pasos": ["Cargar la configuración (1s).", "Registrar Δx·Δpₓ.", "Repite con 2s y 3s."],
      "pregunta": "Si el electrón se acercara más al núcleo, ¿qué le pasaría a su energía cinética?",
      "resultado": "Para el 1s, Δx·Δpₓ = ħ/√3 ≈ 0.577 ħ, por encima del mínimo 0.5 ħ; para 2s y 3s el producto crece. "
                   "Confinar el electrón en una región más pequeña (Δx menor) obliga a un Δp mayor y por tanto a más "
@@ -919,7 +919,7 @@ PREGUNTAS = [
                     "completa es la distribución |ψ|² de muchas medidas repetidas. No hay trayectoria."},
     {"enunciado": "Para el orbital 1s del hidrógeno, la distancia al núcleo más probable es…",
      "opciones": ["0 (el núcleo)", "a₀ = 0.0529 nm, el radio de Bohr", "1.5 a₀", "4 a₀"], "correcta": 1,
-     "explicacion": "P(r) = r²|R|² es máxima en r = a₀. Ojo: |ψ|² (por unidad de volumen) es máxima en el núcleo, "
+     "explicacion": "P(r) = r²|R|² es máxima en r = a₀. Nótese que |ψ|² (por unidad de volumen) es máxima en el núcleo, "
                     "pero el volumen de una capa esférica crece como r², y el producto es máximo en a₀. "
                     "El valor medio es ⟨r⟩ = 1.5 a₀."},
     {"enunciado": "Según la mecánica cuántica, ¿por qué el electrón no cae al núcleo?",
@@ -1018,7 +1018,7 @@ def _pestana_transicion(t: Transicion):
         ], archivo=f"bohr_{t.nucleo}_{t.n_inicial}a{t.n_final}.csv")
     with st.expander("Interpretación física", expanded=False):
         st.markdown(
-            "- Bohr postuló órbitas estables con momento angular cuantizado L = nħ. De ahí salen los radios "
+            "- Bohr postuló órbitas estables con momento angular cuantizado L = nħ. De ahí se obtienen los radios "
             "rₙ = n²a₀/Z y las energías Eₙ = −Z²·13.6 eV/n².\n"
             "- El electrón solo emite o absorbe luz al **saltar** entre órbitas, con un fotón de energía exactamente "
             "|E_f − Eᵢ|. Por eso el espectro está formado por **líneas** y no es continuo.\n"
@@ -1121,7 +1121,7 @@ def _subvista_nube(t: Transicion):
     figura = _cache_nube(n, l, m, real, int(ss["bohr_orb_puntos"]), int(ss["bohr_orb_semilla"]), t.nucleo,
                          t.masa_reducida, bool(ss["bohr_orb_bohr"]), altura)
     qc.mostrar_plotly(figura, "bohr_nube", archivo=f"bohr_nube_{n}{LETRAS_L[l]}_m{m}.html")
-    st.caption("Pulsa «Reproducir» para ver cómo se acumulan las medidas (de 1 al total). Cada punto es una medida "
+    st.caption("Pulsar «Reproducir» para ver cómo se acumulan las medidas (de 1 al total). Cada punto es una medida "
                "independiente de la posición del electrón; arrastra para girar el átomo. "
                + ("Colores: signo de ψ (cian +, naranja −)." if real or m == 0 else "Colores: fase de ψ, que gira "
                   f"{abs(m)} {'vez' if abs(m) == 1 else 'veces'} alrededor del eje z (Lz = {_texto_m(m)} ħ).")
@@ -1154,7 +1154,7 @@ def _subvista_orbitas(t: Transicion):
     n_mostrar = max(t.n_inicial, t.n_final, 3)
     if n_mostrar > N_ORBITAS_3D:
         qc.aviso(f"La animación 3D dibuja órbitas hasta n = {N_ORBITAS_3D} (los radios crecen como n² y las "
-                 f"órbitas interiores dejarían de verse). Elige niveles menores o iguales que {N_ORBITAS_3D}.")
+                 f"órbitas interiores dejarían de verse). Seleccionar niveles menores o iguales que {N_ORBITAS_3D}.")
         return
     d = calcular_transicion(t)
     qc.metricas([
@@ -1167,7 +1167,7 @@ def _subvista_orbitas(t: Transicion):
     figura = _cache_orbitas(t.n_inicial, t.n_final, t.nucleo, t.masa_reducida, n_mostrar, altura)
     qc.mostrar_plotly(figura, "bohr_orbitas", archivo=f"bohr_orbitas_{t.nucleo}_{t.n_inicial}a{t.n_final}.html")
     st.caption("Radios a escala (rₙ = n²a₀/Z). Las velocidades de giro NO están a escala: en realidad el periodo crece "
-               "como n³. El salto se dibuja en varios cuadros para que se vea, pero en el modelo de Bohr es instantáneo. "
+               "como n³. El salto se dibuja en varios cuadros para facilitar la visualización, pero en el modelo de Bohr es instantáneo. "
                "El fotón se dibuja con el color de su longitud de onda (gris claro si es invisible: ultravioleta o "
                "infrarrojo). Los niveles se eligen arriba, en «Átomo y transición».")
 

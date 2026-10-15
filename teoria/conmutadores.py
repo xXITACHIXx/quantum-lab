@@ -107,7 +107,7 @@ def mostrar() -> None:
             "Medir una propiedad puede **cambiar el estado** del sistema. Dos observables α y β, con operadores Â y B̂, "
             "solo se pueden determinar simultáneamente si la primera medida no perturba el resultado de la segunda.")
         st.markdown(
-            "Supón que el sistema está en ψₙ. Si ψₙ es autofunción de Â, medir α deja el sistema en ψₙ y da αₙ. Después "
+            "Suponer que el sistema está en ψₙ. Si ψₙ es autofunción de Â, medir α deja el sistema en ψₙ y da αₙ. Después "
             "se mide β: el estado se mantiene solo si ψₙ **también** es autofunción de B̂. En ese caso:")
         st.latex(r"\hat B[\hat A\psi_n]=\alpha_n\beta_n\psi_n=\hat A[\hat B\psi_n]")
         st.markdown(

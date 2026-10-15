@@ -51,7 +51,7 @@ def mostrar() -> None:
         qc.seccion("¿Es comparable la longitud de onda con el tamaño del problema?")
         st.markdown(
             "La luz de longitud de onda λ que atraviesa una rendija de ancho a se describe bien con rayos mientras λ ≪ a. "
-            "La difracción solo se nota cuando λ es comparable con a. Con partículas ocurre lo mismo, con "
+            "La difracción solo es apreciable cuando λ es comparable con a. Con partículas ocurre lo mismo, con "
             "λ = h/p. **No hay una frontera nítida** entre «partícula» y «onda»: lo que importa es la razón λ/a.")
         qc.seccion("Calculadora")
         opciones = {"Electrón": ME, "Átomo de helio": 4.002602 * U_MASA, "Molécula de N₂": 28.0134 * U_MASA,
@@ -152,7 +152,7 @@ PREGUNTAS = [
      "correcta": 0, "explicacion": "n_i/n_j = e^(−10) ≈ 4.5 × 10⁻⁵: el nivel superior está prácticamente vacío."},
     {"enunciado": "Los resultados clásico y cuántico se parecen cuando...",
      "opciones": ["ΔE ≫ kT", "ΔE ≲ kT", "T = 0", "λ ≫ a"],
-     "correcta": 1, "explicacion": "Si el espaciado es pequeño frente a kT hay muchos niveles poblados y el espectro se ve «continuo»."},
+     "correcta": 1, "explicacion": "Si el espaciado es pequeño frente a kT hay muchos niveles poblados y el espectro parece «continuo»."},
     {"enunciado": "La difracción de una onda en una rendija de ancho a se observa claramente cuando...",
      "opciones": ["λ ≪ a", "λ es comparable con a", "λ = 0", "a es muy grande"],
      "correcta": 1, "explicacion": "Si λ ≪ a se cumple la óptica de rayos; la difracción aparece cuando λ ~ a."},

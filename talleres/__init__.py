@@ -141,7 +141,7 @@ def _pregunta(prefijo: str, i: int, pregunta: Pregunta) -> None:
                 st.radio(p.etiqueta, p.opciones, index=None, key=clave)
             else:
                 etiqueta = p.etiqueta + (f"  [{p.unidad}]" if p.unidad and f"en {p.unidad}" not in p.etiqueta else "")
-                st.text_input(etiqueta, key=clave, placeholder="Escribe un número, por ejemplo 1.256e12 o 1,256 x 10^12")
+                st.text_input(etiqueta, key=clave, placeholder="Escribir un número, por ejemplo 1.256e12 o 1,256 x 10^12")
             if cal is not None:
                 _mensaje(p, cal.resultados[p.clave])
         st.text_area("Tu procedimiento (no se califica; escríbelo como lo harías en el taller)", key=f"{prefijo}_{pregunta.id}_proc",
@@ -211,7 +211,7 @@ def _vista_taller(taller_id: str) -> None:
     obtenido = sum(c.puntos for _, c in calificadas)
     qc.metricas([("Puntaje", f"{obtenido:.2f} / {total:g}"), ("Preguntas calificadas", f"{len(calificadas)} / {len(preguntas)}"),
                  ("Porcentaje", f"{100 * obtenido / total:.0f} %" if total else "—")], columnas=3)
-    st.info("Escribe tus resultados con sus unidades indicadas (se aceptan «1.256e12» y «1,256 x 10^12»). Cada pregunta se califica por separado con una tolerancia "
+    st.info("Ingresar los resultados con las unidades indicadas (se aceptan «1.256e12» y «1,256 x 10^12»). Cada pregunta se califica por separado con una tolerancia "
             "del 2 % y suma puntos parciales por partes. Después de calificar aparece la solución completa. Es un repaso: la nota no es oficial.",
             icon=":material/info:")
     for i, q in enumerate(preguntas, 1):
@@ -222,11 +222,11 @@ def _vista_taller(taller_id: str) -> None:
 
 def _vista_indice() -> None:
     qc.encabezado_pagina("Repaso", "Talleres de repaso",
-                         "Problemas al estilo de los talleres del curso: escribe tus resultados, recibe tu calificación y compara con la solución justificada.")
+                         "Problemas al estilo de los talleres del curso: ingreso de resultados, calificación por partes y comparación con la solución justificada.")
     qc.metricas([("Talleres", f"{len(TALLERES)}"), ("Preguntas", f"{sum(t.n_preguntas for t in TALLERES)}"),
                  ("Puntos", f"{sum(t.puntos for t in TALLERES):g}")], columnas=3)
     st.info("Los enunciados son una reescritura de talleres de semestres anteriores; las soluciones están verificadas numéricamente. "
-            "Con «datos nuevos» puedes repetir cada taller con otros valores.", icon=":material/info:")
+            "La opción «datos nuevos» permite repetir cada taller con otros valores.", icon=":material/info:")
     for inicio in range(0, len(TALLERES), 2):
         cols = st.columns(2)
         for col, t in zip(cols, TALLERES[inicio:inicio + 2]):
@@ -319,7 +319,7 @@ def ejecutar_pruebas() -> "qc.RegistroPruebas":
     mu = f.masa_reducida_u("H", "F")
     r.comprobar("HF: 2B = 1.256×10¹² Hz (primera transición, dato del enunciado original)",
                 math.isclose(f.frecuencia_rotacion(0, f.momento_de_inercia(mu, 91.68)), 1.256e12, rel_tol=5e-4))
-    r.comprobar("HF: de 1.256×10¹² Hz sale r = 91.7 pm", math.isclose(f.longitud_de_enlace_desde_nu(1.256e12, mu), 91.68, rel_tol=5e-4))
+    r.comprobar("HF: de 1.256×10¹² Hz resulta r = 91.7 pm", math.isclose(f.longitud_de_enlace_desde_nu(1.256e12, mu), 91.68, rel_tol=5e-4))
     r.comprobar("Vibración de HF con k = 966 N/m: ν̃ = 4138 cm⁻¹ (valor espectroscópico ωe del 1H19F)",
                 math.isclose(f.frecuencia_vibracion(966.0, mu) / (f.C * 100), 4138.0, rel_tol=5e-3))
     from scipy import constants as const

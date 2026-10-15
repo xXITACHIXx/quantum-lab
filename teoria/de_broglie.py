@@ -101,7 +101,7 @@ def mostrar() -> None:
         dibujar(fig, "debroglie_orbita.png")
         st.caption("En el caso no entero se ve el salto donde la onda debería empalmar consigo misma.")
     with sub[3]:
-        qc.seccion("Calcula la longitud de onda de una partícula")
+        qc.seccion("Calcular la longitud de onda de una partícula")
         c1, c2 = st.columns(2)
         with c1:
             nombre = st.selectbox("Partícula", list(PARTICULAS), key="db_part")

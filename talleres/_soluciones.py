@@ -34,7 +34,7 @@ Una molécula diatómica que vibra o gira se comporta como **una sola partícula
 $$\mu=\frac{{m_1m_2}}{{m_1+m_2}}=\frac{{({ma:.5g}\ \text{{u}})({mb:.5g}\ \text{{u}})}}{{({ma:.5g}+{mb:.5g})\ \text{{u}}}}={mu:.5g}\ \text{{u}}$$
 
 Como $1\ \text{{u}}=1.6605\times10^{{-27}}$ kg: $\mu={mu:.5g}\times1.6605\times10^{{-27}}={tex(mu_kg)}$ kg.
-*Comprueba:* $\mu$ siempre es menor que la masa más ligera ({ma:.3f} u); aquí es casi igual porque el otro átomo es mucho más pesado.
+*Comprobar:* $\mu$ siempre es menor que la masa más ligera ({ma:.3f} u); aquí es casi igual porque el otro átomo es mucho más pesado.
 
 #### Paso 3 · Vibración (apartado a)
 **Idea.** El enlace es un resorte: oscilador armónico, con niveles $E_n=h\nu\left(n+\tfrac12\right)$, $n=0,1,2,\dots$. Los niveles están **igualmente espaciados** y la regla de selección permite solo $\Delta n=\pm1$. Entonces toda transición pura sube exactamente un escalón:
@@ -51,7 +51,7 @@ Por eso la transición $0\to1$ (la más baja) y la $1\to2$ (la segunda) **tienen
 2. $\omega=\sqrt{{k/\mu}}={tex(w)}\ \text{{rad/s}}$ (esta es la frecuencia **angular**)
 3. $\nu=\dfrac{{\omega}}{{2\pi}}=\dfrac{{{tex(w)}}}{{2\pi}}=\mathbf{{{tex(nu_v)}\ \text{{Hz}}}}$
 
-*Error típico:* quedarse en $\omega$ y olvidar dividir entre $2\pi$. Si tu resultado es 6.28 veces mayor, es eso.
+*Error típico:* quedarse en $\omega$ y olvidar dividir entre $2\pi$. Si el resultado obtenido es 6.28 veces mayor, corresponde a este error.
 
 #### Paso 4 · Momento de inercia
 Para la rotación se necesita $I=\mu r_e^2$:
@@ -94,7 +94,7 @@ El {ion} ya perdió todos sus electrones: solo queda el núcleo, con carga $+{Z}
 #### Paso 3 · Energía del estado fundamental
 $$E_n=-\frac{{Z^2e^2}}{{8\pi\varepsilon_0a_0\,n^2}}=-\frac{{Z^2}}{{n^2}}\,(13.606\ \text{{eV}})$$
 
-Con $n=1$ y $Z={Z}$ (ojo: $Z$ va **al cuadrado**, $Z^2={Z ** 2}$):
+Con $n=1$ y $Z={Z}$ (nótese que $Z$ se eleva **al cuadrado**, $Z^2={Z ** 2}$):
 
 $$E_1=-\frac{{{Z}^2}}{{1^2}}(13.606\ \text{{eV}})=-{Z ** 2}\times13.606\ \text{{eV}}=\mathbf{{{tex(E1)}\ \text{{eV}}}}$$
 
@@ -172,7 +172,7 @@ Sustituyendo ($h=6.626\times10^{{-34}}$ J s):
 
 $$I=\frac{{{tex(f.H)}\ \text{{J s}}}}{{4\pi^2\,({tex(nu)}\ \text{{s}}^{{-1}})}}=\mathbf{{{tex(I)}\ \text{{kg m}}^2}}$$
 
-*Comprueba las unidades:* J s / s⁻¹ = (kg m² s⁻²)(s)(s) = kg m². ✓
+*Comprobar las unidades:* J s / s⁻¹ = (kg m² s⁻²)(s)(s) = kg m². ✓
 
 #### Paso 3 · Masa reducida
 $$\mu=\frac{{m_1m_2}}{{m_1+m_2}}=\frac{{({ma:.5g})({mb:.5g})}}{{{ma:.5g}+{mb:.5g}}}={mu:.5g}\ \text{{u}}={tex(mu_kg)}\ \text{{kg}}$$
@@ -360,7 +360,7 @@ Con eso es suficiente, no hace falta ningún dato más.
 
 $$\hat L_z=-i\hbar\frac{{\partial}}{{\partial\varphi}}$$
 
-**Cuenta paso a paso.** Se deriva respecto de $\varphi$ (el $i\,{m}$ del exponente baja multiplicando):
+**Desarrollo paso a paso.** Se deriva respecto de $\varphi$ (el $i\,{m}$ del exponente baja multiplicando):
 
 $$\hat L_z\Phi=-i\hbar\,\frac{{\partial}}{{\partial\varphi}}\left[\frac{{1}}{{\sqrt{{2\pi}}}}e^{{i{m}\varphi}}\right]=-i\hbar\,(i\,{m})\,\frac{{1}}{{\sqrt{{2\pi}}}}e^{{i{m}\varphi}}=(-i\cdot i)\,{m}\,\hbar\,\Phi$$
 
@@ -368,7 +368,7 @@ Como $-i\cdot i=-i^2=+1$:
 
 $$\hat L_z\Phi={m}\,\hbar\,\Phi\ \Rightarrow\ \boxed{{L_z={m}\,\hbar}}$$
 
-**Truco rápido:** en $e^{{i m\varphi}}$ el número que multiplica a $\varphi$ **es** $m$, y $L_z=m\hbar$. El signo indica el sentido del giro (positivo: antihorario visto desde $+z$).
+**Criterio práctico:** en $e^{{i m\varphi}}$ el número que multiplica a $\varphi$ **es** $m$, y $L_z=m\hbar$. El signo indica el sentido del giro (positivo: antihorario visto desde $+z$).
 
 #### Paso 3 · Momento angular total (apartado b)
 **Idea.** La **magnitud** del momento angular la fija el número cuántico $l$, no $m$. El operador $\hat L^2$ tiene valores propios $l(l+1)\hbar^2$:
@@ -376,7 +376,7 @@ $$\hat L_z\Phi={m}\,\hbar\,\Phi\ \Rightarrow\ \boxed{{L_z={m}\,\hbar}}$$
 $$|\vec L|=\sqrt{{l(l+1)}}\,\hbar=\sqrt{{{l}\cdot{l + 1}}}\,\hbar=\sqrt{{{l * (l + 1)}}}\,\hbar=\boxed{{{L:.4f}\,\hbar}}$$
 
 **Comprobación de coherencia:** la componente $z$ nunca puede superar la magnitud total: $|L_z|={abs(m)}\hbar\le|\vec L|={L:.3f}\hbar$. ✓ (por eso $|m|\le l$).
-*Error típico:* responder $l\hbar={l}\hbar$. La magnitud es $\sqrt{{l(l+1)}}\hbar$, siempre un poco mayor que $l\hbar$.
+*Error típico:* responder $l\hbar={l}\hbar$. La magnitud es $\sqrt{{l(l+1)}}\hbar$, siempre ligeramente mayor que $l\hbar$.
 
 #### Paso 4 · Energía de rotación (apartado c)
 **Idea.** Toda la energía es **cinética de rotación**, y para un cuerpo que gira con momento angular $L$ y momento de inercia $I$:

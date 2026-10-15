@@ -109,7 +109,7 @@ def mostrar() -> None:
                      ("Conjugado z*", f"{z.conjugate():.4g}")], columnas=4)
         st.caption("Comprobación: z* z = |z|² = " + f"{(z.conjugate() * z).real:.5g}" + " (siempre real).")
     with sub[4]:
-        qc.seccion("Explora las ondas")
+        qc.seccion("Explorar las ondas")
         c1, c2, c3 = st.columns(3)
         with c1:
             lam = st.slider("Longitud de onda λ", 0.5, 3.0, 1.0, 0.1, key="on_lam")
@@ -145,7 +145,7 @@ def mostrar() -> None:
             ax.set_xlabel("x")
             ax.set_ylabel("amplitud")
         dibujar(fig, "ondas.png")
-        st.caption("Mueve t / T: en la onda viajera cada máximo avanza; en la estacionaria solo cambia la altura entre "
+        st.caption("Mover t / T: en la onda viajera cada máximo avanza; en la estacionaria solo cambia la altura entre "
                    "los nodos. En la onda compleja Re y Im giran en cuadratura mientras el módulo permanece constante.")
 
 

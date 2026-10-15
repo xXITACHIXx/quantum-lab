@@ -125,7 +125,7 @@ def mostrar() -> None:
         else:
             st.error("**No**: Ô f no es proporcional a f (el cociente (Ôf)/f cambia con x).", icon=":material/close:")
         st.caption("La prueba compara (Ôf)/f en 37 puntos: es autofunción si el cociente es el mismo en todos.")
-        st.markdown("Observa un caso instructivo: sin(2x) **no** es autofunción de d/dx, pero sí de d²/dx² con autovalor −4.")
+        st.markdown("Observar un caso instructivo: sin(2x) **no** es autofunción de d/dx, pero sí de d²/dx² con autovalor −4.")
     with sub[1]:
         qc.seccion("El operador de la energía")
         st.markdown("El operador de la energía total se llama **hamiltoniano** (por razones históricas):")

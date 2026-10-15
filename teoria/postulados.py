@@ -135,7 +135,7 @@ def mostrar() -> None:
     with sub[5]:
         qc.seccion("Mide la energía de una superposición en la caja")
         st.markdown(
-            "Prepara el estado Ψ = b₁φ₁ + b₂φ₂ + b₃φ₃ + b₄φ₄ de una partícula en una caja (Eₙ = n² E₁). Los coeficientes se "
+            "Preparar el estado Ψ = b₁φ₁ + b₂φ₂ + b₃φ₃ + b₄φ₄ de una partícula en una caja (Eₙ = n² E₁). Los coeficientes se "
             "normalizan solos. Cada medida da E₁, 4E₁, 9E₁ o 16E₁; el promedio de muchas medidas se acerca al valor esperado.")
         cols = st.columns(4)
         defecto = [1.0, 0.8, 0.0, 0.4]
@@ -145,9 +145,9 @@ def mostrar() -> None:
             n_med = st.slider("Número de medidas", 10, 20000, 500, 10, key="po_nm")
         with c2:
             semilla = st.number_input("Semilla aleatoria", 0, 10 ** 6, 1, key="po_seed",
-                                      help="Cambia la semilla para repetir el experimento con otros resultados.")
+                                      help="Cambiar la semilla para repetir el experimento con otros resultados.")
         if sum(c ** 2 for c in coef) == 0:
-            st.error("Pon al menos un coeficiente distinto de cero.", icon=":material/error:")
+            st.error("Establecer al menos un coeficiente distinto de cero.", icon=":material/error:")
             return
         p = probabilidades(coef)
         e_esp = energia_esperada(coef)
