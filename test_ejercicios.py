@@ -182,7 +182,7 @@ def _abrir(**estado) -> AppTest:
 def test_pagina_sin_excepciones():
     at = _abrir()
     assert not at.exception, [e.value for e in at.exception]
-    assert any("Ver la solución paso a paso" in e.label for e in at.expander)
+    assert any("solución paso a paso" in t.label for t in at.toggle)
 
 
 @pytest.mark.parametrize("ej_id", [e.id for e in ejercicios.EJERCICIOS])

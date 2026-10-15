@@ -152,6 +152,18 @@ la barra lateral que aparece el número de versión esperado.
   `<<plantillas>>` sin rellenar. Para añadir una gráfica, registrar una `Figura` en `FIGURAS` de `_figuras.py`.
 * **Revisión antes de publicar:** `python -m ejercicios` imprime el informe de mantenimiento (cuántos ejercicios hay por
   fuente, semana y tema, reglas de calidad y contrastes numéricos) y termina con error si algo falla.
+* **Formulario** (barra lateral → «Teoría y repaso»): constantes fundamentales con valor CODATA e incertidumbre relativa (las del SI
+  exactas), unidades atómicas, combinaciones frecuentes (hc, ħc, e²/4πε₀, k_BT…), conversor de energía (J, eV, hartree, cm⁻¹, Hz, nm, kJ/mol,
+  kcal/mol, K) con región espectral, conversores de longitud, masa y ángulo, 149 fórmulas agrupadas en 18 temas (con definición de símbolos y
+  condiciones de validez, buscador y enlaces a la teoría y a los ejercicios del tema), masas isotópicas (AME2020) y calculadora de masa reducida.
+  Se descarga completo en Markdown. Cada fórmula con resultado numérico lleva un **contraste** (valor calculado frente a una referencia
+  independiente) que verifican las pruebas. Añadir una fórmula: `F(nombre, latex, nota, contraste)` en `formulario/_formulas_a.py` o `_formulas_b.py`.
+* **Modo examen:** evaluación cronometrada con ejercicios elegidos al azar según fuente, tema y nivel (o solo los pendientes de repaso). No se muestran
+  pistas ni soluciones durante la prueba; al entregar (o al agotarse el tiempo) se califica sobre 5.0 con crédito parcial y se muestra la corrección.
+  Una semilla opcional reproduce el mismo examen. El historial de exámenes se guarda en la copia de seguridad.
+* **Repaso personalizado:** a partir de las comprobaciones y los exámenes, lista los ejercicios por repasar, los temas con menor precisión y los
+  errores más frecuentes detectados por el calificador, con enlaces al ejercicio y a la teoría, y permite armar un examen con los pendientes.
+* **Vocabulario:** los textos de la web usan un registro académico e impersonal (infinitivos o formas impersonales, sin segunda persona).
 * **Añadir un tema nuevo:** crear `teoria/<id>.py` con una función `mostrar()` (y, opcionalmente, una lista `PREGUNTAS`) y
   registrarlo en la lista `UNIDADES` de `teoria/__init__.py` (las instrucciones están en la cabecera de ese archivo).
 * Los **parámetros** están arriba de cada simulador; los resultados se recalculan al instante.

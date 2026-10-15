@@ -25,7 +25,7 @@ def _q1(d: Datos) -> Pregunta:
     r_principal = maximos[int(np.argmax(P))]
     r_interno = maximos[int(np.argmin(P))]
     nodo = f.nodos_radiales_numericos(n, l)[0]
-    enun = ("Para el orbital **3p$_z$** del átomo de hidrógeno se requiere calcular las zonas de mayor y menor densidad electrónica. Calcula estas zonas:\n\n"
+    enun = ("Para el orbital **3p$_z$** del átomo de hidrógeno se requiere calcular las zonas de mayor y menor densidad electrónica. Calcular estas zonas:\n\n"
             "**a)** Con base en la función de distribución radial $P(r)=r^2R_{31}(r)^2$ (con $r$ en unidades de $a_0$).\n\n"
             "**b)** Con base en la densidad de probabilidad angular $|Y_1^0(\\theta)|^2$.")
     partes = (
@@ -55,7 +55,7 @@ def _q2(d: Datos) -> Pregunta:
     m = d.elegir(2, list(range(-l, l + 1)))
     L = math.sqrt(l * (l + 1))
     E = l * (l + 1) / 2
-    enun = (f"Considera la molécula de {nombre} en un nivel rotacional con $l={l}$ que se absorbe sobre una superficie metálica que permite su "
+    enun = (f"Considerar la molécula de {nombre} en un nivel rotacional con $l={l}$ que se absorbe sobre una superficie metálica que permite su "
             "rotación 2D alrededor de un vector normal a la superficie (el eje $z$). Si la función que describe la rotación de la molécula es\n\n"
             f"$$\\Phi(\\varphi)=\\left(\\frac1{{2\\pi}}\\right)^{{1/2}}e^{{i{m}\\varphi}}$$\n\nCalcula:\n\n"
             "**a)** Su momento angular en el eje $z$ (en unidades de $\\hbar$).\n\n"
@@ -69,7 +69,7 @@ def _q2(d: Datos) -> Pregunta:
               confusiones=((l / L, "$l\\hbar$ no es la magnitud: $\\hat L^2$ tiene valor propio $l(l+1)\\hbar^2$, luego $|\\vec L|=\\sqrt{l(l+1)}\\hbar$"),),
               explicacion=f"$|\\vec L|=\\sqrt{{l(l+1)}}\\,\\hbar=\\sqrt{{{l * (l + 1)}}}\\hbar$."),
         Parte("E", "c) Energía rotacional $E$ (en unidades de $\\hbar^2/I$)", NUM, E, "ħ²/I", tol_rel=0.01, peso=0.4,
-              confusiones=((2.0, "$E=L^2/2I$: te falta el factor ½"),),
+              confusiones=((2.0, "$E=L^2/2I$: falta el factor ½"),),
               explicacion="$E=\\dfrac{|\\vec L|^2}{2I}=\\dfrac{l(l+1)\\hbar^2}{2I}$."))
     sol = _s.rotor(l, m, L, E)
     return Pregunta("q2", enun, 1.0, partes, sol, tema="esfera",

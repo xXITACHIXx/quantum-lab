@@ -24,10 +24,10 @@ def _q1(d: Datos) -> Pregunta:
     nu_r = f.frecuencia_rotacion(1, I)
     nu_r1 = f.frecuencia_rotacion(0, I)
     enun = (f"La molécula {NOMBRES[mol]} tiene una constante de fuerza de {k:g} N m⁻¹ y una longitud de enlace de {R} pm. "
-            "Considera la vibración como un oscilador armónico y la rotación como un rotor rígido, con las reglas de selección "
+            "Considerar la vibración como un oscilador armónico y la rotación como un rotor rígido, con las reglas de selección "
             "habituales ($\\Delta n=\\pm1$ en la vibración, $\\Delta l=\\pm1$ en la rotación).\n\n"
-            "**a)** Calcula la frecuencia de la luz que corresponde a la **segunda** transición de vibración pura de menor energía.\n\n"
-            "**b)** Calcula la frecuencia de la luz que corresponde a la **segunda** transición de rotación pura de menor energía.")
+            "**a)** Calcular la frecuencia de la luz que corresponde a la **segunda** transición de vibración pura de menor energía.\n\n"
+            "**b)** Calcular la frecuencia de la luz que corresponde a la **segunda** transición de rotación pura de menor energía.")
     partes = (
         Parte("mu", "Paso previo: masa reducida $\\mu$ (en u)", NUM, mu, "u", tol_rel=0.01, peso=0.1,
               explicacion="$\\mu=m_1m_2/(m_1+m_2)$."),
@@ -42,7 +42,7 @@ def _q1(d: Datos) -> Pregunta:
         Parte("rot", "b) Frecuencia de la 2.ª transición de rotación pura (en Hz)", NUM, nu_r, "Hz", peso=0.45,
               confusiones=((0.5, "ese es el valor de la primera transición ($l=0\\to1$, $2B$); la segunda es $l=1\\to2$, con $4B$"),
                            (0.25, "ese es $B$; la segunda transición $l=1\\to2$ cae en $4B$"),
-                           (1.5, "revisa cuáles son los niveles: $E_l=hB\\,l(l+1)$ y la transición $l=1\\to2$ vale $4B$")),
+                           (1.5, "verificar cuáles son los niveles: $E_l=hB\\,l(l+1)$ y la transición $l=1\\to2$ vale $4B$")),
               explicacion="La transición $l\\to l+1$ tiene frecuencia $2B(l+1)$; para $l=1\\to2$ resulta $4B$."))
     sol = _s.vibracion_rotacion(mol, a, b, k, R, mu, I, nu_v, nu_r, nu_r1)
     return Pregunta("q1", enun, 2.0, partes, sol, tema="espectroscopia",
@@ -54,11 +54,11 @@ def _q2(d: Datos) -> Pregunta:
     E1 = f.energia_hidrogenoide_ev(Z)
     enun = (f"La energía de un ion de un solo electrón (He⁺, Li²⁺, Be³⁺…) es "
             "$E_n=-\\dfrac{Z^2e^2}{8\\pi\\varepsilon_0a_0\\,n^2}$, con $n=1,2,\\dots$ "
-            f"Calcula la afinidad electrónica (en eV) del {IONES[Z]}, es decir, la energía que se libera cuando captura un electrón y queda "
-            f"en el estado fundamental ({FORMADOS[Z]}). Usa $e^2/(8\\pi\\varepsilon_0a_0)=13.606$ eV.")
+            f"Calcular la afinidad electrónica (en eV) del {IONES[Z]}, es decir, la energía que se libera cuando captura un electrón y queda "
+            f"en el estado fundamental ({FORMADOS[Z]}). Usar $e^2/(8\\pi\\varepsilon_0a_0)=13.606$ eV.")
     partes = (
         Parte("E1", f"Paso previo: energía del estado fundamental de {FORMADOS[Z]} (en eV)", NUM, E1, "eV", tol_rel=0.01, peso=0.4,
-              confusiones=((1 / Z ** 2, f"olvidaste elevar $Z$ al cuadrado: aquí $Z={Z}$"),
+              confusiones=((1 / Z ** 2, f"no se elevó $Z$ al cuadrado: aquí $Z={Z}$"),
                            (1 / Z, f"el factor es $Z^2={Z ** 2}$, no $Z={Z}$")),
               explicacion=f"$E_1=-Z^2\\cdot13.606\\text{{ eV}}$ con $Z={Z}$."),
         Parte("AE", f"Afinidad electrónica del {IONES[Z]} (en eV)", NUM, -E1, "eV", tol_rel=0.01, peso=0.6,

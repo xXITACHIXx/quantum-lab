@@ -13,7 +13,7 @@ import base64
 import json
 import zlib
 
-VERSION = 1
+VERSION = 2
 
 
 def token(ej_id: str) -> str:
@@ -36,13 +36,20 @@ def decodificar(codigo: str | None, ids_validos) -> set[str]:
     return {i for i in ids_validos if token(i) in presentes}
 
 
-def a_json(hechos, ids_validos) -> str:
+def a_json(hechos, ids_validos, repasar=(), bitacora=None, examenes=None) -> str:
+    """Copia de seguridad completa: resueltos, pendientes de repaso, bitácora de intentos e historial de exámenes."""
     return json.dumps({"quantum_lab": "ejercicios", "version": VERSION,
-                       "resueltos": [i for i in ids_validos if i in hechos]}, ensure_ascii=False, indent=1)
+                       "resueltos": [i for i in ids_validos if i in hechos],
+                       "repasar": [i for i in ids_validos if i in repasar],
+                       "bitacora": bitacora or {}, "examenes": examenes or []}, ensure_ascii=False, indent=1)
 
 
-def desde_json(datos: bytes | str, ids_validos) -> set[str]:
-    """Lee un archivo exportado. Lanza ValueError si no es un progreso de QUANTUM LAB."""
+def leer_copia(datos: bytes | str, ids_validos) -> dict:
+    """
+    Lee un archivo exportado y devuelve {"resueltos", "repasar", "bitacora", "examenes"} ya depurados.
+    Admite la versión 1 (solo resueltos). Lanza ValueError si no es un progreso de QUANTUM LAB.
+    """
+    from ejercicios import _bitacora
     try:
         obj = json.loads(datos)
     except (ValueError, TypeError) as exc:
@@ -50,4 +57,24 @@ def desde_json(datos: bytes | str, ids_validos) -> set[str]:
     if not isinstance(obj, dict) or obj.get("quantum_lab") != "ejercicios" or not isinstance(obj.get("resueltos"), list):
         raise ValueError("El archivo no es un progreso de los Ejercicios de práctica.")
     validos = set(ids_validos)
-    return {i for i in obj["resueltos"] if isinstance(i, str) and i in validos}
+
+    def ids(clave):
+        lista = obj.get(clave, [])
+        return {i for i in lista if isinstance(i, str) and i in validos} if isinstance(lista, list) else set()
+
+    examenes = []
+    for x in obj.get("examenes", []) if isinstance(obj.get("examenes"), list) else []:
+        if isinstance(x, dict) and isinstance(x.get("nota"), (int, float)) and isinstance(x.get("fecha"), str):
+            examenes.append({"fecha": x["fecha"][:32], "ejercicios": [i for i in x.get("ejercicios", []) if i in validos],
+                             "nota": float(min(max(x["nota"], 0.0), 5.0)),
+                             "porcentaje": float(min(max(x.get("porcentaje", 0.0), 0.0), 100.0)),
+                             "minutos_usados": float(max(x.get("minutos_usados", 0.0), 0.0)),
+                             "minutos_totales": float(max(x.get("minutos_totales", 0.0), 0.0)),
+                             "temas": [str(t)[:60] for t in x.get("temas", [])][:20]})
+    return {"resueltos": ids("resueltos"), "repasar": ids("repasar"),
+            "bitacora": _bitacora.depurar(obj.get("bitacora"), ids_validos), "examenes": examenes}
+
+
+def desde_json(datos: bytes | str, ids_validos) -> set[str]:
+    """Solo los ejercicios resueltos de un archivo exportado (compatibilidad con la versión 1)."""
+    return leer_copia(datos, ids_validos)["resueltos"]

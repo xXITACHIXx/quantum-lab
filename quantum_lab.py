@@ -25,11 +25,14 @@ import streamlit as st
 import quantum_lab_comun as qc
 import efecto_fotoelectrico
 import ejercicios
+import examen
+import formulario
 import modelo_bohr
 import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import repaso
 import talleres
 import teoria
 import verificacion
@@ -46,13 +49,16 @@ PAGINAS = {
     "teoria": ("Centro de teoría", ":material/menu_book:", teoria),
     "talleres": ("Talleres de repaso", ":material/edit_note:", talleres),
     "ejercicios": ("Ejercicios de práctica", ":material/calculate:", ejercicios),
+    "examen": ("Modo examen", ":material/timer:", examen),
+    "repaso": ("Repaso personalizado", ":material/history_edu:", repaso),
+    "formulario": ("Formulario", ":material/functions:", formulario),
     "verificacion": ("Verificación", ":material/verified:", verificacion),
     "pruebas": ("Pruebas numéricas", ":material/fact_check:", None),
 }
 GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
-    ("Teoría y repaso", ["teoria", "talleres", "ejercicios"], True),
+    ("Teoría y repaso", ["teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
     ("Verificación", ["verificacion", "pruebas"], True),
 ]
 
@@ -64,7 +70,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -136,24 +142,34 @@ def _pagina_inicio() -> None:
                 st.button("Abrir simulador", key=f"ql_abrir_{clave}", on_click=_ir_a, args=(clave,),
                           icon=":material/arrow_forward:", width="stretch")
     qc.seccion("Teoría del curso")
-    st.markdown("El **Centro de teoría** reúne en un solo lugar la teoría de cada tema, con enlaces a su simulador, "
-                "experimentos guiados y autoevaluación. Los temas que el curso aún no cubre ya tienen su lugar.")
+    st.markdown("El **Centro de teoría** reúne la teoría de cada tema con enlaces a su simulador, experimentos guiados y autoevaluación. "
+                "Los temas que el curso aún no desarrolla figuran con su lugar reservado.")
     st.button("Abrir el Centro de teoría", key="ql_abrir_teoria", on_click=_ir_a, args=("teoria",),
               icon=":material/menu_book:")
+    qc.seccion("Formulario")
+    st.markdown("El **Formulario** contiene las constantes fundamentales (CODATA) con su incertidumbre, un conversor de unidades de energía, "
+                "longitud, masa y ángulo, las expresiones de cada tema con la definición de sus símbolos y condiciones de validez, y las masas isotópicas.")
+    st.button("Abrir el formulario", key="ql_abrir_formulario", on_click=_ir_a, args=("formulario",), icon=":material/functions:")
     qc.seccion("Talleres de repaso")
-    st.markdown("Los **Talleres de repaso** reproducen el estilo de los talleres evaluativos: escribes tus resultados, la página los califica por partes, "
-                "señala el error más probable y muestra la solución justificada. Cada taller se puede repetir con datos nuevos.")
+    st.markdown("Los **Talleres de repaso** reproducen el formato de los talleres evaluativos: el estudiante ingresa sus resultados, la página los califica por partes, "
+                "indica el error más probable y presenta la solución justificada. Cada taller puede repetirse con datos nuevos.")
     st.button("Abrir los talleres", key="ql_abrir_talleres", on_click=_ir_a, args=("talleres",), icon=":material/edit_note:")
     qc.seccion("Ejercicios de práctica")
-    st.markdown("Los **Ejercicios de práctica** reúnen los problemas de las diapositivas de clase y del libro. Cada uno tiene pistas y una "
-                "**solución explicada paso a paso** que puedes abrir cuando quieras; si quieres, también puedes comprobar tu resultado.")
+    st.markdown("Los **Ejercicios de práctica** reúnen los problemas de las diapositivas de clase y del libro. Cada uno incluye pistas, una "
+                "**solución explicada paso a paso** y, opcionalmente, la comprobación del resultado numérico.")
     st.button("Abrir los ejercicios", key="ql_abrir_ejercicios", on_click=_ir_a, args=("ejercicios",), icon=":material/calculate:")
+    qc.seccion("Modo examen y repaso personalizado")
+    st.markdown("El **Modo examen** genera una evaluación cronometrada con ejercicios del banco, calificada sobre 5.0. "
+                "El **Repaso personalizado** identifica los temas con menor desempeño y los errores más frecuentes a partir de los intentos registrados.")
+    c_ex, c_rp = st.columns(2)
+    c_ex.button("Abrir el modo examen", key="ql_abrir_examen", on_click=_ir_a, args=("examen",), icon=":material/timer:", width="stretch")
+    c_rp.button("Abrir el repaso personalizado", key="ql_abrir_repaso", on_click=_ir_a, args=("repaso",), icon=":material/history_edu:", width="stretch")
     st.markdown("")
     c1, c2 = st.columns(2, gap="large")
     with c1:
         qc.seccion("Uso")
-        st.markdown("1. Elige un simulador o el **Centro de teoría** en la barra lateral o en las tarjetas.\n"
-                    "2. Ajusta los **parámetros del sistema** en el panel superior; los resultados se recalculan al instante.\n"
+        st.markdown("1. Seleccionar un simulador o el **Centro de teoría** en la barra lateral o en las tarjetas.\n"
+                    "2. Ajustar los **parámetros del sistema** en el panel superior; los resultados se recalculan al instante.\n"
                     "3. Recorre las **pestañas**: resultados, visualización, valores detallados e interpretación.\n"
                     "4. «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al comienzo.\n"
                     "5. **Ver la teoría de este tema** abre su explicación; **Guía de práctica** propone experimentos con predicción y resultado; **Autoevaluación** "

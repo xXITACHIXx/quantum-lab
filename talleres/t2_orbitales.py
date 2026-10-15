@@ -20,7 +20,7 @@ def _q1(d: Datos) -> Pregunta:
     enun = ("Para explicar el comportamiento de la energía potencial de una molécula diatómica homonuclear se supone que se comporta como un "
             f"oscilador armónico unidimensional. Si la molécula está en el estado {estado}, halla el valor esperado para la posición "
             "$\\langle x\\rangle$ respecto al centro de la molécula (la distancia de equilibrio).\n\n"
-            "Escribe el valor de $\\langle x\\rangle$ (en unidades de $x_0=\\sqrt{\\hbar/\\mu\\omega}$) y muestra el cálculo en tu procedimiento.")
+            "Escribir el valor de $\\langle x\\rangle$ (en unidades de $x_0=\\sqrt{\\hbar/\\mu\\omega}$) y mostrar el cálculo en el procedimiento.")
     partes = (
         Parte("x", "$\\langle x\\rangle$ (en unidades de $x_0$)", NUM, 0.0, "x₀", tol_rel=0.0, tol_abs=0.01, peso=1.0,
               explicacion="$\\langle x\\rangle=\\int\\psi_n^*\\,x\\,\\psi_n\\,dx=0$ porque el integrando es impar."),)
@@ -44,8 +44,8 @@ def _q2(d: Datos) -> Pregunta:
                            (2.0, "con $\\nu=2B$ y $B=h/(8\\pi^2I)$ resulta $I=h/(4\\pi^2\\nu)$")),
               explicacion="La transición más baja es $l=0\\to1$, de frecuencia $\\nu=2B=h/(4\\pi^2I)$."),
         Parte("R", "Longitud de enlace $r_e$ (en pm)", NUM, R_pm, "pm", peso=0.5,
-              confusiones=((1e12, "diste el resultado en metros: pásalo a pm"), (1e10, "diste el resultado en ángstrom: 1 Å = 100 pm"),
-                           (1e-3, "diste el resultado en nm: 1 nm = 1000 pm")),
+              confusiones=((1e12, "resultado expresado en metros: convertir a pm"), (1e10, "resultado expresado en ángstrom: 1 Å = 100 pm"),
+                           (1e-3, "resultado expresado en nm: 1 nm = 1000 pm")),
               explicacion="$r_e=\\sqrt{I/\\mu}$ con $\\mu$ en kg y el resultado pasado a pm."))
     sol = _s.longitud_desde_nu(mol, a, b, nu, mu, I, R_pm)
     return Pregunta("q2", enun, 1.0, partes, sol, tema="esfera")
@@ -60,7 +60,7 @@ def _q3(d: Datos) -> Pregunta:
     nodos = f.nodos_radiales_numericos(n, l)
     theta_nodal = f.angulos_nodales_m0(l)[0]
     enun = (f"Para el orbital **{nombre}$_{{z^2}}$** del átomo de hidrógeno se requiere calcular las zonas de mayor y menor densidad electrónica. "
-            "Calcula estas zonas:\n\n"
+            "Calcular estas zonas:\n\n"
             "**a)** Con base en la función de distribución radial $P(r)=r^2R_{nl}(r)^2$ (usa $r$ en unidades de $a_0$).\n\n"
             "**b)** Con base en la densidad de probabilidad angular $|Y_l^0(\\theta)|^2$.")
     partes = (

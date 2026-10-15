@@ -25,9 +25,9 @@ Valor esperado = $\psi^*$ · operador aplicado a $\psi$, integrado. Con $\hat p_
 
 $$\langle p_x\rangle=\int_0^L\psi_n\left(-i\hbar\frac{d\psi_n}{dx}\right)dx=-i\hbar\int_0^L\psi_n\frac{d\psi_n}{dx}\,dx$$
 
-*Ojo al orden:* el operador actúa **solo** sobre la $\psi$ de la derecha; no se puede escribir $\frac{d}{dx}\psi^2$ sin más.
+*Orden de aplicación:* el operador actúa **solo** sobre la $\psi$ de la derecha; no se puede escribir $\frac{d}{dx}\psi^2$ sin más.
 
-#### Paso 3 · El truco: $\psi\,\psi'$ es la derivada de $\tfrac12\psi^2$
+#### Paso 3 · Identidad clave: $\psi\,\psi'$ es la derivada de $\tfrac12\psi^2$
 Por la regla de la cadena, $\dfrac{d}{dx}\left(\tfrac12\psi^2\right)=\psi\,\dfrac{d\psi}{dx}$. Entonces, por el teorema fundamental del cálculo,
 
 $$\int_0^L\psi_n\frac{d\psi_n}{dx}dx=\left[\tfrac12\psi_n^2\right]_0^L=\tfrac12\left(\psi_n(L)^2-\psi_n(0)^2\right)$$
@@ -75,13 +75,13 @@ $$[\hat H,\hat p_x]f=\frac{i\hbar^3}{2m}f'''-\frac{i\hbar^3}{2m}f'''=0$$
 
 Es autofunción **de los dos a la vez**, como tiene que pasar cuando los operadores conmutan.
 
-*Cuidado con las cuentas:* $(ik)^2=-k^2$, no $k^2$, y al aplicar $\hat H$ no aparece $\hbar^3k^3$: ese término solo sale al aplicar los **dos** operadores seguidos ($\hat H\hat p_x\psi=\frac{\hbar^3k^3}{2m}\psi$, y lo mismo $\hat p_x\hat H\psi$).
+*Precisión en el cálculo:* $(ik)^2=-k^2$, no $k^2$, y al aplicar $\hat H$ no aparece $\hbar^3k^3$: ese término solo aparece al aplicar los **dos** operadores seguidos ($\hat H\hat p_x\psi=\frac{\hbar^3k^3}{2m}\psi$, y lo mismo $\hat p_x\hat H\psi$).
 """
     return Ejercicio(
         "c_libre", "Energía y momento de la partícula libre", CUADERNO, "Cuaderno · ejercicio de clase", "conmutadores",
         "Para evaluar el movimiento de una partícula libre que viaja en el eje $x$ se calculan su energía total y su momento lineal. "
-        "Determina si estos dos observables se pueden determinar simultáneamente para una función de onda arbitraria $f(x)$. "
-        "Comprueba el resultado con la onda plana $\\psi=Ae^{ikx}$.",
+        "Determinar si estos dos observables se pueden determinar simultáneamente para una función de onda arbitraria $f(x)$. "
+        "Comprobar el resultado con la onda plana $\\psi=Ae^{ikx}$.",
         sol, (Parte("c", "¿Se pueden conocer simultáneamente?", OPC, opciones=("Sí, $[\\hat H,\\hat p_x]=0$", "No, $[\\hat H,\\hat p_x]=i\\hbar$"),
                     correcta=0, explicacion="Ambos órdenes dan $\\frac{i\\hbar^3}{2m}f'''$."),
               Parte("E", "Energía de $Ae^{ikx}$ en unidades de $\\hbar^2k^2/m$", NUM, 0.5, "ħ²k²/m")),
@@ -137,7 +137,7 @@ Dos «montañas» iguales apiladas en la dirección $y$, separadas por el valle 
               Parte("nodo", "b) Nodo interior", OPC, opciones=("La recta $y=L/2$", "La recta $x=L/2$", "El punto $(L/2,L/2)$", "No tiene nodos interiores"),
                     correcta=0, explicacion="$\\sin(2\\pi y/L)=0$ en $y=L/2$."),
               Parte("ymax", "c) Coordenada $y$ del máximo inferior (en unidades de $L$)", NUM, 0.25, "L")),
-        ("$E\\propto n_x^2+n_y^2$: ¿qué otra pareja da 5?", "Busca dónde cada seno vale 0 y dónde vale ±1."), BASICO)
+        ("$E\\propto n_x^2+n_y^2$: ¿qué otra pareja da 5?", "Buscar dónde cada seno vale 0 y dónde vale ±1."), BASICO)
 
 
 def _hf_caja() -> Ejercicio:
@@ -176,7 +176,7 @@ El resultado es unas 30 veces mayor que el enlace real del HF (91.7 pm). La frec
         "En un laboratorio se encontró que la frecuencia de la transición de menor energía entre estados electrónicos del HF es $3.0\\times10^{13}\\ \\text{s}^{-1}$. "
         "Con el modelo de la partícula en una caja monodimensional (transición $n=1\\to2$), determina la longitud del enlace suponiendo que es igual a la longitud de la caja.",
         sol, (Parte("L", "Longitud de la caja (en nm)", NUM, L * 1e9, "nm", tol_rel=0.02,
-                    confusiones=((1e-9, "diste el valor en metros; se pide en nm"), (1 / math.sqrt(3), "usaste $\\Delta E=h^2/8mL^2$; para $1\\to2$ es $3h^2/8mL^2$"))),),
+                    confusiones=((1e-9, "valor expresado en metros; se solicita en nm"), (1 / math.sqrt(3), "se empleó $\\Delta E=h^2/8mL^2$; para $1\\to2$ es $3h^2/8mL^2$"))),),
         ("$\\Delta E=E_2-E_1=3h^2/8mL^2$.", "La partícula es un electrón."), BASICO)
 
 

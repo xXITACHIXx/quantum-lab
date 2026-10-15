@@ -50,7 +50,7 @@ $$\Delta E=E_1-E_0=\frac{\hbar^2}{2I}(1\cdot2)-0=\frac{\hbar^2}{I}$$
 - $\mu=\dfrac{m_Hm_I}{m_H+m_I}=\dfrac{(1.0078)(126.904)}{1.0078+126.904}\ \text{u}=<<mu_u>>\ \text{u}=<<mu>>\ \text{kg}$
 - $I=\mu r^2=(<<mu>>)(1.6092\times10^{-10})^2=<<I>>\ \text{kg m}^2$
 
-*Ojo:* $\mu$ es **un poco menor** que la masa del H ($1.6735\times10^{-27}$ kg), no igual: es el error del cuaderno.
+*Nota:* $\mu$ es **ligeramente menor** que la masa del H ($1.6735\times10^{-27}$ kg), no igual: es el error del cuaderno.
 
 #### Paso 6 · Sustituir
 $$\Delta E=\frac{\hbar^2}{I}=\frac{(1.0546\times10^{-34})^2}{<<I>>}=\mathbf{<<de>>\ \text{J}}$$
@@ -60,7 +60,7 @@ En frecuencia, $\nu=\Delta E/h=<<nu>>$ Hz: microondas, como corresponde a la rot
     return Ejercicio(
         "l01_hi", "Rotación del HI: punto cero y primera excitación", LIBRO, "Libro · ejercicio 1", "esfera",
         "Una molécula de ¹H¹²⁷I en fase gaseosa, con longitud de enlace de **160.92 pm**, rota en el espacio tridimensional.\n\n"
-        "**a)** Calcula la energía de punto cero asociada a esa rotación. **b)** ¿Cuál es la menor energía que puede absorber la molécula en una excitación rotacional?",
+        "**a)** Calcular la energía de punto cero asociada a esa rotación. **b)** ¿Cuál es la menor energía que puede absorber la molécula en una excitación rotacional?",
         sol, (Parte("E0", "a) Energía de punto cero (en J)", NUM, 0.0, "J", tol_rel=0.0, tol_abs=1e-30),
               Parte("dE", "b) Menor energía absorbida (en J)", NUM, de, "J",
                     confusiones=((0.5, "esa es $E_1/2$: la transición $0\\to1$ vale $\\hbar^2/I$, no $\\hbar^2/2I$"),))),
@@ -92,7 +92,7 @@ $$\cos\theta=\frac{m_l}{\sqrt{30}}\qquad\theta=\arccos\frac{m_l}{\sqrt{30}}$$
 
 #### Paso 5 · Cómo dibujarlos
 - Traza el eje $z$ y una semicircunferencia de radio $\sqrt{30}\approx5.48$ (en unidades de $\hbar$).
-- Marca en el eje $z$ las alturas $-5,\dots,5$ y une cada una con la circunferencia: son las generatrices de los conos.
+- Marcar en el eje $z$ las alturas $-5,\dots,5$ y unir cada una con la circunferencia: son las generatrices de los conos.
 - $m_l=0$ ($\theta=90^\circ$) no es un cono sino un **disco** en el plano $xy$. Quedan 5 conos «hacia arriba», 5 «hacia abajo» y el disco: 11 orientaciones.
 
 #### Paso 6 · Comprobación
@@ -100,7 +100,7 @@ Ningún cono tiene $\theta=0$: incluso con $m_l=5$ el vector forma 24.09° con e
 """, L=f"{math.sqrt(30):.3f}", filas=filas)
     return Ejercicio(
         "l04_conos_l5", "Conos de momento angular con l = 5", LIBRO, "Libro · ejercicio 4", "esfera",
-        "Dibuja una figura con todos los conos de momento angular compatibles con $l=5$ y calcula el semiángulo de cada uno.",
+        "Dibujar una figura con todos los conos de momento angular compatibles con $l=5$ y calcula el semiángulo de cada uno.",
         sol, (Parte("L", "Longitud $|\\vec l|$ en unidades de $\\hbar$", NUM, math.sqrt(30), "ħ", confusiones=((5 / math.sqrt(30), "la longitud es $\\sqrt{l(l+1)}\\hbar$, no $l\\hbar$"),)),
               Parte("n", "Número de orientaciones ($m_l$ posibles)", NUM, 11.0, tol_rel=0.0, tol_abs=0.1),
               Parte("t5", "Semiángulo para $m_l=5$ (grados)", NUM, ang[5], "°"),
@@ -139,7 +139,7 @@ Es una mezcla de dos estados con $l_z=+\hbar$ y $l_z=-\hbar$: no tiene un $l_z$ 
     return Ejercicio(
         "l06_px_dxz", "¿Son px y dxz autofunciones de lz?", LIBRO, "Libro · ejercicio 6", "esfera",
         "Las funciones $p_x$ y $d_{xz}$ son combinaciones lineales de armónicos esféricos, que son autofunciones de $\\hat H$, $\\hat l^2$ y $\\hat l_z$ "
-        "en la rotación 3D. Se eligieron así para obtener funciones reales. ¿Siguen siendo autofunciones de $\\hat l_z$? Aplica el operador.",
+        "en la rotación 3D. Se eligieron así para obtener funciones reales. ¿Siguen siendo autofunciones de $\\hat l_z$? Aplicar el operador.",
         sol, (Parte("px", "¿$p_x$ es autofunción de $\\hat l_z$?", OPC, opciones=("No", "Sí, con $l_z=\\hbar$", "Sí, con $l_z=0$"), correcta=0,
                     explicacion="$\\hat l_z p_x\\propto p_y$."),
               Parte("dxz", "¿$d_{xz}$ es autofunción de $\\hat l_z$?", OPC, opciones=("No", "Sí, con $l_z=\\hbar$", "Sí, con $l_z=2\\hbar$"), correcta=0,
@@ -209,15 +209,15 @@ Con la masa colgada en equilibrio, la fuerza del resorte iguala al peso: $kx=mg$
 $$x=\frac{mg}{k}=\frac{(1.50\ \text{kg})(9.81\ \text{m/s}^2)}{<<k>>\ \text{N/m}}=\frac{14.7\ \text{N}}{<<k>>\ \text{N/m}}=\mathbf{<<x>>\ \text{m}}\approx<<xcm>>\ \text{cm}$$
 
 #### Paso 6 · Interpretación
-Un enlace químico es un resorte «duro»: con 1.5 kg colgado apenas se estiraría unos 2.6 cm. Es un resorte de laboratorio bastante rígido.
+Un enlace químico es un resorte «duro»: con 1.5 kg colgado apenas se estiraría unos 2.6 cm. Es un resorte de laboratorio de rigidez elevada.
 """, nu=tex(C * 100 * nt), mu=tex(mu), k=f"{k:.0f}", x=f"{x:.4f}", xcm=f"{100 * x:.2f}")
     return Ejercicio(
         "l08_d2", "Constante de fuerza del D₂", LIBRO, "Libro · ejercicio 8", "oscilador",
         "La frecuencia de vibración de la molécula de **D₂**, expresada como número de onda, es de **3115 cm⁻¹**. ¿Cuál es la constante de fuerza $k$ del enlace? "
-        "¿Cuánto se estiraría un resorte clásico con esta misma constante si se le cuelga una masa de 1.50 kg? Usa $g=9.81$ m/s².",
+        "¿Cuánto se estiraría un resorte clásico con esta misma constante si se le cuelga una masa de 1.50 kg? Usar $g=9.81$ m/s².",
         sol, (Parte("k", "Constante de fuerza (en N/m)", NUM, k, "N/m",
-                    confusiones=((1e-4, "usaste el número de onda en m⁻¹ sin convertir (3115 cm⁻¹ = 311 500 m⁻¹) o $c$ en m/s con $\\tilde\\nu$ en cm⁻¹"),
-                                 (2.0, "usaste la masa de un átomo en lugar de la masa reducida $\\mu=m/2$"))),
+                    confusiones=((1e-4, "se empleó el número de onda sin convertir a m⁻¹ (3115 cm⁻¹ = 311 500 m⁻¹) o $c$ en m/s con $\\tilde\\nu$ en cm⁻¹"),
+                                 (2.0, "se empleó la masa de un átomo en lugar de la masa reducida $\\mu=m/2$"))),
               Parte("x", "Estiramiento del resorte (en m)", NUM, x, "m")),
         ("$\\nu=c\\tilde\\nu$ (con $c$ en cm/s).", "$k=(2\\pi\\nu)^2\\mu$, con $\\mu=m_D/2$."), BASICO,
         nota="En el cuaderno la molécula aparece como «O₂», pero los datos (3115 cm⁻¹ y μ = 1.672×10⁻²⁷ kg) corresponden al D₂, que es la molécula del enunciado del libro.")
@@ -231,7 +231,7 @@ Demostrar con la integral que $\Phi_m=\frac{1}{\sqrt{2\pi}}e^{im\phi}$ y $\Phi_n
 $$\int_0^{2\pi}\Phi_m^*\,\Phi_n\,d\phi=0$$
 
 #### Paso 2 · El conjugado
-Al conjugar se cambia $i\to-i$: $\Phi_m^*=\frac1{\sqrt{2\pi}}e^{-im\phi}$. (Si no se conjuga, el resultado sale mal.)
+Al conjugar se cambia $i\to-i$: $\Phi_m^*=\frac1{\sqrt{2\pi}}e^{-im\phi}$. (Si no se conjuga, el resultado es incorrecto.)
 
 #### Paso 3 · Juntar exponentes
 $$\int_0^{2\pi}\frac{1}{2\pi}e^{-im\phi}e^{in\phi}d\phi=\frac1{2\pi}\int_0^{2\pi}e^{i(n-m)\phi}d\phi$$
@@ -251,7 +251,7 @@ Entonces el integrando es $\frac1{2\pi}e^0=\frac1{2\pi}$ y la integral vale $\fr
 """
     return Ejercicio(
         "l10_ortog_anillo", "Ortogonalidad de las funciones del rotor 2D", LIBRO, "Libro · ejercicio 10", "esfera",
-        "Demuestra, mediante la integración necesaria, que las autofunciones de la ecuación de Schrödinger para la rotación en dos dimensiones, "
+        "Demostrar, mediante la integración necesaria, que las autofunciones de la ecuación de Schrödinger para la rotación en dos dimensiones, "
         "$\\frac{1}{\\sqrt{2\\pi}}e^{im_l\\phi}$ y $\\frac{1}{\\sqrt{2\\pi}}e^{in_l\\phi}$ (con $m_l\\ne n_l$), son ortogonales.",
         sol, (Parte("int", "Valor de la integral con $m_l\\ne n_l$", NUM, 0.0, tol_rel=0.0, tol_abs=0.01),
               Parte("norm", "Valor de la integral con $m_l=n_l$", NUM, 1.0, tol_rel=0.0, tol_abs=0.01)),
@@ -295,8 +295,8 @@ $\langle p_x\rangle=0$ (oscila igual hacia un lado que hacia el otro), pero $\la
 """
     return Ejercicio(
         "l11_p2", "⟨p²⟩ del oscilador en n = 0, 1, 2", LIBRO, "Libro · ejercicio 11", "oscilador",
-        "Evalúa el promedio del cuadrado del momento lineal $\\langle p_x^2\\rangle$ del oscilador armónico cuántico para $n=0$ y los dos primeros estados excitados ($n=1$ y $n=2$). "
-        "Expresa el resultado en unidades de $\\hbar^2\\alpha$, con $\\alpha=\\sqrt{k\\mu}/\\hbar$.",
+        "Evaluar el promedio del cuadrado del momento lineal $\\langle p_x^2\\rangle$ del oscilador armónico cuántico para $n=0$ y los dos primeros estados excitados ($n=1$ y $n=2$). "
+        "Expresar el resultado en unidades de $\\hbar^2\\alpha$, con $\\alpha=\\sqrt{k\\mu}/\\hbar$.",
         sol, (Parte("p0", "$n=0$ (en $\\hbar^2\\alpha$)", NUM, 0.5, "ħ²α"), Parte("p1", "$n=1$ (en $\\hbar^2\\alpha$)", NUM, 1.5, "ħ²α"),
               Parte("p2", "$n=2$ (en $\\hbar^2\\alpha$)", NUM, 2.5, "ħ²α")),
         ("$\\langle E_k\\rangle=\\langle p^2\\rangle/2\\mu$.", "Virial: $\\langle E_k\\rangle=E_n/2$."), MEDIO)
@@ -317,7 +317,7 @@ $$\int\psi_0\psi_2\,dx=\left(\frac{\alpha}{2\pi}\right)^{1/2}\left[2\alpha\int x
 
 $$=\left(\frac{\alpha}{2\pi}\right)^{1/2}\left[2\alpha\cdot\frac{1}{2\alpha}\sqrt{\frac\pi\alpha}-\sqrt{\frac\pi\alpha}\right]=\left(\frac{\alpha}{2\pi}\right)^{1/2}\left[\sqrt{\frac\pi\alpha}-\sqrt{\frac\pi\alpha}\right]=\mathbf 0\ \checkmark$$
 
-*Nota:* aquí **no** basta el argumento par/impar: $\psi_0$ y $\psi_2$ son las dos pares. La ortogonalidad sale de la cancelación exacta.
+*Nota:* aquí **no** basta el argumento par/impar: $\psi_0$ y $\psi_2$ son las dos pares. La ortogonalidad resulta de la cancelación exacta.
 
 #### Paso 4 · b) Normalización de $\psi_2$
 $(2\alpha x^2-1)^2=4\alpha^2x^4-4\alpha x^2+1$. Con la constante al cuadrado, $\left(\frac{\alpha}{4\pi}\right)^{1/2}$:
@@ -331,10 +331,10 @@ $\psi_0$ y $\psi_2$ son ortogonales y $\psi_2$ está normalizada. Es lo esperado
 """
     return Ejercicio(
         "l12_ortog_osc", "ψ₀ y ψ₂ del oscilador: ortogonales y normalizadas", LIBRO, "Libro · ejercicio 12", "oscilador",
-        "Demuestra mediante la integración apropiada que las funciones del oscilador armónico $\\psi_0(x)=(\\alpha/\\pi)^{1/4}e^{-\\alpha x^2/2}$ y "
+        "Demostrar mediante la integración apropiada que las funciones del oscilador armónico $\\psi_0(x)=(\\alpha/\\pi)^{1/4}e^{-\\alpha x^2/2}$ y "
         "$\\psi_2(x)=(\\alpha/4\\pi)^{1/4}(2\\alpha x^2-1)e^{-\\alpha x^2/2}$ son ortogonales en $-\\infty<x<\\infty$ y que $\\psi_2$ está normalizada en el mismo intervalo.",
         sol, (Parte("o", "$\\int\\psi_0\\psi_2\\,dx$", NUM, 0.0, tol_rel=0.0, tol_abs=0.01), Parte("n", "$\\int\\psi_2^2\\,dx$", NUM, 1.0)),
-        ("Usa las integrales gaussianas de $x^0$, $x^2$ y $x^4$.", "Las dos funciones son pares: la ortogonalidad no sale por simetría."), MEDIO)
+        ("Usar las integrales gaussianas de $x^0$, $x^2$ y $x^4$.", "Las dos funciones son pares: la ortogonalidad no se obtiene por simetría."), MEDIO)
 
 
 def _masas_resorte() -> Ejercicio:
@@ -369,13 +369,13 @@ Si la energía se reparte entre las dos masas, cada una con velocidad $v$: $E_0=
 
 $$v=\sqrt{\frac{E_0}{m}}=\sqrt{\frac{<<e0>>}{3.25\times10^{-3}}}=\mathbf{<<v>>\ \text{m/s}}$$
 
-(es lo mismo que usar la masa total $2m$ en $E_0=\tfrac12(2m)v^2$). ¡Unos $10^{-15}$ m/s: imposible de detectar!
+(es lo mismo que usar la masa total $2m$ en $E_0=\tfrac12(2m)v^2$). Resultan unos $10^{-15}$ m/s, una velocidad imposible de detectar.
 """, w2=f"{450 / mu:.4g}", w=f"{w:.2f}", e0=tex(e0), kt=tex(kt), r=tex(e0 / kt), v=tex(v))
     return Ejercicio(
         "l13_masas", "Punto cero de un oscilador macroscópico", LIBRO, "Libro · ejercicio 13", "oscilador",
-        "Dos masas de **3.25 g** están unidas por un resorte con constante de fuerza $k=450\\ \\text{kg s}^{-2}$. Calcula la energía de punto cero del sistema y compárala "
+        "Dos masas de **3.25 g** están unidas por un resorte con constante de fuerza $k=450\\ \\text{kg s}^{-2}$. Calcular la energía de punto cero del sistema y compararla "
         "con la energía térmica $k_BT$ a 298 K. Si la energía de punto cero se convirtiera en energía de traslación, ¿cuál sería la velocidad de las masas?",
-        sol, (Parte("E0", "Energía de punto cero (en J)", NUM, e0, "J", confusiones=((math.sqrt(2), "usaste la masa de una partícula y no la masa reducida $m/2$"),)),
+        sol, (Parte("E0", "Energía de punto cero (en J)", NUM, e0, "J", confusiones=((math.sqrt(2), "se empleó la masa de una partícula y no la masa reducida $m/2$"),)),
               Parte("r", "Cociente $E_0/k_BT$", NUM, e0 / kt),
               Parte("v", "Velocidad (en m/s)", NUM, v, "m/s", tol_rel=0.03)),
         ("Dos masas iguales: $\\mu=m/2$.", "$E_0=\\tfrac12\\hbar\\omega$ con $\\omega=\\sqrt{k/\\mu}$."), BASICO)
@@ -400,7 +400,7 @@ El fotón absorbido tiene $h\nu_{\text{luz}}=\Delta E=h\nu$, luego
 
 $$\nu_{\text{luz}}=\nu=\mathbf{3.15\times10^{13}\ \text{s}^{-1}}$$
 
-¡La luz absorbida tiene **exactamente la frecuencia del oscilador**!
+La luz absorbida tiene **exactamente la frecuencia del oscilador**.
 
 #### Paso 4 · Longitud de onda
 $$\lambda=\frac c\nu=\frac{2.998\times10^8\ \text{m/s}}{3.15\times10^{13}\ \text{s}^{-1}}=\mathbf{<<lam>>\ \text{m}}=<<lum>>\ \mu\text{m}$$
@@ -410,10 +410,10 @@ $$\lambda=\frac c\nu=\frac{2.998\times10^8\ \text{m/s}}{3.15\times10^{13}\ \text
 """, lam=tex(lam), lum=f"{lam * 1e6:.2f}")
     return Ejercicio(
         "l14_transicion", "Radiación absorbida en la transición 2 → 3", LIBRO, "Libro · ejercicio 14", "oscilador",
-        "Calcula la frecuencia y la longitud de onda de la radiación absorbida cuando un oscilador armónico cuántico con frecuencia $3.15\\times10^{13}\\ \\text{s}^{-1}$ "
+        "Calcular la frecuencia y la longitud de onda de la radiación absorbida cuando un oscilador armónico cuántico con frecuencia $3.15\\times10^{13}\\ \\text{s}^{-1}$ "
         "realiza una transición del estado $n=2$ al $n=3$.",
         sol, (Parte("nu", "Frecuencia (en s⁻¹)", NUM, nu, "s⁻¹"),
-              Parte("lam", "Longitud de onda (en μm)", NUM, lam * 1e6, "μm", confusiones=((1e-6, "diste el valor en metros; se pide en μm"),))),
+              Parte("lam", "Longitud de onda (en μm)", NUM, lam * 1e6, "μm", confusiones=((1e-6, "valor expresado en metros; se solicita en μm"),))),
         ("¿Cuánto vale $E_3-E_2$ en el oscilador armónico?",), BASICO)
 
 
@@ -440,7 +440,7 @@ Aun en el estado fundamental hay energía cinética y potencial: la partícula *
 """
     return Ejercicio(
         "l15_virial", "Energías cinética y potencial en n = 0", LIBRO, "Libro · ejercicio 15", "oscilador",
-        "Evalúa la energía cinética promedio y la energía potencial promedio para el estado fundamental ($n=0$) del oscilador armónico.",
+        "Evaluar la energía cinética promedio y la energía potencial promedio para el estado fundamental ($n=0$) del oscilador armónico.",
         sol, (Parte("Ek", "$\\langle E_k\\rangle$ (en $\\hbar\\omega$)", NUM, 0.25, "ħω"), Parte("Ep", "$\\langle E_p\\rangle$ (en $\\hbar\\omega$)", NUM, 0.25, "ħω")),
         ("$E_0=\\frac12\\hbar\\omega$.", "Virial con $s=2$."), BASICO)
 
@@ -475,9 +475,9 @@ $$m=\frac Fg=\frac{<<f>>\ \text{N}}{9.81\ \text{m/s}^2}=\mathbf{<<m>>\ \text{kg}
 """, mu=tex(mu), k=f"{k:.1f}", f=f"{f:.3f}", m=f"{m:.3f}")
     return Ejercicio(
         "l16_cl2", "Constante de fuerza del ³⁵Cl₂", LIBRO, "Libro · ejercicio 16", "oscilador",
-        "La frecuencia de vibración de la molécula de ³⁵Cl₂ es de $1.68\\times10^{13}\\ \\text{s}^{-1}$. Calcula la constante de fuerza de la molécula. "
-        "¿Qué masa habría que colgar de un resorte clásico con esta constante para estirarlo **2.25 cm**? Usa $g=9.81$ m/s².",
-        sol, (Parte("k", "Constante de fuerza (en N/m)", NUM, k, "N/m", confusiones=((2.0, "usaste la masa de un átomo en lugar de $\\mu=m/2$"),)),
+        "La frecuencia de vibración de la molécula de ³⁵Cl₂ es de $1.68\\times10^{13}\\ \\text{s}^{-1}$. Calcular la constante de fuerza de la molécula. "
+        "¿Qué masa habría que colgar de un resorte clásico con esta constante para estirarlo **2.25 cm**? Usar $g=9.81$ m/s².",
+        sol, (Parte("k", "Constante de fuerza (en N/m)", NUM, k, "N/m", confusiones=((2.0, "se empleó la masa de un átomo en lugar de $\\mu=m/2$"),)),
               Parte("m", "Masa colgada (en kg)", NUM, m, "kg")),
         ("$k=4\\pi^2\\nu^2\\mu$.", "$kx=mg$."), BASICO)
 
@@ -512,12 +512,12 @@ $$\boxed{\langle x^2\rangle=\frac{n+\frac12}{\alpha}}$$
 $$\langle x^2\rangle=\sqrt{\frac\alpha\pi}\int x^2e^{-\alpha x^2}dx=\sqrt{\frac\alpha\pi}\cdot\frac{1}{2\alpha}\sqrt{\frac\pi\alpha}=\frac1{2\alpha}\ \checkmark$$
 
 #### Paso 6 · Interpretación
-$\langle x\rangle=0$ pero $\langle x^2\rangle\ne0$: la molécula oscila alrededor del equilibrio y la amplitud típica, $\sqrt{\langle x^2\rangle}$, crece con $n$. *Ojo con la notación:* en el cuaderno aparece «$\hbar/2a$»; el resultado correcto es $1/(2\alpha)=\hbar/(2\mu\omega)$.
+$\langle x\rangle=0$ pero $\langle x^2\rangle\ne0$: la molécula oscila alrededor del equilibrio y la amplitud típica, $\sqrt{\langle x^2\rangle}$, crece con $n$. *Notación:* en el cuaderno aparece «$\hbar/2a$»; el resultado correcto es $1/(2\alpha)=\hbar/(2\mu\omega)$.
 """
     return Ejercicio(
         "l17_x2", "⟨x²⟩ del oscilador en n = 0, 1, 2", LIBRO, "Libro · ejercicio 17", "oscilador",
-        "Evalúa $\\langle x^2\\rangle$ para $n=0$ y los dos primeros estados excitados ($n=1$ y $n=2$) del oscilador armónico cuántico. "
-        "Expresa el resultado en unidades de $1/\\alpha$, con $\\alpha=\\mu\\omega/\\hbar$.",
+        "Evaluar $\\langle x^2\\rangle$ para $n=0$ y los dos primeros estados excitados ($n=1$ y $n=2$) del oscilador armónico cuántico. "
+        "Expresar el resultado en unidades de $1/\\alpha$, con $\\alpha=\\mu\\omega/\\hbar$.",
         sol, (Parte("x0", "$n=0$ (en $1/\\alpha$)", NUM, 0.5, "1/α"), Parte("x1", "$n=1$ (en $1/\\alpha$)", NUM, 1.5, "1/α"),
               Parte("x2", "$n=2$ (en $1/\\alpha$)", NUM, 2.5, "1/α")),
         ("$\\langle E_p\\rangle=\\frac12k\\langle x^2\\rangle$.", "Virial: $\\langle E_p\\rangle=E_n/2$."), MEDIO)
@@ -546,7 +546,7 @@ En el punto de máximo desplazamiento (amplitud $A$) la velocidad es cero y toda
 
 $$E=\tfrac12kA^2=\tfrac12(<<k>>)(0.725\times10^{-2})^2=\mathbf{<<et>>\ \text{J}}$$
 
-(¡ojo! la amplitud en **metros**: 0.725 cm = $7.25\times10^{-3}$ m).
+(la amplitud debe expresarse en **metros**: 0.725 cm = $7.25\times10^{-3}$ m).
 
 #### Paso 5 · d) Número cuántico
 Se iguala con la energía cuántica, $E=\left(n+\tfrac12\right)h\nu$:
@@ -554,15 +554,15 @@ Se iguala con la energía cuántica, $E=\left(n+\tfrac12\right)h\nu$:
 $$n=\frac{E}{h\nu}-\frac12=\frac{<<et>>}{(6.626\times10^{-34})(7.50)}-\frac12=\mathbf{<<n>>}$$
 
 #### Paso 6 · Interpretación
-$n\sim10^{29}$: un número cuántico gigantesco. Los niveles están tan juntos (separados $h\nu\approx5\times10^{-33}$ J) que la energía parece continua. Es el **principio de correspondencia**: para objetos macroscópicos la mecánica cuántica reproduce la clásica.
+$n\sim10^{29}$: un número cuántico extremadamente grande. Los niveles están tan juntos (separados $h\nu\approx5\times10^{-33}$ J) que la energía parece continua. Es el **principio de correspondencia**: para objetos macroscópicos la mecánica cuántica reproduce la clásica.
 """, k=f"{k:.2f}", e0=tex(e0), et=tex(et), n=tex(n))
     return Ejercicio(
         "l18_moneda", "Una moneda colgada de una banda elástica", LIBRO, "Libro · ejercicio 18", "oscilador",
-        "Una moneda de **8.31 g** suspendida de una banda de caucho tiene una frecuencia de vibración de **7.50 s⁻¹**. Calcula: "
+        "Una moneda de **8.31 g** suspendida de una banda de caucho tiene una frecuencia de vibración de **7.50 s⁻¹**. Calcular: "
         "**a)** la constante de fuerza del caucho; **b)** la energía de punto cero; **c)** la energía vibracional total si el desplazamiento máximo es de **0.725 cm**; "
         "**d)** el número cuántico vibracional correspondiente a la energía del inciso c.",
         sol, (Parte("k", "a) $k$ (en N/m)", NUM, k, "N/m"), Parte("E0", "b) $E_0$ (en J)", NUM, e0, "J"),
-              Parte("E", "c) Energía total (en J)", NUM, et, "J", confusiones=((1e4, "usaste la amplitud en cm; pásala a metros"),)),
+              Parte("E", "c) Energía total (en J)", NUM, et, "J", confusiones=((1e4, "se empleó la amplitud en cm; convertir a metros"),)),
               Parte("n", "d) Número cuántico $n$", NUM, n)),
         ("$k=4\\pi^2\\nu^2m$.", "Energía total = $\\frac12kA^2$ (amplitud en metros).", "$n=E/h\\nu-\\frac12$."), BASICO,
         nota="En el cuaderno aparece n ≈ 9.76×10²⁰; con los datos del enunciado el resultado es 9.76×10²⁸.")
@@ -594,11 +594,11 @@ El centro de masa está **casi encima del átomo de flúor**, porque el F es 19 
 """, df=f"{d_f:.2f}", dh=f"{d_h:.2f}")
     return Ejercicio(
         "l19_cm_hf", "Centro de masa del HF", LIBRO, "Libro · ejercicio 19", "esfera",
-        "Calcula la posición del centro de masa de la molécula ¹H¹⁹F, que tiene una longitud de enlace de **91.68 pm**.",
+        "Calcular la posición del centro de masa de la molécula ¹H¹⁹F, que tiene una longitud de enlace de **91.68 pm**.",
         sol, (Parte("dF", "Distancia del centro de masa al núcleo de F (en pm)", NUM, d_f, "pm",
                     confusiones=((d_h / d_f, "esa es la distancia desde el H"),)),
               Parte("dH", "Distancia del centro de masa al núcleo de H (en pm)", NUM, d_h, "pm")),
-        ("$x_{cm}=\\frac{m_1x_1+m_2x_2}{m_1+m_2}$.", "Pon uno de los átomos en el origen."), BASICO)
+        ("$x_{cm}=\\frac{m_1x_1+m_2x_2}{m_1+m_2}$.", "Establecer uno de los átomos en el origen."), BASICO)
 
 
 def _y20_norm() -> Ejercicio:
@@ -631,10 +631,10 @@ Está normalizada. *Error típico:* olvidar el $\sin\theta$ de $d\Omega$; la int
 """
     return Ejercicio(
         "l20_y20_norm", "Y₂⁰ está normalizada", LIBRO, "Libro · ejercicio 20", "esfera",
-        "Demuestra que la función $Y_2^0(\\theta,\\phi)=\\left(\\frac{5}{16\\pi}\\right)^{1/2}(3\\cos^2\\theta-1)$ está normalizada en $0\\le\\theta\\le\\pi$, $0\\le\\phi\\le2\\pi$.",
+        "Demostrar que la función $Y_2^0(\\theta,\\phi)=\\left(\\frac{5}{16\\pi}\\right)^{1/2}(3\\cos^2\\theta-1)$ está normalizada en $0\\le\\theta\\le\\pi$, $0\\le\\phi\\le2\\pi$.",
         sol, (Parte("I", "Valor de $\\displaystyle\\int_0^\\pi(3\\cos^2\\theta-1)^2\\sin\\theta\\,d\\theta$", NUM, 1.6),
               Parte("N", "Valor de la integral de normalización completa", NUM, 1.0)),
-        ("$d\\Omega=\\sin\\theta\\,d\\theta\\,d\\phi$.", "Haz $x=\\cos\\theta$."), BASICO)
+        ("$d\\Omega=\\sin\\theta\\,d\\theta\\,d\\phi$.", "Realizar $x=\\cos\\theta$."), BASICO)
 
 
 def _phi_lz() -> Ejercicio:
@@ -662,10 +662,10 @@ En el estado $\Phi_m=\frac{1}{\sqrt{2\pi}}e^{im\phi}$, $l_z=m\hbar$ está perfec
     return Ejercicio(
         "l21_phi_lz", "Orientación y momento angular del rotor 2D", LIBRO, "Libro · ejercicio 21", "conmutadores",
         "¿Es posible conocer simultáneamente la orientación angular de una molécula que rota en un espacio bidimensional y su momento angular? "
-        "Calcula el conmutador $\\left[\\phi,\\ -i\\hbar\\,\\partial/\\partial\\phi\\right]$.",
+        "Calcular el conmutador $\\left[\\phi,\\ -i\\hbar\\,\\partial/\\partial\\phi\\right]$.",
         sol, (Parte("c", "$[\\hat\\phi,\\hat l_z]=$", OPC, opciones=("$i\\hbar$", "$0$", "$-i\\hbar$", "$\\hbar$"), correcta=0,
                     explicacion="La regla del producto deja $+i\\hbar f$."),),
-        ("Aplica el conmutador a una función $f(\\phi)$ y usa la regla del producto.",), BASICO)
+        ("Aplicar el conmutador a una función $f(\\phi)$ y usa la regla del producto.",), BASICO)
 
 
 def _cl2_velocidad() -> Ejercicio:
@@ -700,14 +700,14 @@ $$v_{rms}=\sqrt{\frac{3k_BT}{M}}=\sqrt{\frac{3(1.381\times10^{-23})(300)}{<<M>>}
 #### Paso 6 · Comparación
 $$\frac{v}{v_{rms}}=\frac{<<v>>}{<<vr>>}=\mathbf{<<r>>}$$
 
-¡Casi iguales! Para el Cl₂ la energía de punto cero ($\approx<<e0>>$ J) es comparable a la energía térmica de traslación ($\tfrac32k_BT=<<et>>$ J). A diferencia del ejercicio 13 (masas de gramos), aquí la energía cuántica de punto cero **no** es despreciable.
+Los valores son casi iguales. Para el Cl₂ la energía de punto cero ($\approx<<e0>>$ J) es comparable a la energía térmica de traslación ($\tfrac32k_BT=<<et>>$ J). A diferencia del ejercicio 13 (masas de gramos), aquí la energía cuántica de punto cero **no** es despreciable.
 """, mu=tex(mu), nu=tex(nu), e0=tex(e0), M=tex(M), v=f"{v:.1f}", vr=f"{vr:.1f}", r=f"{v / vr:.3f}", et=tex(1.5 * KB * 300))
     return Ejercicio(
         "l22_cl2_v", "Punto cero del Cl₂ frente a la agitación térmica", LIBRO, "Libro · ejercicio 22", "oscilador",
-        "La constante de fuerza del ³⁵Cl₂ es de **323 N m⁻¹**. Calcula la energía vibracional de punto cero de esta molécula. Si esta energía se convirtiera en energía "
-        "de traslación, ¿qué tan rápido se movería la molécula? Compara esta velocidad con la velocidad cuadrática media $v_{rms}$ a 300 K.",
+        "La constante de fuerza del ³⁵Cl₂ es de **323 N m⁻¹**. Calcular la energía vibracional de punto cero de esta molécula. Si esta energía se convirtiera en energía "
+        "de traslación, ¿qué tan rápido se movería la molécula? Comparar esta velocidad con la velocidad cuadrática media $v_{rms}$ a 300 K.",
         sol, (Parte("E0", "Energía de punto cero (en J)", NUM, e0, "J"), Parte("v", "Velocidad de traslación (en m/s)", NUM, v, "m/s",
-                    confusiones=((2.0, "usaste la masa reducida; al trasladarse se mueve toda la molécula (masa $M=2m$)"),)),
+                    confusiones=((2.0, "se empleó la masa reducida; al trasladarse se mueve toda la molécula (masa $M=2m$)"),)),
               Parte("vr", "$v_{rms}$ a 300 K (en m/s)", NUM, vr, "m/s")),
         ("$E_0=\\frac12h\\nu$ con $\\nu=\\frac1{2\\pi}\\sqrt{k/\\mu}$.", "Para la traslación usa la masa total de la molécula."), MEDIO)
 
@@ -753,9 +753,9 @@ El electrón está en el anillo negativo un **38.5 %** del tiempo y en los dos l
 """, t0=f"{t0:.2f}", p=f"{p:.4f}")
     return Ejercicio(
         "h03_negativo", "Probabilidad en la región negativa de ψ₃₂₀", LIBRO, "Libro (hidrógeno) · ejercicio 3", "hidrogeno",
-        "Determina la probabilidad de encontrar al electrón en la región en la que la función de onda $\\psi_{320}$ es negativa (la región toroidal).",
+        "Determinar la probabilidad de encontrar al electrón en la región en la que la función de onda $\\psi_{320}$ es negativa (la región toroidal).",
         sol, (Parte("P", "Probabilidad", NUM, p, tol_rel=0.01),),
-        ("El signo lo da $3\\cos^2\\theta-1$; la parte radial está normalizada.", "Haz $x=\\cos\\theta$ y usa límites $\\pm1/\\sqrt3$."), AVANZADO)
+        ("El signo lo da $3\\cos^2\\theta-1$; la parte radial está normalizada.", "Realizar $x=\\cos\\theta$ y usar límites $\\pm1/\\sqrt3$."), AVANZADO)
 
 
 def _potencial_1s() -> Ejercicio:
@@ -793,7 +793,7 @@ Es el **teorema del virial** para el potencial de Coulomb ($s=-1$): $2\langle T\
 """, v=f"{v_ev:.2f}")
     return Ejercicio(
         "h04_potencial", "Energía potencial media del electrón 1s", LIBRO, "Libro (hidrógeno) · ejercicio 4", "hidrogeno",
-        "Calcula el valor esperado de la energía potencial del átomo de H con el electrón en el orbital 1s. Compara el resultado con la energía total.",
+        "Calcular el valor esperado de la energía potencial del átomo de H con el electrón en el orbital 1s. Comparar el resultado con la energía total.",
         sol, (Parte("V", "$\\langle V\\rangle$ (en eV)", NUM, v_ev, "eV", confusiones=((0.5, "ese es $E_1$; $\\langle V\\rangle=2E_1$"),)),
               Parte("T", "$\\langle T\\rangle$ (en eV)", NUM, -v_ev / 2, "eV")),
         ("$\\int_0^\\infty r^ne^{-br}dr=n!/b^{n+1}$.", "La parte angular aporta $4\\pi$."), MEDIO)
@@ -833,9 +833,9 @@ Casi un **44 %** de probabilidad en esa capa, que contiene el máximo de la dist
 """, p=f"{p:.4f}")
     return Ejercicio(
         "h05_prob", "Probabilidad entre a₀ y 2a₀ (1s)", LIBRO, "Libro (hidrógeno) · ejercicio 5", "hidrogeno",
-        "Calcula la probabilidad de que el electrón 1s del átomo de H se encuentre entre $r=a_0$ y $r=2a_0$.",
+        "Calcular la probabilidad de que el electrón 1s del átomo de H se encuentre entre $r=a_0$ y $r=2a_0$.",
         sol, (Parte("P", "Probabilidad", NUM, p, tol_rel=0.01),),
-        ("Usa la distribución radial $P(r)=r^2R_{10}^2$.", "Cambio $x=2r/a_0$ y $\\int x^2e^{-x}dx=-e^{-x}(x^2+2x+2)$."), MEDIO,
+        ("Usar la distribución radial $P(r)=r^2R_{10}^2$.", "Cambio $x=2r/a_0$ y $\\int x^2e^{-x}dx=-e^{-x}(x^2+2x+2)$."), MEDIO,
         nota="En el cuaderno el resultado aparece como 0.4366; el valor exacto de 5e⁻² − 13e⁻⁴ es 0.4386.")
 
 
@@ -864,7 +864,7 @@ Para orbitales con $l=n-1$ (1s, 2p, 3d…) el único máximo está en $r=n^2a_0$
 """
     return Ejercicio(
         "h06_2p", "Máximos de la distribución radial 2p", LIBRO, "Libro (hidrógeno) · ejercicio 6", "hidrogeno",
-        "Calcula la distancia desde el núcleo a la cual la función de distribución radial del orbital 2p tiene su máximo principal y su máximo secundario, si los hay.",
+        "Calcular la distancia desde el núcleo a la cual la función de distribución radial del orbital 2p tiene su máximo principal y su máximo secundario, si los hay.",
         sol, (Parte("r", "Máximo principal (en $a_0$)", NUM, 4.0, "a₀", confusiones=((0.5, "ese es el punto de máxima $|\\psi|^2$; la distribución radial lleva el factor $r^2$"),)),
               Parte("n", "Número de máximos", NUM, 1.0, tol_rel=0.0, tol_abs=0.1)),
         ("$P(r)=r^2R_{21}^2\\propto r^4e^{-r/a_0}$.", "¿Cuántos nodos radiales tiene el 2p?"), BASICO)
@@ -915,7 +915,7 @@ Crece como $Z^2$: un núcleo con más carga atrae más al electrón, y además l
         "del estado 1s del H, el He⁺ y el Li²⁺ sustituyendo en la ecuación de Schrödinger.",
         sol, (Parte("H", "H (en eV)", NUM, -ry, "eV"), Parte("He", "He⁺ (en eV)", NUM, -4 * ry, "eV", confusiones=((0.5, "el factor es $Z^2=4$, no $Z=2$"),)),
               Parte("Li", "Li²⁺ (en eV)", NUM, -9 * ry, "eV", confusiones=((1 / 3, "el factor es $Z^2=9$, no $Z=3$"),))),
-        ("Deriva $\\psi$ y sustituye; los términos con $1/r$ deben cancelarse.", "$a_0=4\\pi\\varepsilon_0\\hbar^2/m_ee^2$."), MEDIO,
+        ("Derivar $\\psi$ y sustituye; los términos con $1/r$ deben cancelarse.", "$a_0=4\\pi\\varepsilon_0\\hbar^2/m_ee^2$."), MEDIO,
         nota="En el cuaderno la exponencial aparece como e^(−2r/a₀); la función 1s correcta es e^(−Zr/a₀).")
 
 
@@ -957,7 +957,7 @@ Son **dos conos** con vértice en el núcleo (los mismos de cualquier orbital $d
         "Localiza los nodos angulares y radiales del orbital $4d_{z^2}$, $\\psi_{420}(r,\\theta,\\phi)$.",
         sol, (Parte("r", "Nodo radial (en $a_0$)", NUM, 12.0, "a₀", confusiones=((0.5, "ese es el valor de $r/2a_0$; el nodo está en $r=12a_0$"),)),
               Parte("t", "Menor ángulo nodal (grados)", NUM, t, "°")),
-        ("Nodos radiales: $n-l-1$; angulares: $l$.", "El nodo radial sale de $6-r/2a_0=0$."), BASICO)
+        ("Nodos radiales: $n-l-1$; angulares: $l$.", "El nodo radial se obtiene de $6-r/2a_0=0$."), BASICO)
 
 
 EJERCICIOS = (_hi(), _conos_l5(), _px_dxz(), _y20_nodos(), _d2(), _ortog_anillo(), _p2_osc(), _ortog_osc(),

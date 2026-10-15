@@ -80,13 +80,13 @@ $\psi$ es un estado válido, pero **sin energía definida**: si se mide la energ
 """
     return Ejercicio(
         "s6_superposicion", "Superposición de dos estados de la caja", CLASE, "Semana 6 · Example Problem 2", "caja",
-        "Considera la función de onda $\\psi(x)=c\\sin(\\pi x/a)+d\\sin(2\\pi x/a)$ para la partícula en una caja de longitud $a$.\n\n"
+        "Considerar la función de onda $\\psi(x)=c\\sin(\\pi x/a)+d\\sin(2\\pi x/a)$ para la partícula en una caja de longitud $a$.\n\n"
         "**a)** ¿Es una función de onda aceptable? **b)** ¿Es autofunción del operador de energía total $\\hat H$?",
         sol,
         (Parte("a", "a) ¿Es aceptable?", OPC, opciones=("Sí", "No"), correcta=0, explicacion="Se anula en $x=0$ y $x=a$ y es continua y normalizable."),
          Parte("b", "b) ¿Es autofunción de $\\hat H$?", OPC, opciones=("No", "Sí, con energía $E_1+E_2$", "Sí, con energía $E_1$"), correcta=0,
                explicacion="$\\hat H$ multiplica el término $n=2$ por un factor 4 veces mayor que el del término $n=1$.")),
-        ("Comprueba qué pasa en $x=0$ y $x=a$.", "Aplica $-\\frac{\\hbar^2}{2m}\\frac{d^2}{dx^2}$ a cada seno por separado."), BASICO)
+        ("Comprobar qué pasa en $x=0$ y $x=a$.", "Aplicar $-\\frac{\\hbar^2}{2m}\\frac{d^2}{dx^2}$ a cada seno por separado."), BASICO)
 
 
 def _prob_tercio() -> Ejercicio:
@@ -122,7 +122,7 @@ Clásicamente la partícula pasaría el mismo tiempo en cada tercio: $P=1/3$. Cu
         "s6_prob_tercio", "Probabilidad en el tercio central de la caja", CLASE, "Semana 6 · Example Problem 3", "caja",
         "¿Cuál es la probabilidad $P$ de encontrar la partícula en el **tercio central** de la caja ($a/3\\le x\\le2a/3$) si está en su estado fundamental?",
         sol, (Parte("P", "Probabilidad $P$", NUM, p, tol_rel=0.01, confusiones=((1 / 3 / p, "1/3 sería el resultado clásico; la densidad cuántica no es uniforme"),)),),
-        ("$P=\\int|\\psi|^2dx$ entre $a/3$ y $2a/3$.", "Usa $\\sin^2u=\\tfrac12(1-\\cos2u)$."), MEDIO)
+        ("$P=\\int|\\psi|^2dx$ entre $a/3$ y $2a/3$.", "Usar $\\sin^2u=\\tfrac12(1-\\cos2u)$."), MEDIO)
 
 
 def _x_medio_caja() -> Ejercicio:
@@ -153,11 +153,11 @@ $|\psi_1|^2$ es **simétrica** respecto al centro de la caja: hay la misma proba
     return Ejercicio(
         "s6_x_medio", "Posición media en la caja", CLASE, "Semana 6 · Example Problem 4", "caja",
         "Una partícula está en una caja de longitud $a$ con $\\psi(x)=\\sqrt{2/a}\\,\\sin(\\pi x/a)$.\n\n"
-        "**a)** ¿Es este estado una autofunción del operador de posición $\\hat x$? **b)** Calcula el valor medio $\\langle x\\rangle$ de un gran número de mediciones.",
+        "**a)** ¿Es este estado una autofunción del operador de posición $\\hat x$? **b)** Calcular el valor medio $\\langle x\\rangle$ de un gran número de mediciones.",
         sol,
         (Parte("a", "a) ¿Es autofunción de $\\hat x$?", OPC, opciones=("No", "Sí"), correcta=0, explicacion="$\\hat x\\psi=x\\psi$ y $x$ no es constante."),
          Parte("x", "b) $\\langle x\\rangle$ en unidades de $a$", NUM, 0.5, "a")),
-        ("$\\hat x$ multiplica por $x$.", "Piensa en la simetría de $|\\psi|^2$ respecto a $x=a/2$."), BASICO)
+        ("$\\hat x$ multiplica por $x$.", "Considerar en la simetría de $|\\psi|^2$ respecto a $x=a/2$."), BASICO)
 
 
 # ---------------------------------------------------------------------
@@ -180,17 +180,17 @@ Un conmutador se calcula **siempre** sobre una función de prueba, para no perde
 #### Paso 4 · Restar
 $$[\hat p_x,\hat T]f=\frac{i\hbar^3}{2m}f'''-\frac{i\hbar^3}{2m}f'''=0$$
 
-Da igual derivar primero una vez y luego dos, o al revés: en ambos casos se deriva tres veces. Las constantes salen fuera sin problema.
+Da igual derivar primero una vez y luego dos, o al revés: en ambos casos se deriva tres veces. Las constantes se extraen de la integral sin dificultad.
 
 #### Paso 5 · Conclusión
 $[\hat p_x,\hat T]=0$: **sí se pueden conocer simultáneamente y con exactitud**. Tiene sentido: $T=p^2/2m$ es función de $p$, y un operador siempre conmuta con funciones de sí mismo.
 """
     return Ejercicio(
         "s7_p_t", "¿Momento y energía cinética a la vez?", CLASE, "Semana 7 · Example Problem 1", "conmutadores",
-        "Determina si el momento lineal $\\hat p_x$ y la energía cinética $\\hat T$ se pueden conocer simultáneamente con exactitud.",
+        "Determinar si el momento lineal $\\hat p_x$ y la energía cinética $\\hat T$ se pueden conocer simultáneamente con exactitud.",
         sol, (Parte("c", "¿Conmutan?", OPC, opciones=("Sí: $[\\hat p_x,\\hat T]=0$", "No: $[\\hat p_x,\\hat T]=i\\hbar$"), correcta=0,
                     explicacion="Ambos productos dan $\\frac{i\\hbar^3}{2m}f'''$."),),
-        ("Calcula $\\hat p_x(\\hat Tf)$ y $\\hat T(\\hat p_xf)$ sobre una función $f(x)$ cualquiera.",), BASICO)
+        ("Calcular $\\hat p_x(\\hat Tf)$ y $\\hat T(\\hat p_xf)$ sobre una función $f(x)$ cualquiera.",), BASICO)
 
 
 def _x_p() -> Ejercicio:
@@ -217,16 +217,16 @@ Como $\dfrac1i=-i$: $-\dfrac\hbar i=i\hbar$. Entonces
 $$[\hat x,\hat p_x]f=i\hbar\,f\quad\Rightarrow\quad\boxed{[\hat x,\hat p_x]=i\hbar}$$
 
 #### Paso 6 · Interpretación
-No es cero: posición y momento son **observables complementarios**. De aquí sale el principio de incertidumbre $\Delta x\,\Delta p_x\ge\frac12|\langle[\hat x,\hat p_x]\rangle|=\frac\hbar2$. En cambio, $x$, $y$, $z$ conmutan entre sí, y también $p_x$, $p_y$, $p_z$.
+No es cero: posición y momento son **observables complementarios**. De aquí se deduce el principio de incertidumbre $\Delta x\,\Delta p_x\ge\frac12|\langle[\hat x,\hat p_x]\rangle|=\frac\hbar2$. En cambio, $x$, $y$, $z$ conmutan entre sí, y también $p_x$, $p_y$, $p_z$.
 
-*Error típico:* olvidar la regla del producto en el paso 4; entonces todo se cancela y sale (mal) que conmutan.
+*Error típico:* olvidar la regla del producto en el paso 4; entonces todo se cancela y resultaría (erróneamente) que conmutan.
 """
     return Ejercicio(
         "s7_x_p", "Posición y momento no conmutan", CLASE, "Semana 7 · Example Problem 2", "conmutadores",
-        "Demuestra que $\\hat x$ y $\\hat p_x$ no conmutan, de modo que estos dos observables no se pueden especificar simultáneamente. ¿Cuánto vale $[\\hat x,\\hat p_x]$?",
+        "Demostrar que $\\hat x$ y $\\hat p_x$ no conmutan, de modo que estos dos observables no se pueden especificar simultáneamente. ¿Cuánto vale $[\\hat x,\\hat p_x]$?",
         sol, (Parte("c", "$[\\hat x,\\hat p_x]=$", OPC, opciones=("$i\\hbar$", "$-i\\hbar$", "$0$", "$\\hbar/2$"), correcta=0,
                     explicacion="La regla del producto deja un término $-\\frac\\hbar if=i\\hbar f$."),),
-        ("Aplica el conmutador a una función de prueba $f(x)$.", "Al derivar $x f$ usa la regla del producto."), BASICO)
+        ("Aplicar el conmutador a una función de prueba $f(x)$.", "Al derivar $x f$ usa la regla del producto."), BASICO)
 
 
 def _dxdp() -> Ejercicio:
@@ -266,12 +266,12 @@ $0.568\,\hbar>0.5\,\hbar$: se cumple el principio de incertidumbre $\Delta x\Del
 """, dx=f"{math.sqrt(1 / 12 - 1 / (2 * math.pi ** 2)):.4f}", p=f"{prod:.3f}")
     return Ejercicio(
         "s7_dxdp", "Incertidumbre en el estado fundamental de la caja", CLASE, "Semana 7 · Example Problem 3", "conmutadores",
-        "Calcula $\\Delta x\\,\\Delta p_x$ para el estado fundamental de una partícula de masa $m$ en una caja de longitud $L$, "
+        "Calcular $\\Delta x\\,\\Delta p_x$ para el estado fundamental de una partícula de masa $m$ en una caja de longitud $L$, "
         "con $\\psi(x)=(2/L)^{1/2}\\sin(\\pi x/L)$.",
         sol, (Parte("prod", "$\\Delta x\\,\\Delta p_x$ en unidades de $\\hbar$", NUM, prod, "ħ", tol_rel=0.01,
                     confusiones=((0.5 / prod, "$\\hbar/2$ es solo la cota inferior; hay que calcular las desviaciones"),)),),
         ("Necesitas $\\langle x\\rangle$, $\\langle x^2\\rangle$, $\\langle p_x\\rangle$ y $\\langle p_x^2\\rangle$.",
-         "$\\langle p_x^2\\rangle$ sale directo: $\\psi$ es autofunción de $d^2/dx^2$."), MEDIO)
+         "$\\langle p_x^2\\rangle$ se obtiene directamente: $\\psi$ es autofunción de $d^2/dx^2$."), MEDIO)
 
 
 # ---------------------------------------------------------------------
@@ -314,11 +314,11 @@ Cuatro nodos ✓, colocados simétricamente porque $\psi_4$ es una función **pa
 """, y1=f"{y1:.4f}", y2=f"{y2:.4f}", x1=f"{math.sqrt(y1):.4f}", x2=f"{math.sqrt(y2):.4f}")
     return Ejercicio(
         "s9_nodos", "Nodos del oscilador con n = 4", CLASE, "Semana 9 · Example Problem 1", "oscilador",
-        "Localiza los nodos de la función de onda del oscilador armónico con $n=4$. Usa $H_4(\\alpha x)=16(\\alpha x)^4-48(\\alpha x)^2+12$.",
+        "Localiza los nodos de la función de onda del oscilador armónico con $n=4$. Usar $H_4(\\alpha x)=16(\\alpha x)^4-48(\\alpha x)^2+12$.",
         sol, (Parte("x1", "Nodo interior: $\\alpha x$ (valor positivo)", NUM, math.sqrt(y1), tol_rel=0.01),
               Parte("x2", "Nodo exterior: $\\alpha x$ (valor positivo)", NUM, math.sqrt(y2), tol_rel=0.01,
                     confusiones=((y2 / math.sqrt(y2), "ese es $y=(\\alpha x)^2$; falta sacar la raíz"),))),
-        ("La gaussiana nunca se anula: busca los ceros de $H_4$.", "Usa $y=(\\alpha x)^2$ para tener una cuadrática."), MEDIO)
+        ("La gaussiana nunca se anula: busca los ceros de $H_4$.", "Usar $y=(\\alpha x)^2$ para tener una cuadrática."), MEDIO)
 
 
 def _gaussiana() -> Ejercicio:
@@ -352,11 +352,11 @@ Es el **estado fundamental** del oscilador ($n=0$) y su energía es la **energí
 """
     return Ejercicio(
         "s9_gaussiana", "La gaussiana es el estado fundamental", CLASE, "Semana 9 · Example Problem 2", "oscilador",
-        "Muestra que la función $e^{-\\beta x^2}$ satisface la ecuación de Schrödinger del oscilador armónico cuántico. ¿Qué condición impone esto sobre $\\beta$? ¿Cuánto vale $E$?",
+        "Demostrar que la función $e^{-\\beta x^2}$ satisface la ecuación de Schrödinger del oscilador armónico cuántico. ¿Qué condición impone esto sobre $\\beta$? ¿Cuánto vale $E$?",
         sol, (Parte("E", "Energía $E$ en unidades de $\\hbar\\omega$", NUM, 0.5, "ħω"),
               Parte("beta", "$\\beta$ es igual a", OPC, opciones=("$\\sqrt{k\\mu}/(2\\hbar)$", "$\\sqrt{k\\mu}/\\hbar$", "$k\\mu/(4\\hbar^2)$", "$\\sqrt{k/\\mu}$"),
                     correcta=0, explicacion="De $2\\hbar^2\\beta^2/\\mu=k/2$.")),
-        ("Deriva dos veces $e^{-\\beta x^2}$ (necesitarás la regla del producto en la segunda).",
+        ("Derivar dos veces $e^{-\\beta x^2}$ (necesitarás la regla del producto en la segunda).",
          "Los términos con $x^2$ deben cancelarse."), MEDIO)
 
 
@@ -393,7 +393,7 @@ $\langle E_k\rangle=E_1-\langle E_p\rangle=\tfrac32\hbar\omega-\tfrac34\hbar\ome
     return Ejercicio(
         "s9_energias", "Energías cinética y potencial en ψ₁", CLASE, "Semana 9 · Example Problem 3", "oscilador",
         "¿Cuáles son los valores medios de la energía cinética y de la energía potencial de un oscilador armónico cuántico en el estado "
-        "$\\psi_1(x)=(4\\alpha^3/\\pi)^{1/4}x\\,e^{-(1/2)\\alpha x^2}$? Usa $\\displaystyle\\int_0^\\infty x^{2n}e^{-ax^2}dx=\\frac{1\\cdot3\\cdot5\\cdots(2n-1)}{2^{n+1}a^n}\\sqrt{\\frac\\pi a}$.",
+        "$\\psi_1(x)=(4\\alpha^3/\\pi)^{1/4}x\\,e^{-(1/2)\\alpha x^2}$? Usar $\\displaystyle\\int_0^\\infty x^{2n}e^{-ax^2}dx=\\frac{1\\cdot3\\cdot5\\cdots(2n-1)}{2^{n+1}a^n}\\sqrt{\\frac\\pi a}$.",
         sol, (Parte("Ek", "$\\langle E_k\\rangle$ en unidades de $\\hbar\\omega$", NUM, 0.75, "ħω"),
               Parte("Ep", "$\\langle E_p\\rangle$ en unidades de $\\hbar\\omega$", NUM, 0.75, "ħω")),
         ("El teorema del virial con $s=2$ da $\\langle E_k\\rangle=\\langle E_p\\rangle$.", "$E_1=\\frac32\\hbar\\omega$."), MEDIO,
@@ -419,7 +419,7 @@ El conjugado cambia $i\to-i$: $\Phi^*=A^*e^{-im_l\phi}$. Al multiplicar, los exp
 
 $$\Phi^*\Phi=|A|^2e^{-im_l\phi}e^{im_l\phi}=|A|^2e^{0}=|A|^2$$
 
-¡La densidad de probabilidad es **constante**: la partícula está igual de probable en cualquier punto del anillo!
+La densidad de probabilidad es **constante**: la probabilidad es la misma en cualquier punto del anillo.
 
 #### Paso 4 · Integrar y despejar
 $$|A|^2\int_0^{2\pi}d\phi=2\pi|A|^2=1\ \Rightarrow\ |A|=\frac1{\sqrt{2\pi}}=\mathbf{<<a>>}$$
@@ -431,7 +431,7 @@ $$\Phi_{m_l}(\phi)=\frac1{\sqrt{2\pi}}e^{im_l\phi},\qquad m_l=0,\pm1,\pm2,\dots$
 """, a=f"{a:.4f}")
     return Ejercicio(
         "s10_anillo", "Normalización de la partícula en un anillo", CLASE, "Semana 10 · Example Problem 4", "esfera",
-        "Determina la constante de normalización $A$ de la función de onda $\\Phi(\\phi)=A\\,e^{im_l\\phi}$ ($0\\le\\phi\\le2\\pi$).",
+        "Determinar la constante de normalización $A$ de la función de onda $\\Phi(\\phi)=A\\,e^{im_l\\phi}$ ($0\\le\\phi\\le2\\pi$).",
         sol, (Parte("A", "Valor de $A$", NUM, a, tol_rel=0.01,
                     confusiones=((1 / (2 * math.pi) / a, "ese es $|A|^2$; falta la raíz cuadrada"),)),),
         ("$|e^{i\\theta}|^2=1$.",), BASICO)
@@ -465,7 +465,7 @@ $\hat l^2=-\hbar^2\Lambda^2$, así que $\hat l^2Y_{1,0}=2\hbar^2Y_{1,0}$: el mom
         "s10_lambda", "Y₁,₀ es autofunción de Λ²", CLASE, "Semana 10 · Example Problem 5", "esfera",
         "Confirma que el armónico esférico $Y_{1,0}=N\\cos\\theta$ es solución de $\\Lambda^2Y_{l,m_l}=-l(l+1)Y_{l,m_l}$.",
         sol, (Parte("aut", "Autovalor de $\\Lambda^2$ para $Y_{1,0}$", NUM, -2.0, tol_rel=0.0, tol_abs=0.01),),
-        ("$Y_{1,0}$ no depende de $\\phi$.", "Deriva $\\cos\\theta$, multiplica por $\\sin\\theta$, deriva otra vez y divide entre $\\sin\\theta$."), BASICO)
+        ("$Y_{1,0}$ no depende de $\\phi$.", "Derivar $\\cos\\theta$, multiplica por $\\sin\\theta$, deriva otra vez y divide entre $\\sin\\theta$."), BASICO)
 
 
 def _conos_1000() -> Ejercicio:
@@ -489,7 +489,7 @@ $$\cos\theta=\frac{1000}{\sqrt{1000\times1001}}=\sqrt{\frac{1000}{1001}}=<<c>>$$
 
 $$\theta=\arccos(<<c>>)=\mathbf{<<t>>^\circ}$$
 
-*Ojo con el redondeo:* $\cos\theta$ es casi 1 y el arcocoseno es muy sensible ahí. Hay que conservar varias cifras. La diapositiva da 1.7° porque redondea $\sqrt{1000\cdot1001}$ a 1000.50; con más cifras sale 1.81°.
+*Redondeo:* $\cos\theta$ es casi 1 y el arcocoseno es muy sensible ahí. Hay que conservar varias cifras. La diapositiva da 1.7° porque redondea $\sqrt{1000\cdot1001}$ a 1000.50; con más cifras resulta 1.81°.
 
 #### Paso 5 · Interpretación
 Aun con $m_l$ máximo, el vector **nunca** apunta exactamente sobre el eje $z$ ($\theta\ne0$): si lo hiciera conoceríamos $l_x=l_y=0$ además de $l_z$, y esas componentes no conmutan. Para $l$ grande el ángulo se hace pequeño y se recupera el comportamiento clásico.
@@ -538,7 +538,7 @@ Toda función de un estado ligado decae como una exponencial, más rápido cuant
 """
     return Ejercicio(
         "s11_decaimiento", "Las funciones ligadas decaen exponencialmente", CLASE, "Semana 11 · Example Problem 1", "hidrogeno",
-        "Muestra que a grandes distancias del núcleo las funciones de onda atómicas de estados ligados decaen exponencialmente a cero.",
+        "Demostrar que a grandes distancias del núcleo las funciones de onda atómicas de estados ligados decaen exponencialmente a cero.",
         sol, (Parte("signo", "¿Qué propiedad de $E$ hace que la solución sea una exponencial decreciente y no una onda?", OPC,
                     opciones=("$E<0$ (estado ligado)", "$E>0$", "$E=0$", "$l=0$"), correcta=0,
                     explicacion="Con $E<0$, $R''=+(2\\mu|E|/\\hbar^2)R$: exponenciales reales."),),
@@ -572,19 +572,19 @@ Dos nodos ✓. En cada uno la función **cambia de signo** (es una raíz simple 
 """, r1=f"{r1:.3f}", r2=f"{r2:.3f}")
     return Ejercicio(
         "s11_nodos3s", "Nodos radiales del orbital 3s", CLASE, "Semana 11 · Example Problem 2", "hidrogeno",
-        "Encuentra los nodos de la función radial con $n=3$ y $l=0$. Sus ceros ocurren donde $6-6\\rho+\\rho^2=0$, con $\\rho=2Zr/3a_0$. "
+        "Determinar los nodos de la función radial con $n=3$ y $l=0$. Sus ceros ocurren donde $6-6\\rho+\\rho^2=0$, con $\\rho=2Zr/3a_0$. "
         "Da los resultados para el hidrógeno ($Z=1$) en unidades de $a_0$.",
         sol, (Parte("r1", "Nodo interior (en $a_0$)", NUM, r1, "a₀", tol_rel=0.01,
                     confusiones=((1 / 1.5, "ese es el valor de $\\rho$; falta pasar a $r=\\frac{3a_0}{2Z}\\rho$"),)),
               Parte("r2", "Nodo exterior (en $a_0$)", NUM, r2, "a₀", tol_rel=0.01,
                     confusiones=((1 / 1.5, "ese es el valor de $\\rho$; falta pasar a $r=\\frac{3a_0}{2Z}\\rho$"),))),
-        ("Resuelve la cuadrática en $\\rho$.", "Después despeja $r$ de $\\rho=2Zr/3a_0$."), BASICO)
+        ("Resolver la cuadrática en $\\rho$.", "Después despeja $r$ de $\\rho=2Zr/3a_0$."), BASICO)
 
 
 def _punto_2pz() -> Ejercicio:
     sol = r"""
 #### Paso 1 · Qué se pide y qué función usar
-El **punto del espacio** donde es más probable encontrar un electrón $2p_z$. Ojo: se pide el punto donde $|\psi|^2$ es máxima (densidad de probabilidad), **no** el máximo de la distribución radial $r^2R^2$. La función es
+El **punto del espacio** donde es más probable encontrar un electrón $2p_z$. Nótese que se solicita el punto donde $|\psi|^2$ es máxima (densidad de probabilidad), **no** el máximo de la distribución radial $r^2R^2$. La función es
 
 $$\psi_{210}=R_{21}(r)\,Y_{10}(\theta)\qquad R_{21}\propto\rho\,e^{-\rho/2},\ \ \rho=\frac{Zr}{a_0}\qquad Y_{10}\propto\cos\theta$$
 
@@ -611,12 +611,12 @@ La **distribución radial** $P(r)=r^2R_{21}^2\propto r^4e^{-r/a_0}$ tiene su má
     return Ejercicio(
         "s11_2pz", "Punto más probable de un electrón 2pz", CLASE, "Semana 11 · Example Problem 3", "hidrogeno",
         "¿Cuál es el punto del espacio más probable en el que se encontrará un electrón $2p_z$ hidrogenoide? "
-        "(Usa $R_{21}\\propto\\rho e^{-\\rho/2}$ con $\\rho=Zr/a_0$ y $Y_{10}\\propto\\cos\\theta$.)",
+        "(Usar $R_{21}\\propto\\rho e^{-\\rho/2}$ con $\\rho=Zr/a_0$ y $Y_{10}\\propto\\cos\\theta$.)",
         sol, (Parte("r", "Distancia al núcleo $r$ (en unidades de $a_0/Z$)", NUM, 2.0, "a₀/Z",
                     confusiones=((2.0, "4 a₀ es el máximo de la distribución radial $r^2R^2$; aquí se pide el punto de máxima $|\\psi|^2$"),)),
               Parte("dir", "Dirección", OPC, opciones=("Sobre el eje $z$ ($\\theta=0$ y $\\pi$)", "En el plano $xy$", "Sobre los conos de 54.7°"),
                     correcta=0, explicacion="$|\\cos\\theta|$ es máximo en los polos.")),
-        ("Maximiza por separado la parte angular y la radial.", "Deriva $\\rho e^{-\\rho/2}$ e iguala a cero."), MEDIO)
+        ("Maximiza por separado la parte angular y la radial.", "Derivar $\\rho e^{-\\rho/2}$ e iguala a cero."), MEDIO)
 
 
 # ---------------------------------------------------------------------
@@ -656,7 +656,7 @@ $\psi^2$ y $\psi^3$ (espines paralelos) son estados **triplete**. $\psi^1$ y $\p
     return Ejercicio(
         "s13_helio", "Determinantes del helio 1s¹2s¹", CLASE, "Semana 13 · Example Problem 1", "espin",
         "El primer estado excitado del helio se describe con la configuración $1s^12s^1$. Hay cuatro orientaciones de espín compatibles: "
-        "(1) 1s↑ 2s↓, (2) 1s↑ 2s↑, (3) 1s↓ 2s↓, (4) 1s↓ 2s↑. Escribe las funciones de onda (determinantes) que corresponden a cada una.",
+        "(1) 1s↑ 2s↓, (2) 1s↑ 2s↑, (3) 1s↓ 2s↓, (4) 1s↓ 2s↑. Escribir las funciones de onda (determinantes) que corresponden a cada una.",
         sol, (Parte("n", "¿Cuántos determinantes distintos hay?", NUM, 4.0, tol_rel=0.0, tol_abs=0.1),
               Parte("d2", "Columnas del determinante de la orientación (2), 1s↑ 2s↑", OPC,
                     opciones=("$1s\\alpha$ y $2s\\alpha$", "$1s\\alpha$ y $1s\\beta$", "$1s\\alpha$ y $2s\\beta$", "$2s\\alpha$ y $2s\\beta$"), correcta=0,
@@ -718,14 +718,14 @@ $$E_{\min}=E(<<al>>)=\mathbf{<<em>>\,\frac{h^2}{ma^2}}$$
 
 Siempre por **encima** del valor exacto. Optimizar el parámetro mejora mucho la energía, pero no se puede bajar más con esta familia de funciones: es la limitación del método.
 
-*Errata de la diapositiva:* en el primer enunciado aparece $-\tfrac12(x^7/a^7-x^9/a^9)$; el signo correcto es **+**, el de la fórmula grande. Solo con **+** la función se anula en $x=a$ y salen los $\alpha$ de la diapositiva.
+*Errata de la diapositiva:* en el primer enunciado aparece $-\tfrac12(x^7/a^7-x^9/a^9)$; el signo correcto es **+**, el de la fórmula grande. Solo con **+** la función se anula en $x=a$ y se obtienen los $\alpha$ de la diapositiva.
 """, e0=f"{e0:.4f}", em=f"{emin:.4f}", al=f"{alfa:.3f}", err0=f"{100 * (e0 / 0.125 - 1):.1f}", err1=f"{100 * (emin / 0.125 - 1):.1f}")
     return Ejercicio(
         "s13_variacional", "Método variacional en la caja", CLASE, "Semana 13 · ejemplo del método variacional", "aproximados",
         "Para la partícula en una caja de longitud $a$ se usa la función de prueba "
         "$\\Phi(x)=\\left(\\dfrac xa-\\dfrac{x^3}{a^3}\\right)+\\alpha\\left(\\dfrac{x^5}{a^5}-\\dfrac12\\left(\\dfrac{x^7}{a^7}+\\dfrac{x^9}{a^9}\\right)\\right)$.\n\n"
-        "**a)** Calcula la energía variacional con $\\alpha=0$. **b)** Encuentra el valor óptimo de $\\alpha$ y la energía mínima. "
-        "Compara con el valor exacto $E_0=0.125\\,h^2/ma^2$.",
+        "**a)** Calcular la energía variacional con $\\alpha=0$. **b)** Determinar el valor óptimo de $\\alpha$ y la energía mínima. "
+        "Comparar con el valor exacto $E_0=0.125\\,h^2/ma^2$.",
         sol, (Parte("E0", "a) $E$ con $\\alpha=0$ (en $h^2/ma^2$)", NUM, e0, "h²/ma²", tol_rel=0.01),
               Parte("alfa", "b) $\\alpha$ óptimo", NUM, alfa, tol_rel=0.02,
                     confusiones=((-5.74 / alfa, "esa raíz corresponde a un máximo de $E(\\alpha)$; evalúa la energía en las dos"),)),

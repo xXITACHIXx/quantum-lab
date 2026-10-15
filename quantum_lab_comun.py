@@ -920,7 +920,7 @@ def cargar_desde_url(valores_iniciales: dict) -> None:
 
 
 # Parámetros de la dirección que se conservan al cambiar de página (se guardan en session_state["ql_fijo_<nombre>"]).
-PARAMETROS_FIJOS = ("prog",)
+PARAMETROS_FIJOS = ("prog", "rev")
 
 
 def escribir_en_url(valores_iniciales: dict | None, extra: dict | None = None) -> None:
@@ -1008,7 +1008,7 @@ def guia_practica(experimentos: list[dict], prefijo: str) -> None:
     """
     import streamlit as st
     st.markdown("Cada experimento propone una **predicción**, una **medida** y una **interpretación**. "
-                "Escribe tu predicción antes de mirar el resultado: así la práctica tiene sentido.")
+                "Escribir la predicción antes de observar el resultado; de ese modo la práctica adquiere valor formativo.")
     for i, e in enumerate(experimentos, 1):
         with st.container(border=True):
             seccion(f"Experimento {i}")
@@ -1023,10 +1023,10 @@ def guia_practica(experimentos: list[dict], prefijo: str) -> None:
                     st.button("Cargar configuración", key=f"{prefijo}_guia_{i}", icon=":material/tune:",
                               width="stretch", on_click=fijar_estado,
                               args=(e["config"], f"Configuración del experimento {i} cargada. "
-                                                 f"Abre la pestaña «{e['pestana']}»."))
+                                                 f"Abrir la pestaña «{e['pestana']}»."))
                 st.caption(f"Dónde mirar: pestaña «{e['pestana']}».")
-            st.text_area("Tu predicción y tus medidas", key=f"{prefijo}_pred_{i}", height=80,
-                         placeholder="Escribe aquí lo que esperas observar y, después, lo que mediste…")
+            st.text_area("Predicción y medidas", key=f"{prefijo}_pred_{i}", height=80,
+                         placeholder="Registrar aquí la predicción y, después, las medidas obtenidas…")
             with st.expander("Qué deberías observar"):
                 st.markdown(e["resultado"])
 

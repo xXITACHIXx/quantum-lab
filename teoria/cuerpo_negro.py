@@ -87,14 +87,14 @@ def mostrar() -> None:
             "espaciado entre energías permitidas (aquí hν) no es pequeño frente a kT.")
         qc.seccion("La ley de Planck y sus consecuencias")
         st.latex(r"u(\lambda,T)=\frac{8\pi hc}{\lambda^5}\,\frac{1}{e^{hc/\lambda k_BT}-1}")
-        st.markdown("De ella salen las dos leyes experimentales:")
+        st.markdown("De ella se derivan las dos leyes experimentales:")
         st.latex(r"\lambda_{\max}\,T=b\approx2.898\times10^{-3}\ \mathrm{m\,K}\qquad\text{(Wien)}")
         st.latex(r"M=\sigma T^4,\qquad \sigma=\frac{2\pi^5k_B^4}{15h^3c^2}=5.670\times10^{-8}\ \mathrm{W\,m^{-2}K^{-4}}\qquad\text{(Stefan–Boltzmann)}")
         st.markdown(
             "El ajuste de la curva experimental dio el valor de la nueva constante, h ≈ 6.6 × 10⁻³⁴ J·s, "
             "que reaparece después en el efecto fotoeléctrico y en la relación de De Broglie.")
     with sub[2]:
-        qc.seccion("Compara a Planck con la física clásica")
+        qc.seccion("Comparar a Planck con la física clásica")
         c1, c2 = st.columns(2)
         with c1:
             T = st.slider("Temperatura T [K]", 1000, 10000, 5772, 100, key="cn_T",
@@ -132,8 +132,8 @@ def mostrar() -> None:
                    "Con la fórmula clásica esa integral diverge.")
         qc.seccion("Qué observar")
         st.markdown(
-            "1. Sube T: el máximo crece muy rápido (∝ T⁵) y se corre hacia el azul.\n"
-            "2. Aumenta el rango del eje horizontal: a longitudes de onda largas las dos curvas coinciden.\n"
+            "1. Aumentar T: el máximo crece muy rápido (∝ T⁵) y se corre hacia el azul.\n"
+            "2. Aumentar el rango del eje horizontal: a longitudes de onda largas las dos curvas coinciden.\n"
             "3. Hacia λ pequeñas la curva clásica se dispara y la de Planck cae a cero.")
     with sub[3]:
         qc.seccion("Resumen")

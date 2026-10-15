@@ -121,7 +121,7 @@ def mostrar() -> None:
             f"Ejemplo: un electrón de 1 eV frente a una pared de 3 eV penetra 1/κ = **{d * 1e9:.3f} nm**, aproximadamente el "
             "tamaño de un átomo. Por eso la penetración importa en superficies, electrodos y en todo proceso a escala atómica.")
     with sub[3]:
-        qc.seccion("Mira la función de onda cerca de la pared")
+        qc.seccion("Observar la función de onda cerca de la pared")
         c1, c2, c3 = st.columns(3)
         with c1:
             nombre = st.selectbox("Partícula", list(PARTICULAS), key="lpp_part")
@@ -130,7 +130,7 @@ def mostrar() -> None:
         with c3:
             V_ev = st.slider("Altura de la pared V [eV]", 0.2, 10.0, 3.0, 0.1, key="lpp_V")
         if V_ev <= E_ev:
-            st.warning("Aquí se estudia el caso E < V. Sube V o baja E.", icon=":material/info:")
+            st.warning("Aquí se estudia el caso E < V. Aumentar V o baja E.", icon=":material/info:")
             return
         m = PARTICULAS[nombre]
         k = numero_de_onda(m, E_ev * EV)

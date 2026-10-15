@@ -249,7 +249,7 @@ def interfaz() -> None:
                  ("Sistemas verificados", f"{len({c['sistema'] for c in casos})}"),
                  ("Fuente de las constantes", "CODATA 2018")])
     if r["fallos"]:
-        qc.error(f"{len(r['fallos'])} comparaciones fuera de tolerancia: revisa la tabla.")
+        qc.error(f"{len(r['fallos'])} comparaciones fuera de tolerancia: revisar la tabla.")
     else:
         qc.nota("Todas las comparaciones están dentro de su tolerancia. La tolerancia depende del método: las "
                 "fórmulas cerradas se comparan a 10⁻¹⁰; las diagonalizaciones y las integrales numéricas, a 10⁻⁴ "
@@ -268,7 +268,7 @@ def interfaz() -> None:
                    archivo="verificacion_quantum_lab.csv")
 
     qc.seccion("Contraste con los notebooks de Google Colab")
-    st.markdown("Los notebooks de Colab son una **implementación independiente** de la misma física. Escribe estos "
+    st.markdown("Los notebooks de Colab son una **implementación independiente** de la misma física. Escribir estos "
                 "parámetros en los dos y compara: las cifras que ambos muestran deben coincidir.")
     qc.tabla_libre([{"Sistema": s, "Parámetros": p, "Magnitud": m, "Valor": v, "Unidad": u}
                     for s, p, m, v, u in valores_colab()],

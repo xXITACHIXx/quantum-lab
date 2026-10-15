@@ -316,7 +316,7 @@ def _remuestrear(x, y, x0, x1, puntos=450):
 def figura_compresion(p: Paquete, compacto: bool = False):
     """
     Figura interactiva (Plotly): el deslizador cambia el ancho del paquete; a la izquierda |ψ(x)|² y a la derecha
-    |φ(p)|². Los ejes están FIJOS para que se vea que, al estrechar uno, el otro se ensancha.
+    |φ(p)|². Los ejes están FIJOS para evidenciar que, al estrechar uno, el otro se ensancha.
     """
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
@@ -667,8 +667,8 @@ DEMOS = {
 GUIA = [
     {"titulo": "Comprimir un paquete",
      "objetivo": "Comprobar que estrechar el paquete en x lo ensancha en p.",
-     "pasos": ["Carga la configuración (gaussiano de 1 nm).", "En la figura interactiva mueve el deslizador del ancho "
-               "hacia la izquierda y hacia la derecha.", "Anota Δx, Δp y su producto para tres anchos distintos."],
+     "pasos": ["Cargar la configuración (gaussiano de 1 nm).", "En la figura interactiva mueve el deslizador del ancho "
+               "hacia la izquierda y hacia la derecha.", "Registrar Δx, Δp y su producto para tres anchos distintos."],
      "pregunta": "Si reduces Δx a la mitad, ¿qué le pasa a Δp? ¿Y al producto?",
      "resultado": "Δp se duplica y el producto se mantiene exactamente en 0.5 ħ: el gaussiano es el paquete de "
                   "mínima incertidumbre para cualquier ancho. Las curvas de x y p son transformadas de Fourier una de "
@@ -676,8 +676,8 @@ GUIA = [
      "pestana": "Paquete de ondas", "config": {"inc_tipo": "gaussiano", "inc_ancho": 1.0, "inc_k0": 5.0}},
     {"titulo": "No todos los paquetes son mínimos",
      "objetivo": "Comparar el producto Δx·Δp de distintas formas de paquete.",
-     "pasos": ["Carga la configuración.", "Abre «Relación Δx–Δp» y mira el gráfico de barras.",
-               "Sube el chirp β a 4 y vuelve a mirar."],
+     "pasos": ["Cargar la configuración.", "Abrir «Relación Δx–Δp» y mira el gráfico de barras.",
+               "Aumentar el chirp β a 4 y vuelve a mirar."],
      "pregunta": "¿Cuál de los paquetes tiene el menor producto? ¿Puede alguno bajar de 0.5 ħ?",
      "resultado": "El gaussiano (0.5 ħ). Le siguen la secante hiperbólica (π/6 ≈ 0.524 ħ) y el triangular "
                   "(√0.3 ≈ 0.548 ħ). El chirp añade una fase que no cambia |ψ|² pero sí el reparto de momentos: "
@@ -685,8 +685,8 @@ GUIA = [
      "pestana": "Relación Δx–Δp", "config": {"inc_tipo": "chirp", "inc_ancho": 1.0, "inc_beta": 2.0, "inc_k0": 5.0}},
     {"titulo": "Δx no es «el tamaño de cada trozo»",
      "objetivo": "Ver la incertidumbre en un estado superposición de dos posiciones.",
-     "pasos": ["Carga la configuración (dos gaussianas de 0.6 nm separadas 6 nm).",
-               "Mira |φ(p)|²: ¿qué aparece en la distribución de momentos?", "Reduce la separación a 1 nm."],
+     "pasos": ["Cargar la configuración (dos gaussianas de 0.6 nm separadas 6 nm).",
+               "Observar |φ(p)|²: ¿qué aparece en la distribución de momentos?", "Reducir la separación a 1 nm."],
      "pregunta": "¿Por qué el producto es tan grande si cada pico es estrecho?",
      "resultado": "Δx mide la dispersión de TODAS las posiciones posibles (≈ d/2 = 3 nm), no la anchura de cada pico. "
                   "En momento aparecen franjas de interferencia (cos²(pd/2ħ)), señal de que los dos picos son una "
@@ -694,8 +694,8 @@ GUIA = [
      "pestana": "Paquete de ondas", "config": {"inc_tipo": "dos", "inc_ancho": 0.6, "inc_sep": 6.0, "inc_k0": 0.0}},
     {"titulo": "El paquete se dispersa",
      "objetivo": "Observar la evolución libre y la escala de tiempo τ = 2mσ₀²/ħ.",
-     "pasos": ["Carga la configuración (electrón, 1 nm).", "Abre «Evolución libre» y reproduce la animación.",
-               "Cambia la partícula a protón y luego a un grano de polvo; mira τ."],
+     "pasos": ["Cargar la configuración (electrón, 1 nm).", "Abrir «Evolución libre» y reproduce la animación.",
+               "Cambiar la partícula a protón y luego a un grano de polvo; mira τ."],
      "pregunta": "¿Por qué no vemos ensancharse una pelota o un grano de polvo?",
      "resultado": "Δp no cambia, pero las componentes de distinto momento se separan: Δx(t) crece y en t = τ ya es "
                   "√2 veces mayor. Para un electrón de 1 nm τ ≈ 17 fs; para un protón ≈ 32 ps; para un grano de polvo "
@@ -704,8 +704,8 @@ GUIA = [
      "pestana": "Evolución libre", "config": {"inc_tipo": "gaussiano", "inc_ancho": 1.0, "inc_k0": 5.0, "inc_masa": "electron"}},
     {"titulo": "Una rendija como medida de la posición",
      "objetivo": "Relacionar el ancho de una rendija con la dispersión angular del haz.",
-     "pasos": ["Carga la configuración (luz verde, rendija de 20 µm).", "Anota el ancho del máximo central.",
-               "Reduce la rendija a 5 µm y después a 1 µm."],
+     "pasos": ["Cargar la configuración (luz verde, rendija de 20 µm).", "Registrar el ancho del máximo central.",
+               "Reducir la rendija a 5 µm y después a 1 µm."],
      "pregunta": "¿Por qué el haz se abre MÁS cuando la rendija es MÁS estrecha?",
      "resultado": "La rendija localiza la partícula en Δy ≈ a; eso obliga a una dispersión del momento transversal "
                   "Δp_y ≈ h/a, y el ángulo del primer mínimo cumple sen θ₁ = λ/a. Con 20 µm el máximo central mide "
@@ -804,7 +804,7 @@ def _pestana_paquete(p: Paquete):
                       f"incertidumbre_posicion_{p.tipo}.csv", "Descargar |ψ(x)|² (CSV)")
     qc.exportar_datos({"k [1/nm]": c["k"], "|phi|^2 [nm]": np.abs(c["phi"]) ** 2},
                       f"incertidumbre_momento_{p.tipo}.csv", "Descargar |φ(p)|² (CSV)")
-    st.caption("Mueve el deslizador para cambiar el ancho del paquete: los ejes están fijos, así que se ve cómo al "
+    st.caption("Mover el deslizador para cambiar el ancho del paquete: los ejes están fijos, así que se aprecia cómo al "
                "estrecharse |ψ(x)|² se ensancha |φ(p)|², y al revés. El deslizador solo cambia la figura; los "
                "resultados de arriba corresponden al ancho elegido en los parámetros. Líneas punteadas: ±Δx y ±Δp. "
                "La curva azul tenue es Re ψ: sus oscilaciones tienen longitud de onda 2π/k₀.")
@@ -895,7 +895,7 @@ def _pestana_rendija():
         ("Δy ≈ a [m]", f"{r.ancho_nm * 1e-9:.3e}", "La rendija localiza la partícula"),
         ("Δp_y ≈ p·sen θ₁ [kg·m/s]", f"{d['dpy']:.4e}" if d["hay_minimo"] else "—", "= h/a"),
         ("Δy·Δp_y [h]", f"{d['producto_h']:.4f}" if d["hay_minimo"] else "—", "= 1 h ≈ 6.3 ħ, mayor que ħ/2"),
-        ("Sombra geométrica", f"{r.ancho_nm * 1e-6:.4g} mm", "Lo que se vería si la luz fuera un chorro de partículas clásicas"),
+        ("Sombra geométrica", f"{r.ancho_nm * 1e-6:.4g} mm", "Lo que se observaría si la luz fuera un chorro de partículas clásicas"),
     ])
     qc.mostrar_pyplot(figura_rendija(r, d), archivo="incertidumbre_rendija.png")
     with st.expander("Interpretación física", expanded=False):

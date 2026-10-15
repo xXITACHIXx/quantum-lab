@@ -901,16 +901,16 @@ DEMOS = {
 GUIA = [
     {"titulo": "Nodos latitudinales: l − |m|",
      "objetivo": "Relacionar los números cuánticos con la forma de |Yₗᵐ|².",
-     "pasos": ["Carga la configuración (l = 3, m = 0).", "Cuenta los conos nodales en la vista 3D o en la proyección 2D.",
-               "Cambia m a 1, 2 y 3 y cuenta otra vez."],
+     "pasos": ["Cargar la configuración (l = 3, m = 0).", "Contar los conos nodales en la vista 3D o en la proyección 2D.",
+               "Cambiar m a 1, 2 y 3 y cuenta otra vez."],
      "pregunta": "¿Cuántos nodos latitudinales esperas para l = 3 y cada valor de m?",
      "resultado": "Hay l − |m| nodos latitudinales: 3, 2, 1 y 0. Además, para m ≠ 0 la densidad se anula en los polos "
                   "(factor sin^|m| θ). Con m = ±3 la densidad es un anillo en el ecuador.",
      "pestana": "Armónico 3D", "config": {"esf_l": 3, "esf_m": 0, "esf_modo": "densidad", "esf_forma": "lobulos"}},
     {"titulo": "Orbital complejo frente a orbital real",
      "objetivo": "Ver que ±m dan la misma |Y|² y que los orbitales reales son combinaciones de ambos.",
-     "pasos": ["Carga la configuración (l = 1, m = 1, densidad).", "Observa la forma (anillo).",
-               "Cambia la magnitud a «Combinación real ∝ cos(|m|φ)» y después a «∝ sin(|m|φ)»."],
+     "pasos": ["Cargar la configuración (l = 1, m = 1, densidad).", "Observar la forma (anillo).",
+               "Cambiar la magnitud a «Combinación real ∝ cos(|m|φ)» y después a «∝ sin(|m|φ)»."],
      "pregunta": "¿Por qué el armónico complejo no tiene orientación en el plano xy y el real sí?",
      "resultado": "|Y₁^{±1}|² ∝ sin²θ no depende de φ (simetría axial). Las combinaciones reales ∝ sinθ cosφ y "
                   "∝ sinθ sinφ son los orbitales pₓ y p_y: tienen un plano nodal y una orientación definida. Ambas "
@@ -918,7 +918,7 @@ GUIA = [
      "pestana": "Armónico 3D", "config": {"esf_l": 1, "esf_m": 1, "esf_modo": "densidad", "esf_forma": "lobulos"}},
     {"titulo": "Paridad (−1)ˡ",
      "objetivo": "Comprobar cómo cambia el signo del armónico al invertir la dirección r → −r.",
-     "pasos": ["Carga la configuración (l = 2, m = 0, parte real).", "En la proyección 2D compara θ y 180° − θ.",
+     "pasos": ["Cargar la configuración (l = 2, m = 0, parte real).", "En la proyección 2D compara θ y 180° − θ.",
                "Repite con l = 3."],
      "pregunta": "¿Para qué valores de l el armónico es simétrico respecto al ecuador?",
      "resultado": "Para l par (paridad +1) el valor en θ y en 180° − θ (con φ → φ + 180°) es el mismo; para l impar "
@@ -928,8 +928,8 @@ GUIA = [
                                                      "esf_mapa": "RdBu"}},
     {"titulo": "Niveles de una partícula confinada en una esfera",
      "objetivo": "Medir la dependencia E ∝ 1/R² y el orden de los niveles.",
-     "pasos": ["Carga la configuración (n = 1, l = 0, R = 1 nm).", "Anota la energía.",
-               "Cambia R a 2 nm. Después vuelve a 1 nm y prueba l = 1 y l = 2, y n = 2 con l = 0."],
+     "pasos": ["Cargar la configuración (n = 1, l = 0, R = 1 nm).", "Registrar la energía.",
+               "Cambiar R a 2 nm. Después vuelve a 1 nm y prueba l = 1 y l = 2, y n = 2 con l = 0."],
      "pregunta": "¿Qué nivel es más bajo: 2s (n = 2, l = 0) o 1d (n = 1, l = 2)?",
      "resultado": "Con R = 1 nm, E₁ₛ ≈ 0.376 eV (igual que la caja 1D de 1 nm, porque α = π) y con R = 2 nm se "
                   "divide por 4. El orden es 1s < 1p < 1d < 2s < 1f < 2p: el 1d (α ≈ 5.76) está por debajo del 2s "
@@ -1083,7 +1083,7 @@ def _pestana_3d(p: ParametrosEsfera):
                        "x [m]": p.radio * np.sin(T) * np.cos(P), "y [m]": p.radio * np.sin(T) * np.sin(P),
                        "z [m]": p.radio * np.cos(T), "|Y|^2 [1/sr]": np.abs(Y) ** 2, "Y": Y},
                       f"esfera_datos_l{p.l}_m{p.m}.csv", "Descargar |Y|² sobre la esfera, con x, y, z (CSV)")
-    st.caption("Arrastra para rotar · rueda para ampliar · doble clic para restablecer la vista.")
+    st.caption("Arrastrar para rotar · rueda para ampliar · doble clic para restablecer la vista.")
     with st.expander("Valores numéricos detallados", expanded=False):
         nodos_txt = "ninguno" if len(lat) == 0 else ", ".join(f"{np.degrees(t):.3f}" for t in lat)
         filas = [
@@ -1140,7 +1140,7 @@ def _pestana_comparacion(p: ParametrosEsfera):
                 estados.append((l, m))
     estados = estados[:6]
     if not estados:
-        qc.nota("Selecciona al menos un orbital.")
+        qc.nota("Seleccionar al menos un orbital.")
         return
     qc.seccion("Visualización")
     try:

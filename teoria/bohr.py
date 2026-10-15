@@ -28,7 +28,7 @@ def mostrar() -> None:
         qc.seccion("Las pistas experimentales")
         qc.tabla_libre([
             {"Año": "1853–1862", "Quién": "Ångström", "Hallazgo": "Mide con precisión las cuatro líneas visibles del hidrógeno."},
-            {"Año": "1885", "Quién": "J. J. Balmer", "Hallazgo": "Encuentra la fórmula empírica λ = B·n²/(n² − 4), con B = 364.56 nm."},
+            {"Año": "1885", "Quién": "J. J. Balmer", "Hallazgo": "Determinar la fórmula empírica λ = B·n²/(n² − 4), con B = 364.56 nm."},
             {"Año": "1888", "Quién": "J. Rydberg", "Hallazgo": "La generaliza: 1/λ = R(1/n₁² − 1/n₂²) para todas las series."},
             {"Año": "1900", "Quién": "M. Planck", "Hallazgo": "La energía de la radiación se intercambia en cuantos E = hν."},
             {"Año": "1905", "Quién": "A. Einstein", "Hallazgo": "La luz misma está formada por cuantos (efecto fotoeléctrico)."},
@@ -103,7 +103,7 @@ def mostrar() -> None:
     with sub[3]:
         qc.seccion("Éxitos del modelo")
         st.markdown(
-            "- **Deduce la constante de Rydberg** a partir de mₑ, e, h y c, con un acuerdo del orden de 0.05 % "
+            "- **Deducir la constante de Rydberg** a partir de mₑ, e, h y c, con un acuerdo del orden de 0.05 % "
             "(exacto al incluir la masa reducida).\n"
             "- **Explica la estabilidad** del átomo (por postulado) y el carácter **discreto** del espectro.\n"
             "- **Predice el tamaño** del átomo, a₀ ≈ 0.053 nm, y la **energía de ionización**, 13.6 eV.\n"

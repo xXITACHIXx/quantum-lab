@@ -59,12 +59,12 @@ $$v=\sqrt{\frac{2E_e}{m_e}}=\sqrt{\frac{2\,(<<ek>>\ \text{J})}{9.109\times10^{-3
     return Ejercicio(
         "s1_fotoelectrico", "Electrones arrancados del potasio", CLASE, "Semana 1 · Example Problem 1", "fotoelectrico",
         "Luz de longitud de onda **300 nm** incide sobre una superficie de potasio, cuya función trabajo es $\\phi=2.26$ eV. "
-        "Calcula la energía cinética y la velocidad de los electrones emitidos.",
+        "Calcular la energía cinética y la velocidad de los electrones emitidos.",
         sol,
         (Parte("ek", "Energía cinética de los electrones (en J)", NUM, ek, "J", tol_rel=0.02,
-               confusiones=((1 / E, "parece que diste la energía en eV y no en J (1 eV = 1.602×10⁻¹⁹ J)"),)),
+               confusiones=((1 / E, "la energía parece expresada en eV y no en J (1 eV = 1.602×10⁻¹⁹ J)"),)),
          Parte("v", "Velocidad de los electrones (en m/s)", NUM, v, "m/s", tol_rel=0.02)),
-        ("Escribe la ecuación de Einstein del efecto fotoeléctrico: la energía del fotón se reparte entre $\\phi$ y la energía cinética.",
+        ("Escribir la ecuación de Einstein del efecto fotoeléctrico: la energía del fotón se reparte entre $\\phi$ y la energía cinética.",
          "Pasa $\\phi$ a julios antes de restar, y usa $E=\\tfrac12mv^2$ para la velocidad."),
         BASICO)
 
@@ -94,9 +94,9 @@ Este valor es el **radio de Bohr**, $a_0$: la unidad natural de longitud en los 
 """, num=tex(4 * math.pi * EPS0 * HBAR ** 2), den=tex(ME * E ** 2), r=tex(r))
     return Ejercicio(
         "s1_radio_bohr", "Radio de la primera órbita de Bohr", CLASE, "Semana 1 · Example Problem 2", "bohr",
-        "Calcula el radio de la órbita del electrón del átomo de H en su estado de menor energía ($n=1$), según el modelo de Bohr.",
-        sol, (Parte("r", "Radio $r_1$ (en m)", NUM, r, "m", confusiones=((1e12, "diste el valor en pm; se pide en metros"),)),),
-        ("La fórmula es $r_n=4\\pi\\varepsilon_0\\hbar^2n^2/(m_ee^2)$. Ojo: usa $\\hbar$, no $h$.",), BASICO)
+        "Calcular el radio de la órbita del electrón del átomo de H en su estado de menor energía ($n=1$), según el modelo de Bohr.",
+        sol, (Parte("r", "Radio $r_1$ (en m)", NUM, r, "m", confusiones=((1e12, "valor expresado en pm; se solicita en metros"),)),),
+        ("La fórmula es $r_n=4\\pi\\varepsilon_0\\hbar^2n^2/(m_ee^2)$. Nótese que se emplea $\\hbar$, no $h$.",), BASICO)
 
 
 def _electrones_difraccion() -> Ejercicio:
@@ -150,7 +150,7 @@ La masa atómica del flúor es 18.998 u, así que F₂ tiene $2\times18.998=37.9
 
 $$m=37.997\times1.6605\times10^{-27}=<<m>>\ \text{kg}$$
 
-*Ojo:* es la masa de **una** molécula, no la masa molar (38 g/mol). Si usas 0.038 kg el resultado sale $6\times10^{23}$ veces más pequeño.
+*Nota:* es la masa de **una** molécula, no la masa molar (38 g/mol). Si se emplea 0.038 kg el resultado resulta $6\times10^{23}$ veces más pequeño.
 
 #### Paso 4 · Velocidad
 Para la molécula, $p=mv$, así que
@@ -158,14 +158,14 @@ Para la molécula, $p=mv$, así que
 $$v=\frac{p}{m}=\frac{<<p>>}{<<m>>}=\mathbf{<<v>>\ \text{m/s}}$$
 
 #### Paso 5 · Interpretación
-¡Unos <<vcm>> cm/s! El momento de un fotón visible o ultravioleta es diminuto: una molécula lo iguala moviéndose muy despacio. (A temperatura ambiente las moléculas de F₂ se mueven a unos 400 m/s.)
+Resulta una velocidad de apenas <<vcm>> cm/s. El momento de un fotón visible o ultravioleta es muy pequeño: una molécula lo iguala moviéndose muy despacio. (A temperatura ambiente las moléculas de F₂ se mueven a unos 400 m/s.)
 """, p=tex(p), m=tex(m), v=tex(v), vcm=f"{100 * v:.1f}")
     return Ejercicio(
         "s1_fluor", "Molécula de F₂ con el momento de un fotón", CLASE, "Semana 1 · Classwork 1", "de_broglie",
         "¿Qué velocidad (en m/s) tiene una molécula de flúor (F₂) si su momento lineal es igual al de un fotón de longitud de onda **225 nm**?",
         sol, (Parte("v", "Velocidad de la molécula de F₂ (en m/s)", NUM, v, "m/s",
-                    confusiones=((1 / 6.02214076e23, "usaste la masa molar en kg/mol: necesitas la masa de una molécula (divide entre $N_A$)"),
-                                 (2.0, "usaste la masa de un átomo de F, no la de la molécula F₂"))),),
+                    confusiones=((1 / 6.02214076e23, "se empleó la masa molar en kg/mol: se requiere la masa de una molécula (dividir entre $N_A$)"),
+                                 (2.0, "se empleó la masa de un átomo de F, no la de la molécula F₂"))),),
         ("El momento del fotón es $p=h/\\lambda$.", "Para la molécula $p=mv$, con $m$ = masa de **una** molécula en kg."), BASICO)
 
 
@@ -193,11 +193,11 @@ $$\frac1\lambda=R_H\left(\frac11-0\right)=R_H$$
 
 #### Paso 5 · Comprobación
 - Las líneas de Lyman están en el **ultravioleta** (121.6 nm la primera, $2\to1$), y todas son más largas que el límite de <<lnm>> nm. ✓
-- Con la constante $R_\infty=109\,737\ \text{cm}^{-1}$ (núcleo infinitamente pesado) sale 91.13 nm: la diferencia es la corrección por la masa del protón.
+- Con la constante $R_\infty=109\,737\ \text{cm}^{-1}$ (núcleo infinitamente pesado) resulta 91.13 nm: la diferencia es la corrección por la masa del protón.
 """, lcm=tex(1 / rh), lnm=f"{lam_nm:.2f}")
     return Ejercicio(
         "s1_lyman", "Límite de la serie de Lyman", CLASE, "Semana 1 · Classwork 2", "bohr",
-        "Calcula la longitud de onda más corta (en nm) que se observa en la serie de Lyman del hidrógeno.",
+        "Calcular la longitud de onda más corta (en nm) que se observa en la serie de Lyman del hidrógeno.",
         sol, (Parte("lam", "Longitud de onda más corta (en nm)", NUM, lam_nm, "nm", tol_rel=0.01,
                     confusiones=((4 / 3, "ese es el valor de la transición $2\\to1$, la de mayor longitud de onda; la más corta es $\\infty\\to1$"),)),),
         ("En la serie de Lyman el estado final es $n=1$.", "La $\\lambda$ más corta corresponde a la transición con más energía: $n_i\\to\\infty$."),
@@ -242,12 +242,12 @@ La onda viajera es solución de la ecuación de onda para cualquier $A$, $k$, $\
 """
     return Ejercicio(
         "s2_onda_viajera", "La onda viajera cumple la ecuación de onda", CLASE, "Semana 2 · Example Problem 1", "ondas",
-        "Demuestra que la onda viajera $\\Psi(x,t)=A\\sin(kx-\\omega t+\\phi)$ es solución de la ecuación de onda no dispersiva "
+        "Demostrar que la onda viajera $\\Psi(x,t)=A\\sin(kx-\\omega t+\\phi)$ es solución de la ecuación de onda no dispersiva "
         "$\\dfrac{\\partial^2\\Psi}{\\partial x^2}=\\dfrac1{v^2}\\dfrac{\\partial^2\\Psi}{\\partial t^2}$.",
         sol, (Parte("cond", "¿Qué condición deben cumplir $k$, $\\omega$ y $v$ para que la igualdad se cumpla?", OPC,
                     opciones=("$v=\\omega/k$", "$v=k/\\omega$", "$v=\\omega k$", "Ninguna: se cumple para cualquier $v$"), correcta=0,
                     explicacion="Las dos derivadas segundas dan $-k^2\\Psi$ y $-(\\omega^2/v^2)\\Psi$: deben ser iguales."),),
-        ("Deriva dos veces respecto de $x$ (dejando $t$ fijo) y dos veces respecto de $t$ (dejando $x$ fijo).",), BASICO)
+        ("Derivar dos veces respecto de $x$ (dejando $t$ fijo) y dos veces respecto de $t$ (dejando $x$ fijo).",), BASICO)
 
 
 def _complejos() -> Ejercicio:
@@ -286,7 +286,7 @@ $$\left|\frac{e^{\sqrt2 i\pi}e^{-3i\pi}}{4e^{i\pi/4}}\right|=\frac{1\cdot1}{4\cd
 """, a=f"{a:.4f}", b=f"{b:.4f}", d=f"{d:.4f}")
     return Ejercicio(
         "s2_complejos", "Módulo de números complejos", CLASE, "Semana 2 · Example Problem 2", "ondas",
-        "Determina el módulo (magnitud) de los siguientes números complejos:\n\n"
+        "Determinar el módulo (magnitud) de los siguientes números complejos:\n\n"
         "**A)** $(1+i)(\\sqrt2+5i)$ **B)** $\\dfrac{1+\\sqrt3\\,i}{11-2i}$ **C)** $\\dfrac{e^{\\sqrt2\\,i\\pi}e^{-3i\\pi}}{4e^{i\\pi/4}}$ **D)** $\\dfrac{1+6i}{i}$",
         sol,
         (Parte("A", "A) módulo", NUM, a), Parte("B", "B) módulo", NUM, b), Parte("C", "C) módulo", NUM, c), Parte("D", "D) módulo", NUM, d)),
@@ -296,7 +296,7 @@ $$\left|\frac{e^{\sqrt2 i\pi}e^{-3i\pi}}{4e^{i\pi/4}}\right|=\frac{1\cdot1}{4\cd
 def _autofuncion_ondas() -> Ejercicio:
     sol = r"""
 #### Paso 1 · Qué significa «autofunción»
-$f$ es autofunción de un operador $\hat A$ si al aplicarlo se obtiene **la misma función multiplicada por una constante**: $\hat Af=a\,f$. La constante $a$ es el **autovalor**. Para comprobarlo se aplica el operador y se mira si sale «número × la función original».
+$f$ es autofunción de un operador $\hat A$ si al aplicarlo se obtiene **la misma función multiplicada por una constante**: $\hat Af=a\,f$. La constante $a$ es el **autovalor**. Para comprobarlo se aplica el operador y se verifica si resulta «número × la función original».
 
 #### Paso 2 · Operador $d/dx$
 Se deriva término a término ($\frac{d}{dx}e^{ikx}=ik\,e^{ikx}$ y $\frac{d}{dx}e^{-ikx}=-ik\,e^{-ikx}$):
@@ -318,14 +318,14 @@ $$\frac{d^2}{dx^2}\psi=ik\left(ikAe^{ikx}+ikBe^{-ikx}\right)=(ik)^2\left(Ae^{ikx
 """
     return Ejercicio(
         "s2_autofuncion", "¿Autofunción de d/dx y de d²/dx²?", CLASE, "Semana 2 · Example Problem 3", "operadores",
-        "Considera los operadores $\\dfrac{d}{dx}$ y $\\dfrac{d^2}{dx^2}$. ¿Es $\\psi(x)=Ae^{ikx}+Be^{-ikx}$ una autofunción de estos operadores? "
+        "Considerar los operadores $\\dfrac{d}{dx}$ y $\\dfrac{d^2}{dx^2}$. ¿Es $\\psi(x)=Ae^{ikx}+Be^{-ikx}$ una autofunción de estos operadores? "
         "Si lo es, ¿cuál es el autovalor? ($A$, $B$ y $k$ son reales.)",
         sol,
         (Parte("d1", "¿Es autofunción de $d/dx$ (con $A$ y $B$ distintos de cero)?", OPC,
                opciones=("No", "Sí, con autovalor $ik$", "Sí, con autovalor $-ik$"), correcta=0,
                explicacion="Sale $ik(Ae^{ikx}-Be^{-ikx})$: el signo del segundo término cambia."),
          Parte("d2", "Autovalor de $d^2/dx^2$ (en unidades de $k^2$)", NUM, -1.0, "k²", tol_rel=0.0, tol_abs=0.01)),
-        ("Aplica el operador y mira si el resultado es «constante × la función original».", "Recuerda que $i^2=-1$."), BASICO)
+        ("Aplicar el operador y mira si el resultado es «constante × la función original».", "Recordar que $i^2=-1$."), BASICO)
 
 
 def _ortogonales_graf() -> Ejercicio:
@@ -361,9 +361,9 @@ $\sin x$ y $\cos3x$ son ortogonales. Es un caso de un resultado general: senos y
 """
     return Ejercicio(
         "s2_ortogonales", "sen x y cos 3x son ortogonales", CLASE, "Semana 2 · Example Problem 4", "operadores",
-        "Muestra gráficamente que $\\sin x$ y $\\cos3x$ son funciones ortogonales en el intervalo $[-2j\\pi,2j\\pi]$, donde $j$ es un entero muy grande.",
+        "Mostrar gráficamente que $\\sin x$ y $\\cos3x$ son funciones ortogonales en el intervalo $[-2j\\pi,2j\\pi]$, donde $j$ es un entero muy grande.",
         sol, (Parte("int", "Valor de $\\displaystyle\\int_{-2j\\pi}^{2j\\pi}\\sin x\\cos3x\\,dx$", NUM, 0.0, tol_rel=0.0, tol_abs=0.01),),
-        ("Piensa en la integral como un área con signo.", "$\\sin x$ es impar y $\\cos3x$ es par: ¿qué es el producto?"), BASICO)
+        ("Considerar en la integral como un área con signo.", "$\\sin x$ es impar y $\\cos3x$ es par: ¿qué es el producto?"), BASICO)
 
 
 def _normalizar_parabola() -> Ejercicio:
@@ -397,9 +397,9 @@ $$\psi(x)=\sqrt{\frac{3}{a^5}}\;a(a-x)$$
 """
     return Ejercicio(
         "s2_normalizar", "Normalizar a(a − x)", CLASE, "Semana 2 · Example Problem 5", "operadores",
-        "Normaliza la función $a(a-x)$ en el intervalo $0\\le x\\le a$.",
+        "Normalizar la función $a(a-x)$ en el intervalo $0\\le x\\le a$.",
         sol, (Parte("N", "Valor de $N$ cuando $a=1$", NUM, math.sqrt(3), tol_rel=0.01,
-                    confusiones=((math.sqrt(3), "olvidaste la raíz: $N^2=3/a^5$, luego $N=\\sqrt3$ para $a=1$"),)),),
+                    confusiones=((math.sqrt(3), "se omitió la raíz: $N^2=3/a^5$, luego $N=\\sqrt3$ para $a=1$"),)),),
         ("Plantea $N^2\\int_0^a[a(a-x)]^2dx=1$.", "Desarrolla $(a-x)^2$ y integra término a término."), BASICO)
 
 
@@ -430,7 +430,7 @@ Las únicas autofunciones de $d/dx$ son las exponenciales $e^{cx}$ (con $c$ cons
         "¿Cuáles de las siguientes funciones son autofunciones del operador $\\dfrac{d}{dx}$? **a)** $e^{-ix}$ **b)** $e^{-ix^2}$",
         sol, (Parte("cual", "Respuesta", OPC, opciones=("Solo a)", "Solo b)", "Las dos", "Ninguna"), correcta=0,
                     explicacion="$e^{-ix}\\to-ie^{-ix}$ (constante); $e^{-ix^2}\\to-2ix\\,e^{-ix^2}$ (depende de $x$)."),),
-        ("Deriva con la regla de la cadena y mira si el factor que sale depende de $x$.",), BASICO)
+        ("Derivar con la regla de la cadena y verificar si el factor que resulta depende de $x$.",), BASICO)
 
 
 def _normalizar_e_r() -> Ejercicio:
@@ -466,11 +466,11 @@ $\psi=\dfrac{1}{\sqrt\pi}e^{-r}$ es exactamente el orbital $1s$ del hidrógeno c
 """, n=f"{n:.4f}")
     return Ejercicio(
         "s2_cw_normalizar", "Normalizar e^(−r) en todo el espacio", CLASE, "Semana 2 · Classwork 2", "operadores",
-        "Encuentra el valor de $N$ que normaliza la función $e^{-r}$ en $0\\le r\\le\\infty$, $0\\le\\theta\\le\\pi$ y $0\\le\\phi\\le2\\pi$ "
+        "Determinar el valor de $N$ que normaliza la función $e^{-r}$ en $0\\le r\\le\\infty$, $0\\le\\theta\\le\\pi$ y $0\\le\\phi\\le2\\pi$ "
         "(coordenadas esféricas: $x=r\\sin\\theta\\cos\\phi$, $y=r\\sin\\theta\\sin\\phi$, $z=r\\cos\\theta$).",
         sol, (Parte("N", "Valor de $N$", NUM, n, tol_rel=0.01,
-                    confusiones=((2 * math.sqrt(math.pi), "olvidaste los factores angulares: integrar en $\\theta$ y $\\phi$ aporta $4\\pi$"),
-                                 (1 / math.sqrt(2), "olvidaste el factor $r^2$ del elemento de volumen (sin él la integral radial vale 1/2)"))),),
+                    confusiones=((2 * math.sqrt(math.pi), "se omitieron los factores angulares: integrar en $\\theta$ y $\\phi$ aporta $4\\pi$"),
+                                 (1 / math.sqrt(2), "se omitió el factor $r^2$ del elemento de volumen (sin él la integral radial vale 1/2)"))),),
         ("El elemento de volumen es $d\\tau=r^2\\sin\\theta\\,dr\\,d\\theta\\,d\\phi$.", "$\\int_0^\\infty r^ne^{-br}dr=n!/b^{n+1}$."), MEDIO)
 
 
@@ -483,7 +483,7 @@ def _penetracion() -> Ejercicio:
 #### Paso 1 · Qué se pide
 Un electrón con energía $E=1.0$ eV llega a una barrera de altura $V=2.0$ eV. Clásicamente **no puede** entrar (le falta energía). Cuánticamente la función de onda **penetra** en la barrera decayendo exponencialmente: $\psi\propto e^{-\kappa x}$. Se pide la **profundidad de penetración** $1/\kappa$, la distancia en la que la amplitud cae a $1/e\approx37$ % de su valor en el borde.
 
-#### Paso 2 · De dónde sale $\kappa$
+#### Paso 2 · Origen de $\kappa$
 Dentro de la barrera la ecuación de Schrödinger es $-\frac{\hbar^2}{2m}\psi''=(E-V)\psi$. Como $V>E$, la solución es $e^{-\kappa x}$ con
 
 $$\kappa=\frac{\sqrt{2m(V-E)}}{\hbar}\qquad\Rightarrow\qquad\frac1\kappa=\frac{\hbar}{\sqrt{2m(V-E)}}$$
@@ -504,10 +504,10 @@ La onda penetra unas décimas de nanómetro, **del orden del tamaño de un átom
     return Ejercicio(
         "s5_penetracion", "Profundidad de penetración en una barrera", CLASE, "Semana 5 · Example Problem 3", "libre_pared",
         "Un electrón acelerado por una diferencia de potencial de 1.0 V (energía 1.0 eV) incide sobre una barrera de potencial de **2.0 eV**. "
-        "Calcula la profundidad de penetración $1/\\kappa$ de su función de onda en la barrera.",
+        "Calcular la profundidad de penetración $1/\\kappa$ de su función de onda en la barrera.",
         sol, (Parte("d", "Profundidad de penetración (en nm)", NUM, d * 1e9, "nm", tol_rel=0.03,
-                    confusiones=((1 / math.sqrt(2), "usaste $V=2$ eV en lugar de $V-E=1$ eV"), (1e-9, "diste el valor en metros; se pide en nm"))),),
-        ("$1/\\kappa=\\hbar/\\sqrt{2m(V-E)}$.", "Convierte $V-E$ de eV a J."), BASICO)
+                    confusiones=((1 / math.sqrt(2), "se empleó $V=2$ eV en lugar de $V-E=1$ eV"), (1e-9, "valor expresado en metros; se solicita en nm"))),),
+        ("$1/\\kappa=\\hbar/\\sqrt{2m(V-E)}$.", "Convertir $V-E$ de eV a J."), BASICO)
 
 
 EJERCICIOS = (_fotoelectrico(), _radio_bohr(), _electrones_difraccion(), _fluor_foton(), _lyman(),
