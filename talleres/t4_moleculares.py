@@ -94,7 +94,7 @@ def _q2(d: Datos) -> Pregunta:
 
 
 def _q3(d: Datos) -> Pregunta:
-    ne = d.elegir(3, [2, 3, 4])
+    ne = d.elegir(4, [2, 3, 4])
     nombre, formula = ALILO[ne]
     x, C = f.huckel_alilo()
     enun = (f"El {nombre} ({formula}) es un sistema $\\pi$ conjugado de tres carbonos con **{ne} electrones $\\pi$**.\n\n"
@@ -128,8 +128,8 @@ def _q3(d: Datos) -> Pregunta:
            "Los otros dos son $\\psi_2=\\frac1{\\sqrt2}(\\phi_1-\\phi_3)$ (nodo en el carbono central) y $\\psi_3=\\tfrac12\\phi_1-\\tfrac1{\\sqrt2}\\phi_2+\\tfrac12\\phi_3$ (dos nodos).")
     sol = sol.replace("Con $x=(\\alpha-E)/\\beta$... escrito como $E=\\alpha+x\\beta$, la", "Escribiendo $E=\\alpha+x\\beta$, la")
     return Pregunta("q3", enun, 1.5, partes, sol, tema="orbitales_moleculares",
-                    nota="En la foto el enunciado dice que hay un electrón en el orbital p del carbono adyacente al doble enlace (radical, 3 electrones $\\pi$). "
-                         "El símbolo de carga del texto es poco legible: con 4 electrones (anión) solo cambia $n_\\alpha$.")
+                    nota="La especie del enunciado original es el anión alilo, CH₂CHCH₂⁻, con 4 electrones $\\pi$ (2 del doble enlace y 2 del carbanión). "
+                         "Con «datos nuevos» también aparecen el catión (2 electrones) y el radical (3): solo cambia $n_\\alpha$.")
 
 
 def construir(d: Datos) -> list[Pregunta]:
