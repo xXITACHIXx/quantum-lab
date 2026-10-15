@@ -13,6 +13,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `quantum_lab.py` | Menú principal (portada, acceso a los seis simuladores y al Centro de teoría, pruebas globales) |
 | `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `talleres/` | **Talleres de repaso**: `__init__.py` (índice, página y pruebas), `_calificar.py` (lectura de números y tolerancias), `_modelo.py` (preguntas y calificación por partes), `_fisica.py` (cálculos verificados) y un archivo por taller (`t1_espectros.py`…) |
+| `ejercicios/` | **Ejercicios de práctica**: `__init__.py` (página, filtros y pruebas), `_modelo.py` (ejercicio, fuentes y temas) y los ejercicios por fuente: `clase_s1_s5.py`, `clase_s6_s13.py` (diapositivas), `libro.py` y `cuaderno.py` |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
 | `particula_esfera.py` | 03 · Armónicos esféricos Yₗᵐ en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
@@ -132,6 +133,14 @@ la barra lateral que aparece el número de versión esperado.
 * **Añadir un taller:** crear `talleres/tN_<tema>.py` con una función `construir(datos)` que devuelva sus `Pregunta` y un
   `TALLER = Taller(...)`, y añadirlo a `TALLERES` en `talleres/__init__.py`. Las pruebas comprueban que las respuestas
   correctas obtienen el puntaje completo en todas las variantes.
+* **Ejercicios de práctica** (barra lateral → «Teoría y repaso»): los *Example Problems* y *Classwork* de las diapositivas y
+  los ejercicios del libro trabajados en el cuaderno. Se filtran por fuente, tema o texto; cada uno tiene pistas y una
+  **solución paso a paso** que se puede abrir sin responder, y las partes numéricas o de opción se pueden comprobar con el
+  mismo calificador de los talleres. Las erratas encontradas en las fuentes se señalan en la nota del ejercicio. Un
+  ejercicio se enlaza con `?sim=ejercicios&ej=s9_nodos`.
+* **Añadir un ejercicio:** escribir una función que devuelva un `Ejercicio(...)` en el archivo de su fuente (`ejercicios/`)
+  y añadirla a la tupla `EJERCICIOS` de ese archivo. Las pruebas comprueban la estructura, que la respuesta correcta
+  obtenga la nota completa y contrastan los resultados con cálculos independientes.
 * **Añadir un tema nuevo:** crear `teoria/<id>.py` con una función `mostrar()` (y, opcionalmente, una lista `PREGUNTAS`) y
   registrarlo en la lista `UNIDADES` de `teoria/__init__.py` (las instrucciones están en la cabecera de ese archivo).
 * Los **parámetros** están arriba de cada simulador; los resultados se recalculan al instante.
