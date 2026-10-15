@@ -919,6 +919,10 @@ def cargar_desde_url(valores_iniciales: dict) -> None:
             pass                              # parámetro manipulado o antiguo: se ignora
 
 
+# Parámetros de la dirección que se conservan al cambiar de página (se guardan en session_state["ql_fijo_<nombre>"]).
+PARAMETROS_FIJOS = ("prog",)
+
+
 def escribir_en_url(valores_iniciales: dict | None, extra: dict | None = None) -> None:
     """
     Refleja en la barra de direcciones los parámetros que difieren de los valores iniciales, de modo que
@@ -930,6 +934,14 @@ def escribir_en_url(valores_iniciales: dict | None, extra: dict | None = None) -
     if pagina and pagina != "inicio":
         datos["sim"] = pagina
     datos.update({k: v for k, v in (extra or {}).items() if v})
+    for clave in PARAMETROS_FIJOS:          # el progreso de los ejercicios acompaña a la dirección en todas las páginas
+        guardado = st.session_state.get(f"ql_fijo_{clave}")
+        if guardado is None:
+            guardado = st.query_params.get(clave)
+            if guardado:
+                st.session_state[f"ql_fijo_{clave}"] = guardado
+        if guardado:
+            datos[clave] = guardado
     for clave in _claves_compartibles(valores_iniciales or {}):
         valor = st.session_state.get(clave)
         if valor is None:
