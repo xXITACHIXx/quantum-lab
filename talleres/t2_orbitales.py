@@ -15,28 +15,22 @@ ORBITALES_D = {(3, 2): "3d", (4, 2): "4d"}
 
 def _q1(d: Datos) -> Pregunta:
     n = d.elegir(0, [0, 1, 2, 3])
-    opciones = ("0", "$x_0/2$, con $x_0=\\sqrt{\\hbar/\\mu\\omega}$", "$x_0$", "$\\hbar\\omega/2$ (la energía de punto cero)")
+    estado = "fundamental ($n=0$)" if n == 0 else f"$n={n}$"
     enun = ("Para explicar el comportamiento de la energía potencial de una molécula diatómica homonuclear se supone que se comporta como un "
-            f"oscilador armónico unidimensional. Si la molécula está en el estado **$n={n}$**, halla el valor esperado de la posición "
-            "$x$ respecto al centro de la molécula (la distancia de equilibrio).\n\n"
-            "**a)** ¿Cuánto vale $\\langle x\\rangle$?\n\n"
-            f"**b)** *(Ampliación)* Calcula $\\langle x^2\\rangle$ en unidades de $x_0^2$, con $x_0^2=\\hbar/(\\mu\\omega)$.")
+            f"oscilador armónico unidimensional. Si la molécula está en el estado {estado}, halla el valor esperado para la posición "
+            "$\\langle x\\rangle$ respecto al centro de la molécula (la distancia de equilibrio).\n\n"
+            "Escribe el valor de $\\langle x\\rangle$ (en unidades de $x_0=\\sqrt{\\hbar/\\mu\\omega}$) y muestra el cálculo en tu procedimiento.")
     partes = (
-        Parte("x", "a) $\\langle x\\rangle$ =", OPC, opciones=opciones, correcta=0, peso=0.6,
-              explicacion="$|\\psi_n|^2$ es simétrica respecto al centro (par), así que el integrando $x|\\psi_n|^2$ es impar y su integral es 0."),
-        Parte("x2", "b) $\\langle x^2\\rangle/x_0^2$ =", NUM, n + 0.5, "", tol_rel=0.02, peso=0.4,
-              confusiones=((2.0, "$\\langle x^2\\rangle=(n+\\tfrac12)x_0^2$: ese es el valor sin el factor ½ de $\\langle x^2\\rangle$"),
-                           (0.5, "el factor es $n+\\tfrac12$ (virial: $\\langle V\\rangle=\\tfrac12 E$ con $V=\\tfrac12\\mu\\omega^2x^2$)")),
-              explicacion="Del teorema del virial, $\\langle V\\rangle=\\frac12\\mu\\omega^2\\langle x^2\\rangle=\\frac12E_n$, y $E_n=\\hbar\\omega(n+\\frac12)$."))
-    sol = (f"**a)** Las funciones del oscilador tienen paridad definida: $\\psi_n(-x)=(-1)^n\\psi_n(x)$. Por tanto $|\\psi_n|^2$ es **par** y\n\n"
-           f"$$\\langle x\\rangle=\\int_{{-\\infty}}^{{\\infty}}x\\,|\\psi_n(x)|^2\\,dx=0$$\n\n"
-           f"porque el integrando es impar. La partícula pasa tanto tiempo a un lado como al otro del centro, para todo $n$ (en particular para $n={n}$).\n\n"
-           f"**b)** Con el teorema del virial, $\\langle V\\rangle=\\langle T\\rangle=E_n/2$:\n\n"
-           f"$$\\tfrac12\\mu\\omega^2\\langle x^2\\rangle=\\tfrac12\\hbar\\omega\\left(n+\\tfrac12\\right)\\;\\Rightarrow\\;"
-           f"\\langle x^2\\rangle=\\left(n+\\tfrac12\\right)\\frac{{\\hbar}}{{\\mu\\omega}}={n + 0.5:g}\\,x_0^2$$\n\n"
-           "Aunque $\\langle x\\rangle=0$, la partícula no está quieta en el centro: la dispersión $\\sqrt{\\langle x^2\\rangle}$ crece con $n$.")
-    return Pregunta("q1", enun, 1.0, partes, sol, tema="oscilador",
-                    nota="El enunciado original pide el valor esperado de la posición en el estado fundamental; el apartado b) es una ampliación.")
+        Parte("x", "$\\langle x\\rangle$ (en unidades de $x_0$)", NUM, 0.0, "x₀", tol_rel=0.0, tol_abs=0.01, peso=1.0,
+              explicacion="$\\langle x\\rangle=\\int\\psi_n^*\\,x\\,\\psi_n\\,dx=0$ porque el integrando es impar."),)
+    sol = (f"El valor esperado de la posición es\n\n"
+           f"$$\\langle x\\rangle=\\int_{{-\\infty}}^{{\\infty}}\\psi_{{{n}}}^*(x)\\,x\\,\\psi_{{{n}}}(x)\\,dx=\\int_{{-\\infty}}^{{\\infty}}x\\,|\\psi_{{{n}}}(x)|^2\\,dx$$\n\n"
+           f"Las funciones del oscilador armónico tienen paridad definida, $\\psi_n(-x)=(-1)^n\\psi_n(x)$, de modo que $|\\psi_n|^2$ es una función **par**. "
+           f"El integrando $x\\,|\\psi_n|^2$ es entonces **impar** y su integral sobre un intervalo simétrico es cero:\n\n"
+           f"$$\\langle x\\rangle=0$$\n\n"
+           f"La molécula pasa tanto tiempo a un lado como al otro de la distancia de equilibrio. Esto no significa que esté quieta: "
+           f"la dispersión de la posición no es cero (por eso $\\langle x^2\\rangle\\neq0$).")
+    return Pregunta("q1", enun, 1.0, partes, sol, tema="oscilador")
 
 
 def _q2(d: Datos) -> Pregunta:

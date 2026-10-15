@@ -4,6 +4,8 @@ talleres/t3_p_rotor.py — Taller 3: orbital 3p_z y rotación plana de una molé
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
 from talleres import _fisica as f
@@ -51,41 +53,38 @@ def _q1(d: Datos) -> Pregunta:
 
 
 def _q2(d: Datos) -> Pregunta:
-    mol = d.elegir("H2", list(ROTORES))
-    m = d.elegir(2, [1, 2, 3, 4])
-    mu, R, nombre = ROTORES[mol]
-    I = f.momento_de_inercia(mu, R)
-    Lz = m * f.HBAR
-    E = f.energia_anillo(m, I)
-    enun = (f"Considera la molécula de {nombre} sobre una superficie metálica que permite su rotación **2D** alrededor de un vector normal a la superficie "
-            f"(el eje $z$). Su longitud de enlace es {R} pm. Si la función que describe la rotación de la molécula es\n\n"
+    nombre = d.elegir("hidrógeno (H₂)", [r[2] for r in ROTORES.values()])
+    l = d.elegir(2, [1, 2, 3, 4])
+    m = d.elegir(2, list(range(-l, l + 1)))
+    L = math.sqrt(l * (l + 1))
+    E = l * (l + 1) / 2
+    enun = (f"Considera la molécula de {nombre} en un nivel rotacional con $l={l}$ que se absorbe sobre una superficie metálica que permite su "
+            "rotación 2D alrededor de un vector normal a la superficie (el eje $z$). Si la función que describe la rotación de la molécula es\n\n"
             f"$$\\Phi(\\varphi)=\\left(\\frac1{{2\\pi}}\\right)^{{1/2}}e^{{i{m}\\varphi}}$$\n\nCalcula:\n\n"
-            "**a)** Su momento angular en el eje $z$ (en unidades de $\\hbar$ y en J s).\n\n"
+            "**a)** Su momento angular en el eje $z$ (en unidades de $\\hbar$).\n\n"
             "**b)** Su momento angular total (en unidades de $\\hbar$).\n\n"
-            "**c)** Su energía rotacional (en J).")
+            "**c)** Su energía rotacional (en unidades de $\\hbar^2/I$, donde $I$ es el momento de inercia de la molécula).")
     partes = (
-        Parte("Lz_h", "a) $L_z$ en unidades de $\\hbar$", NUM, float(m), "ħ", tol_rel=0.0, tol_abs=0.01, peso=0.2,
+        Parte("Lz", "a) $L_z$ en unidades de $\\hbar$", NUM, float(m), "ħ", tol_rel=0.0, tol_abs=0.01, peso=0.3,
               confusiones=((-1.0, "el signo indica el sentido de giro: $e^{+im\\varphi}$ corresponde a $m>0$"),),
-              explicacion="$\\hat L_z=-i\\hbar\\,\\partial/\\partial\\varphi$ actúa sobre $e^{im\\varphi}$ y da $m\\hbar$."),
-        Parte("Lz", "a) $L_z$ en J s", NUM, Lz, "J s", peso=0.15,
-              explicacion=f"$L_z={m}\\hbar={tex(Lz)}$ J s."),
-        Parte("L", "b) $|\\vec L|$ en unidades de $\\hbar$", NUM, float(m), "ħ", tol_rel=0.0, tol_abs=0.01, peso=0.25,
-              confusiones=((np.sqrt(m * (m + 1)) / m, "$\\sqrt{l(l+1)}\\hbar$ vale para la rotación en 3D (esfera); aquí la rotación es plana y $\\vec L$ apunta solo en $z$"),),
-              explicacion="En la rotación plana $\\vec L$ solo tiene componente $z$: $|\\vec L|=|L_z|$."),
-        Parte("E", "c) Energía rotacional $E$ (en J)", NUM, E, "J", peso=0.4,
-              confusiones=((2.0, "$E=L^2/2I$: te falta el factor ½"), (1 / m, f"la energía depende de $m^2$ (aquí $m^2={m ** 2}$), no de $m$"),
-                           (2 * np.pi, "usa $\\hbar$, no $h$, en $E=m^2\\hbar^2/2I$")),
-              explicacion="$E=\\dfrac{m^2\\hbar^2}{2I}$ con $I=\\mu r_e^2$."))
-    sol = (f"La función $\\Phi_m(\\varphi)=\\dfrac1{{\\sqrt{{2\\pi}}}}e^{{im\\varphi}}$ es la del rotor plano (partícula en un anillo) con $m={m}$.\n\n"
-           f"**a)** $\\hat L_z=-i\\hbar\\dfrac{{\\partial}}{{\\partial\\varphi}}$, luego $\\hat L_z\\Phi=m\\hbar\\,\\Phi$ y $L_z={m}\\hbar={tex(Lz)}$ J s (el signo $+$ indica giro antihorario).\n\n"
-           f"**b)** Como la molécula solo rota en el plano perpendicular a $z$, el vector momento angular apunta únicamente en $z$: "
-           f"$|\\vec L|=|L_z|={m}\\hbar$. *(En una rotación 3D, en cambio, $|\\vec L|=\\sqrt{{l(l+1)}}\\hbar$ y $L_z$ es solo una componente.)*\n\n"
-           f"**c)** $\\mu={tex(mu)}$ u e $I=\\mu r_e^2={tex(I)}$ kg m². Entonces\n\n"
-           f"$$E=\\frac{{L^2}}{{2I}}=\\frac{{m^2\\hbar^2}}{{2I}}=\\frac{{{m}^2\\,({tex(f.HBAR)})^2}}{{2\\,({tex(I)})}}={tex(E)}\\ \\text{{J}}\\;({E / f.EV * 1e3:.3g}\\ \\text{{meV}})$$")
+              explicacion="$\\hat L_z=-i\\hbar\\,\\partial/\\partial\\varphi$ actúa sobre $e^{im\\varphi}$ y da $m\\hbar$: el número que multiplica a $\\varphi$ en el exponente."),
+        Parte("L", "b) $|\\vec L|$ en unidades de $\\hbar$", NUM, L, "ħ", tol_rel=0.01, peso=0.3,
+              confusiones=((l / L, "$l\\hbar$ no es la magnitud: $\\hat L^2$ tiene valor propio $l(l+1)\\hbar^2$, luego $|\\vec L|=\\sqrt{l(l+1)}\\hbar$"),),
+              explicacion=f"$|\\vec L|=\\sqrt{{l(l+1)}}\\,\\hbar=\\sqrt{{{l * (l + 1)}}}\\hbar$."),
+        Parte("E", "c) Energía rotacional $E$ (en unidades de $\\hbar^2/I$)", NUM, E, "ħ²/I", tol_rel=0.01, peso=0.4,
+              confusiones=((2.0, "$E=L^2/2I$: te falta el factor ½"),),
+              explicacion="$E=\\dfrac{|\\vec L|^2}{2I}=\\dfrac{l(l+1)\\hbar^2}{2I}$."))
+    sol = (f"El enunciado da el número cuántico $l={l}$ y la función de onda $\\Phi(\\varphi)=\\dfrac1{{\\sqrt{{2\\pi}}}}e^{{i{m}\\varphi}}$.\n\n"
+           f"**a)** El operador de la componente $z$ es $\\hat L_z=-i\\hbar\\dfrac{{\\partial}}{{\\partial\\varphi}}$. Al aplicarlo a la función dada,\n\n"
+           f"$$\\hat L_z\\Phi=-i\\hbar\\,(i{m})\\,\\Phi={m}\\hbar\\,\\Phi\\;\\Rightarrow\\;L_z={m}\\hbar$$\n\n"
+           f"(el signo indica el sentido de giro alrededor de $z$).\n\n"
+           f"**b)** La magnitud del momento angular depende del número cuántico $l$ (valor propio de $\\hat L^2$):\n\n"
+           f"$$|\\vec L|=\\sqrt{{l(l+1)}}\\,\\hbar=\\sqrt{{{l}\\cdot{l + 1}}}\\,\\hbar={L:.4f}\\,\\hbar$$\n\n"
+           f"**c)** La energía de rotación es la cinética, $E=\\dfrac{{|\\vec L|^2}}{{2I}}$:\n\n"
+           f"$$E=\\frac{{l(l+1)\\hbar^2}}{{2I}}=\\frac{{{l * (l + 1)}}}{{2}}\\frac{{\\hbar^2}}{{I}}={E:g}\\,\\frac{{\\hbar^2}}{{I}}$$\n\n"
+           f"El enunciado no da la longitud de enlace, por eso la energía se expresa en unidades de $\\hbar^2/I$ con $I=\\mu r_e^2$.")
     return Pregunta("q2", enun, 1.0, partes, sol, tema="esfera",
-                    nota="El enunciado original no da la longitud de enlace del H₂; aquí se usa el valor tabulado de 74.14 pm. "
-                         "Si tu profesor consideró $l=m$ como número cuántico del rotor 3D, el momento angular total sería $\\sqrt{l(l+1)}\\hbar$: "
-                         "aquí se resuelve como rotación plana, que es lo que indica «rotación 2D».")
+                    nota="Se resuelve solo con los datos del enunciado: el número cuántico $l$ y la función $\\Phi$.")
 
 
 def construir(d: Datos) -> list[Pregunta]:

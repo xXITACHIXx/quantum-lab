@@ -161,3 +161,18 @@ def test_opcion_multiple_y_nuevo_intento():
     assert not at.exception and at.session_state["tl_int_moleculares"] == 1
     at.radio(key="tl_modo_moleculares").set_value(talleres.MODOS[1]).run()
     assert not at.exception, [e.value for e in at.exception]
+
+
+def test_rotacion_del_h2_usa_solo_los_datos_del_enunciado():
+    q = talleres.t3_p_rotor.construir(Datos())[1]
+    esperado = {p.clave: p.esperado for p in q.partes}
+    assert esperado == {"Lz": 2.0, "L": pytest.approx(math.sqrt(6)), "E": 3.0}        # l = 2, e^{i2φ}: Lz = 2ħ, |L| = √6 ħ, E = 3ħ²/I
+    assert "pm" not in q.enunciado                                                   # no se añaden datos que el enunciado no da
+    assert calificar(q, {"Lz": "2", "L": "2.449", "E": "3"}).puntos == pytest.approx(q.puntos)
+    assert calificar(q, {"Lz": "2", "L": "2", "E": "3"}).resultados["L"].estado == CASI      # confundió l con √(l(l+1))
+
+
+def test_oscilador_pide_solo_el_valor_esperado():
+    q = talleres.t2_orbitales.construir(Datos())[0]
+    assert [p.clave for p in q.partes] == ["x"] and q.partes[0].esperado == 0.0
+    assert calificar(q, {"x": "0"}).puntos == pytest.approx(q.puntos)
