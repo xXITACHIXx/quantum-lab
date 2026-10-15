@@ -29,6 +29,7 @@ import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import talleres
 import teoria
 import verificacion
 
@@ -42,13 +43,15 @@ PAGINAS = {
     "bohr": ("Átomo de hidrógeno", ":material/radio_button_checked:", modelo_bohr),
     "incertidumbre": ("Principio de incertidumbre", ":material/blur_on:", principio_incertidumbre),
     "teoria": ("Centro de teoría", ":material/menu_book:", teoria),
+    "talleres": ("Talleres de repaso", ":material/edit_note:", talleres),
     "verificacion": ("Verificación", ":material/verified:", verificacion),
     "pruebas": ("Pruebas numéricas", ":material/fact_check:", None),
 }
 GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
-    ("Teoría y verificación", ["teoria", "verificacion", "pruebas"], True),
+    ("Teoría y repaso", ["teoria", "talleres"], True),
+    ("Verificación", ["verificacion", "pruebas"], True),
 ]
 
 
@@ -59,7 +62,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -135,6 +138,10 @@ def _pagina_inicio() -> None:
                 "experimentos guiados y autoevaluación. Los temas que el curso aún no cubre ya tienen su lugar.")
     st.button("Abrir el Centro de teoría", key="ql_abrir_teoria", on_click=_ir_a, args=("teoria",),
               icon=":material/menu_book:")
+    qc.seccion("Talleres de repaso")
+    st.markdown("Los **Talleres de repaso** reproducen el estilo de los talleres evaluativos: escribes tus resultados, la página los califica por partes, "
+                "señala el error más probable y muestra la solución justificada. Cada taller se puede repetir con datos nuevos.")
+    st.button("Abrir los talleres", key="ql_abrir_talleres", on_click=_ir_a, args=("talleres",), icon=":material/edit_note:")
     st.markdown("")
     c1, c2 = st.columns(2, gap="large")
     with c1:
