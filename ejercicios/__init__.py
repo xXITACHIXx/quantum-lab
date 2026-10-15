@@ -25,13 +25,14 @@ import streamlit as st
 
 import quantum_lab_comun as qc
 import teoria
-from ejercicios import clase_s1_s5, clase_s6_s13, cuaderno, libro
+from ejercicios import _calidad, _figuras, _progreso, clase_s1_s5, clase_s6_s13, cuaderno, libro
 from ejercicios._modelo import CLASE, CUADERNO, FUENTES, LIBRO, TEMAS, Ejercicio, calificar
 from talleres._calificar import CASI, INVALIDA, OK, VACIA
 from talleres._modelo import NUM, OPC
 
 EJERCICIOS: tuple[Ejercicio, ...] = (*clase_s1_s5.EJERCICIOS, *clase_s6_s13.EJERCICIOS, *cuaderno.EJERCICIOS, *libro.EJERCICIOS)
 _POR_ID = {e.id: e for e in EJERCICIOS}
+IDS = tuple(e.id for e in EJERCICIOS)
 TODAS, TODOS = "Todas las fuentes", "Todos los temas"
 
 
@@ -61,6 +62,28 @@ def _resultados() -> dict:
     return st.session_state.setdefault("ej_res", {})
 
 
+def _hechos() -> set:
+    """Ejercicios marcados como resueltos. Al abrir la página se recuperan del parámetro `prog` de la dirección."""
+    if "ej_hechos" not in st.session_state:
+        codigo = st.session_state.get("ql_fijo_prog") or st.query_params.get("prog")
+        st.session_state["ej_hechos"] = _progreso.decodificar(codigo, IDS)
+    return st.session_state["ej_hechos"]
+
+
+def _guardar_progreso() -> None:
+    """Refleja el progreso en la dirección de la página (sobrevive a recargar o guardar en favoritos)."""
+    st.session_state["ql_fijo_prog"] = _progreso.codificar(_hechos(), IDS)
+
+
+def _marcar(ej_id: str) -> None:
+    """Callback de la casilla «Ya lo resolví»."""
+    if st.session_state.get(f"ej_hecho_{ej_id}"):
+        _hechos().add(ej_id)
+    else:
+        _hechos().discard(ej_id)
+    _guardar_progreso()
+
+
 def _clave(ej: Ejercicio, parte: str) -> str:
     return f"ej_{ej.id}_{parte}"
 
@@ -68,11 +91,42 @@ def _clave(ej: Ejercicio, parte: str) -> str:
 def _comprobar(ej_id: str) -> None:
     ej = buscar(ej_id)
     respuestas = {p.clave: st.session_state.get(_clave(ej, p.clave)) for p in ej.partes}
-    _resultados()[ej_id] = calificar(ej, respuestas)
+    cal = _resultados()[ej_id] = calificar(ej, respuestas)
+    if cal.fraccion >= 0.999:                      # acertar todo cuenta como resuelto
+        _hechos().add(ej_id)
+        _guardar_progreso()
 
 
 def _ir(ej_id: str) -> None:
     st.session_state["ej_sel"] = ej_id
+
+
+def _siguiente_pendiente(ids: list, actual: str) -> None:
+    """Callback: salta al siguiente ejercicio de la lista que aún no está resuelto (da la vuelta al final)."""
+    inicio = ids.index(actual) if actual in ids else -1
+    for k in range(1, len(ids) + 1):
+        candidato = ids[(inicio + k) % len(ids)]
+        if candidato not in _hechos():
+            st.session_state["ej_sel"] = candidato
+            return
+
+
+def _borrar_progreso() -> None:
+    _hechos().clear()
+    _resultados().clear()
+    _guardar_progreso()
+
+
+def _cargar_progreso(archivo) -> None:
+    try:
+        nuevos = _progreso.desde_json(archivo.getvalue(), IDS)
+    except ValueError as exc:
+        st.session_state["ej_bk_msg"] = ("error", str(exc))
+        return
+    antes = len(_hechos())
+    _hechos().update(nuevos)
+    _guardar_progreso()
+    st.session_state["ej_bk_msg"] = ("ok", f"Se cargaron {len(nuevos)} ejercicios resueltos ({len(_hechos()) - antes} nuevos).")
 
 
 def _limpiar_filtros() -> None:
@@ -120,6 +174,18 @@ def _tema_relacionado(ej: Ejercicio) -> None:
                   on_click=qc.ir_a_tema, args=(ej.tema,))
 
 
+def _figuras_del_ejercicio(ej: Ejercicio) -> None:
+    """Gráficas interactivas de este ejercicio (si las tiene), con deslizador cuando la figura depende de un parámetro."""
+    for i, fig in enumerate(_figuras.figuras_de(ej.id)):
+        with st.expander(f"Gráfica interactiva: {fig.titulo}", icon=":material/show_chart:"):
+            st.markdown(fig.descripcion)
+            valor = None
+            if fig.parametro:
+                etiqueta, minimo, maximo, inicial = fig.parametro
+                valor = st.slider(etiqueta, minimo, maximo, inicial, key=f"ej_fig_{ej.id}_{i}")
+            qc.mostrar_plotly(fig.dibujar(valor), clave=f"ej_plot_{ej.id}_{i}")
+
+
 def _vista_ejercicio(ej: Ejercicio, numero: int, total: int) -> None:
     cal = _resultados().get(ej.id)
     with st.container(border=True):
@@ -153,6 +219,10 @@ def _vista_ejercicio(ej: Ejercicio, numero: int, total: int) -> None:
                     st.markdown(f"**Pista {i}.** {pista}")
         with st.expander("Ver la solución paso a paso", icon=":material/menu_book:"):
             st.markdown(ej.solucion)
+        _figuras_del_ejercicio(ej)
+        clave_hecho = f"ej_hecho_{ej.id}"
+        st.session_state[clave_hecho] = ej.id in _hechos()
+        st.checkbox("Ya lo resolví (marcar en mi progreso)", key=clave_hecho, on_change=_marcar, args=(ej.id,))
         _tema_relacionado(ej)
 
 
@@ -160,10 +230,14 @@ def _navegacion(lista: list[Ejercicio], indice: int) -> None:
     c1, c2, c3 = st.columns([1, 1, 2], vertical_alignment="center")
     anterior = lista[indice - 1].id if indice > 0 else None
     siguiente = lista[indice + 1].id if indice < len(lista) - 1 else None
+    ids = [e.id for e in lista]
+    pendientes = [i for i in ids if i not in _hechos()]
     c1.button("Anterior", key="ej_ant", icon=":material/arrow_back:", width="stretch", disabled=anterior is None,
               on_click=_ir, args=(anterior,))
     c2.button("Siguiente", key="ej_sig", icon=":material/arrow_forward:", width="stretch", disabled=siguiente is None,
               on_click=_ir, args=(siguiente,))
+    c3.button("Siguiente sin resolver", key="ej_pend", icon=":material/skip_next:", width="stretch",
+              disabled=not pendientes or pendientes == [ids[indice]], on_click=_siguiente_pendiente, args=(ids, ids[indice]))
 
 
 def _tabla(lista: list[Ejercicio]) -> list[dict]:
@@ -171,10 +245,30 @@ def _tabla(lista: list[Ejercicio]) -> list[dict]:
     filas = []
     for i, e in enumerate(lista, 1):
         cal = resultados.get(e.id)
-        estado = "—" if not e.comprobable else ("Sin comprobar" if cal is None else ("Correcto" if cal.fraccion >= 0.999 else f"{100 * cal.fraccion:.0f} %"))
+        if e.id in _hechos():
+            estado = "Resuelto"
+        elif not e.comprobable:
+            estado = "Pendiente"
+        else:
+            estado = "Pendiente" if cal is None else f"{100 * cal.fraccion:.0f} % (sin completar)"
         filas.append({"N.º": i, "Ejercicio": e.titulo, "Fuente": e.fuente, "Referencia": e.referencia,
                       "Tema": TEMAS.get(e.tema, e.tema), "Nivel": e.dificultad, "Mi resultado": estado})
     return filas
+
+
+def _copia_de_seguridad() -> None:
+    with st.expander("Copia de seguridad de mi progreso", icon=":material/save:"):
+        st.markdown("Descarga tu progreso para guardarlo o pasarlo a otro dispositivo, y cárgalo cuando quieras. "
+                    "No se envía a ningún servidor: queda en tu archivo y en la dirección de la página.")
+        qc.boton_descarga("Descargar mi progreso (JSON)", _progreso.a_json(_hechos(), IDS).encode("utf-8"),
+                          "progreso_ejercicios.json", "application/json")
+        archivo = st.file_uploader("Cargar un progreso guardado", type=["json"], key="ej_bk_sub")
+        if archivo is not None:
+            st.button("Combinar con mi progreso", key="ej_bk_cargar", icon=":material/upload:", on_click=_cargar_progreso, args=(archivo,))
+        mensaje = st.session_state.pop("ej_bk_msg", None)
+        if mensaje:
+            (st.success if mensaje[0] == "ok" else st.error)(mensaje[1])
+        st.button("Borrar mi progreso", key="ej_bk_borrar", icon=":material/delete:", on_click=_borrar_progreso)
 
 
 def interfaz() -> None:
@@ -186,12 +280,13 @@ def interfaz() -> None:
     qc.encabezado_pagina("Repaso", "Ejercicios de práctica",
                          "Los ejercicios de las diapositivas de clase y del libro, con su solución explicada paso a paso. "
                          "Intenta resolverlos; si te atascas, abre una pista o la solución completa.")
-    resultados = _resultados()
-    correctos = sum(1 for c in resultados.values() if c.fraccion >= 0.999)
+    hechos = _hechos()
     qc.metricas([("Ejercicios", f"{len(EJERCICIOS)}"),
                  ("De las diapositivas", f"{sum(e.fuente == CLASE for e in EJERCICIOS)}"),
                  ("Del libro y el cuaderno", f"{sum(e.fuente in (LIBRO, CUADERNO) for e in EJERCICIOS)}"),
-                 ("Resueltos bien (esta sesión)", f"{correctos}")], columnas=4)
+                 ("Mi progreso", f"{len(hechos)} de {len(EJERCICIOS)}")], columnas=4)
+    st.progress(len(hechos) / len(EJERCICIOS), text=f"Llevas {len(hechos)} de {len(EJERCICIOS)} ejercicios resueltos. "
+                "Tu progreso queda en la dirección de esta página: guárdala en favoritos para continuar después.")
 
     c1, c2, c3, c4 = st.columns([2, 2, 2, 1], vertical_alignment="bottom")
     with c1:
@@ -222,6 +317,7 @@ def interfaz() -> None:
     _vista_ejercicio(ej, indice + 1, len(lista))
     with st.expander(f"Lista de los {len(lista)} ejercicios de esta selección", icon=":material/list:"):
         st.dataframe(_tabla(lista), hide_index=True, width="stretch")
+    _copia_de_seguridad()
 
 
 # ---------------------------------------------------------------------
@@ -248,6 +344,17 @@ def ejecutar_pruebas() -> "qc.RegistroPruebas":
                   all(0 <= p.correcta < len(p.opciones) for e in EJERCICIOS for p in e.partes if p.tipo == OPC))
     reg.comprobar("Respuestas correctas → nota completa en todos los ejercicios comprobables",
                   all(calificar(e, respuestas_correctas(e)).fraccion > 0.999 for e in EJERCICIOS if e.comprobable))
+
+    reg.comprobar("Reglas de calidad (ids, referencias, pasos numerados, pistas, $ balanceados)",
+                  not any(_calidad.revisar(e) for e in EJERCICIOS),
+                  "; ".join(f"{e.id}: {m}" for e in EJERCICIOS for m in _calidad.revisar(e))[:300])
+    reg.comprobar("Progreso: el código de cada ejercicio es único", len({_progreso.token(i) for i in ids}) == len(ids))
+    reg.comprobar("Progreso: guardar y recuperar no pierde nada",
+                  _progreso.decodificar(_progreso.codificar(set(ids), ids), ids) == set(ids))
+    reg.comprobar("Gráficas: todas pertenecen a un ejercicio existente", all(i in _POR_ID for i in _figuras.FIGURAS))
+    reg.comprobar("Gráficas: todas se dibujan",
+                  all(len(f.dibujar().data) > 0
+                      for fs in _figuras.FIGURAS.values() for f in fs))
 
     # Contrastes numéricos independientes (fórmulas cerradas o integración numérica)
     h, hb, me, e, c = const.h, const.hbar, const.m_e, const.e, const.c
