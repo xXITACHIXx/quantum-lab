@@ -58,6 +58,21 @@ def psi_oscilador(n: int, u: np.ndarray) -> np.ndarray:
     return norma * _herm.hermval(u, [0] * n + [1]) * np.exp(-u * u / 2)
 
 
+def _acabado(fig: go.Figure, titulo: str, altura: int = 480, leyenda: bool = True) -> go.Figure:
+    """Tema común: título corto (no choca con la barra de herramientas), leyenda debajo y ejes con aire."""
+    aplicar_tema_plotly(fig, titulo, altura=altura)
+    fig.update_layout(
+        margin=dict(l=80, r=30, t=75, b=125 if leyenda else 80),
+        showlegend=leyenda,
+        legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5, font=dict(size=13)),
+        title=dict(font=dict(size=15)),
+    )
+    fig.update_xaxes(title_standoff=14, tickfont=dict(size=12), title_font=dict(size=13))
+    fig.update_yaxes(title_standoff=14, tickfont=dict(size=12), title_font=dict(size=13))
+    fig.update_annotations(font_size=13)
+    return fig
+
+
 def fig_oscilador_nodos(n: int = 4) -> go.Figure:
     u = np.linspace(-6, 6, 1201)
     psi = psi_oscilador(n, u)
@@ -68,12 +83,12 @@ def fig_oscilador_nodos(n: int = 4) -> go.Figure:
     fig.add_trace(go.Scatter(x=u, y=psi ** 2, name=f"|ψ{_sub(n)}|²", line=dict(color=COLORES["densidad"], width=2, dash="dot"),
                              hovertemplate="αx = %{x:.3f}<br>|ψ|² = %{y:.4f}<extra></extra>"))
     if len(nodos):
-        fig.add_trace(go.Scatter(x=nodos, y=np.zeros_like(nodos), mode="markers", name=f"{len(nodos)} nodos",
+        fig.add_trace(go.Scatter(x=nodos, y=np.zeros_like(nodos), mode="markers", name=f"nodos ({len(nodos)})",
                                  marker=dict(color=_ROJO, size=12, symbol="x", line=dict(width=2, color=_ROJO)),
                                  hovertemplate="nodo en αx = %{x:.4f}<extra></extra>"))
-    fig.update_xaxes(title_text="αx", range=[-6, 6])
-    fig.update_yaxes(title_text="ψ / α^½")
-    return aplicar_tema_plotly(fig, f"Oscilador armónico con n = {n}: {n} nodos, los ceros de H{_sub(n)}", altura=430)
+    fig.update_xaxes(title_text="αx  (posición adimensional)", range=[-6, 6])
+    fig.update_yaxes(title_text="ψ  (en unidades de α^½)")
+    return _acabado(fig, f"Oscilador armónico, n = {n}: {n} nodos", altura=470)
 
 
 # ---------------------------------------------------------------------
@@ -94,32 +109,45 @@ def fig_conos(l: int = 5) -> go.Figure:
     for m, theta in angulos_cono(l):
         rho = math.sqrt(longitud ** 2 - m ** 2)
         for signo in (1, -1):
+            extremo = m == l
             fig.add_trace(go.Scatter(
-                x=[0, signo * rho], y=[0, m], mode="lines+markers", showlegend=False,
-                line=dict(color=COLORES["onda"] if signo == 1 else "rgba(0,212,255,0.35)", width=2.5 if signo == 1 else 1.5),
+                x=[0, signo * rho], y=[0, m], mode="lines+markers+text", showlegend=False,
+                text=["", f"m = {m}" if signo == 1 else ""], textposition="middle right", textfont=dict(size=12, color=COLORES["texto"]),
+                line=dict(color=(COLORES["densidad"] if extremo else COLORES["onda"]) if signo == 1 else "rgba(0,212,255,0.35)",
+                          width=3 if signo == 1 else 1.5),
                 marker=dict(size=[0, 9], color=COLORES["densidad"]),
                 hovertemplate=f"m = {m}<br>θ = {theta:.2f}°<br>L_z = {m} ħ<extra></extra>"))
         fig.add_hline(y=m, line=dict(color=COLORES["rejilla"], width=1, dash="dot"))
-    fig.update_xaxes(title_text="componente perpendicular (ħ)", scaleanchor="y", scaleratio=1, zeroline=False)
-    fig.update_yaxes(title_text="L_z  (ħ)", tickmode="linear", dtick=1)
-    return aplicar_tema_plotly(fig, f"l = {l}: |L| = √{l * (l + 1)} ħ = {longitud:.3f} ħ y {2 * l + 1} orientaciones permitidas",
-                               altura=520)
+    theta_min = angulos_cono(l)[0][1]
+    fig.add_annotation(x=-longitud * 1.02, y=l, text=f"θ mínimo = {theta_min:.2f}° (m = ±{l})", showarrow=False, xanchor="left",
+                       yanchor="bottom", font=dict(color=COLORES["densidad"]))
+    fig.update_xaxes(title_text="componente perpendicular al eje z  (ħ)", scaleanchor="y", scaleratio=1, zeroline=False,
+                     range=[-longitud * 1.25, longitud * 1.8], constrain="domain")
+    fig.update_yaxes(title_text="L_z  (ħ)", tickmode="linear", dtick=1 if l <= 8 else 2, range=[-longitud * 1.12, longitud * 1.2],
+                     constrain="domain")
+    return _acabado(fig, f"l = {l}: |L| = {longitud:.3f} ħ, {2 * l + 1} orientaciones", altura=600, leyenda=False)
 
 
 def fig_cono_minimo(l_marca: int = 1000) -> go.Figure:
     ls = np.unique(np.round(np.logspace(0, 4, 300)).astype(int))
     theta = np.degrees(np.arccos(np.sqrt(ls / (ls + 1.0))))
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=ls, y=theta, name="θ mínimo", line=dict(color=COLORES["onda"], width=3),
-                             hovertemplate="l = %{x}<br>θ_min = %{y:.3f}°<extra></extra>"))
-    for l in sorted({5, l_marca}):
+    fig.add_trace(go.Scatter(x=ls, y=theta, name="ángulo mínimo", line=dict(color=COLORES["onda"], width=3), showlegend=False,
+                             hovertemplate="l = %{x}<br>θ mínimo = %{y:.3f}°<extra></extra>"))
+    for l, ax, ay in ((5, 60, -45), (l_marca, -75, -55)):
         t = math.degrees(math.acos(math.sqrt(l / (l + 1))))
-        fig.add_trace(go.Scatter(x=[l], y=[t], mode="markers+text", text=[f"l = {l}: {t:.2f}°"], textposition="top right",
-                                 marker=dict(size=11, color=COLORES["densidad"]), showlegend=False,
-                                 hovertemplate=f"l = {l}<br>θ_min = {t:.3f}°<extra></extra>"))
-    fig.update_xaxes(title_text="número cuántico l", type="log")
-    fig.update_yaxes(title_text="ángulo del cono más cercano al eje z (grados)", type="log")
-    return aplicar_tema_plotly(fig, "Al crecer l, los conos se cierran sobre el eje z", altura=430)
+        fig.add_trace(go.Scatter(x=[l], y=[t], mode="markers", showlegend=False,
+                                 marker=dict(size=12, color=COLORES["densidad"], line=dict(color="white", width=1.5)),
+                                 hovertemplate=f"l = {l}<br>θ mínimo = {t:.3f}°<extra></extra>"))
+        fig.add_annotation(x=math.log10(l), y=math.log10(t), xref="x", yref="y", text=f"<b>l = {l}</b><br>θ = {t:.2f}°",
+                           showarrow=True, arrowhead=0, arrowcolor=COLORES["densidad"], ax=ax, ay=ay,
+                           bgcolor="rgba(11,16,32,0.9)", bordercolor=COLORES["densidad"], borderwidth=1, borderpad=5,
+                           font=dict(size=13, color=COLORES["texto"]))
+    fig.update_xaxes(title_text="número cuántico l  (escala logarítmica)", type="log", range=[0, 4.05],
+                     tickmode="array", tickvals=[1, 10, 100, 1000, 10000], ticktext=["1", "10", "100", "1000", "10 000"])
+    fig.update_yaxes(title_text="ángulo del cono más cercano a z  (°)", type="log", range=[math.log10(0.4), math.log10(70)],
+                     tickmode="array", tickvals=[0.5, 1, 2, 5, 10, 20, 45], ticktext=["0.5°", "1°", "2°", "5°", "10°", "20°", "45°"])
+    return _acabado(fig, "Ángulo mínimo del cono según l", altura=470, leyenda=False)
 
 
 # ---------------------------------------------------------------------
@@ -140,21 +168,22 @@ def radial_21(r: np.ndarray) -> np.ndarray:
 def _radial(funcion, nodos, rmax: float, nombre: str, titulo: str) -> go.Figure:
     r = np.linspace(0, rmax, 1200)
     R = funcion(r)
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1,
-                        subplot_titles=(f"{nombre}(r): cambia de signo en cada nodo", f"Distribución radial r²{nombre}²"))
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.14,
+                        subplot_titles=(f"Función radial {nombre}(r): cambia de signo en cada nodo", f"Distribución radial r²·{nombre}²"))
     fig.add_trace(go.Scatter(x=r, y=R, name=nombre, line=dict(color=COLORES["onda"], width=3),
                              hovertemplate="r = %{x:.2f} a₀<br>R = %{y:.4f}<extra></extra>"), row=1, col=1)
     fig.add_trace(go.Scatter(x=r, y=r * r * R * R, name="r²R²", line=dict(color=COLORES["densidad"], width=3),
                              fill="tozeroy", fillcolor="rgba(255,176,0,0.15)",
                              hovertemplate="r = %{x:.2f} a₀<br>r²R² = %{y:.4f}<extra></extra>"), row=2, col=1)
     for k, rn in enumerate(nodos):
-        fig.add_trace(go.Scatter(x=[rn], y=[0], mode="markers", name="nodo" if k == 0 else None, showlegend=k == 0,
+        fig.add_trace(go.Scatter(x=[rn], y=[0], mode="markers", name="nodo radial" if k == 0 else None, showlegend=k == 0,
                                  marker=dict(color=_ROJO, size=12, symbol="x", line=dict(width=2, color=_ROJO)),
                                  hovertemplate=f"nodo en r = {rn:.3f} a₀<extra></extra>"), row=1, col=1)
         fig.add_vline(x=rn, line=dict(color=_ROJO, width=1, dash="dash"))
     fig.update_xaxes(title_text="r  (a₀)", row=2, col=1)
-    fig.update_layout(showlegend=True)
-    return aplicar_tema_plotly(fig, titulo, altura=560)
+    fig.update_yaxes(title_text=f"{nombre}  (a₀^-3/2)", row=1, col=1)
+    fig.update_yaxes(title_text="r²R²  (a₀^-1)", row=2, col=1)
+    return _acabado(fig, titulo, altura=620)
 
 
 def nodos_3s() -> tuple[float, float]:
@@ -162,11 +191,11 @@ def nodos_3s() -> tuple[float, float]:
 
 
 def fig_radial_3s(_=None) -> go.Figure:
-    return _radial(radial_30, nodos_3s(), 22, "R₃₀", "Orbital 3s del hidrógeno: dos nodos radiales")
+    return _radial(radial_30, nodos_3s(), 22, "R₃₀", "Orbital 3s: dos nodos radiales")
 
 
 def fig_radial_4d(_=None) -> go.Figure:
-    return _radial(radial_42, (12.0,), 45, "R₄₂", "Orbital 4d del hidrógeno: un nodo radial (más dos nodos angulares)")
+    return _radial(radial_42, (12.0,), 45, "R₄₂", "Orbital 4d: un nodo radial")
 
 
 # ---------------------------------------------------------------------
@@ -179,17 +208,20 @@ def fig_2pz(_=None) -> go.Figure:
     R = np.hypot(X, Z)
     psi = Z * np.exp(-R / 2)
     psi = psi / np.abs(psi).max()
-    fig = go.Figure(go.Heatmap(x=eje, y=eje, z=psi, zmin=-1, zmax=1, colorscale="RdBu", reversescale=True,
-                               colorbar=dict(title="ψ (rel.)"),
-                               hovertemplate="x = %{x:.1f} a₀<br>z = %{y:.1f} a₀<br>ψ = %{z:.3f}<extra></extra>"))
-    fig.add_trace(go.Scatter(x=[0, 0], y=[2, -2], mode="markers", name="máximo de |ψ|² (z = ±2 a₀)", showlegend=True,
-                             marker=dict(color="white", size=12, symbol="star", line=dict(color="black", width=1.5)),
+    fig = go.Figure(go.Heatmap(x=eje, y=eje, z=psi, zmin=-1, zmax=1, colorscale="RdBu", reversescale=True, showscale=False,
+                               hovertemplate="x = %{x:.1f} a₀<br>z = %{y:.1f} a₀<br>ψ = %{z:.3f} (relativo)<extra></extra>"))
+    # Entradas de leyenda en lugar de barra de color: el signo se lee sin tapar nada
+    for nombre, color in (("ψ > 0", "#B2182B"), ("ψ < 0", "#2166AC")):
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode="markers", name=nombre, marker=dict(size=13, color=color, symbol="square")))
+    fig.add_trace(go.Scatter(x=[0, 0], y=[2, -2], mode="markers", name="máximo de |ψ|² (z = ±2 a₀)",
+                             marker=dict(color="white", size=13, symbol="star", line=dict(color="black", width=1.5)),
                              hovertemplate="máximo de |ψ|²: z = %{y:.0f} a₀<extra></extra>"))
     fig.add_hline(y=0, line=dict(color="#0B1020", width=1.5, dash="dash"))
-    fig.add_annotation(x=-11.5, y=0.7, text="plano nodal z = 0", showarrow=False, xanchor="left", font=dict(color="#0B1020"))
-    fig.update_xaxes(title_text="x  (a₀)", scaleanchor="y", scaleratio=1)
-    fig.update_yaxes(title_text="z  (a₀)")
-    return aplicar_tema_plotly(fig, "Orbital 2pz (corte en el plano xz): rojo y azul = signos opuestos", altura=520)
+    fig.add_annotation(x=-11.6, y=-0.9, text="plano nodal z = 0", showarrow=False, xanchor="left", yanchor="top",
+                       font=dict(color="#0B1020", size=13))
+    fig.update_xaxes(title_text="x  (a₀)", range=[-12, 12], scaleanchor="y", scaleratio=1, constrain="domain")
+    fig.update_yaxes(title_text="z  (a₀)", range=[-12, 12], constrain="domain")
+    return _acabado(fig, "Orbital 2pz: corte en el plano xz", altura=580)
 
 
 def fig_y20(_=None) -> go.Figure:
@@ -199,19 +231,20 @@ def fig_y20(_=None) -> go.Figure:
     radio = np.abs(y)
     crit = math.acos(1 / math.sqrt(3))
     fig = go.Figure()
-    for nombre, mascara, color in (("Y₂⁰ > 0", y >= 0, _AZUL), ("Y₂⁰ < 0", y <= 0, _ROJO)):
+    for nombre, mascara, color in (("Y₂⁰ > 0 (lóbulos a lo largo de z)", y >= 0, _AZUL), ("Y₂⁰ < 0 (anillo en el plano xy)", y <= 0, _ROJO)):
         for lado in (1, -1):
             fig.add_trace(go.Scatter(x=lado * radio[mascara] * np.sin(theta[mascara]), y=radio[mascara] * np.cos(theta[mascara]),
                                      mode="lines", fill="toself", name=nombre, legendgroup=nombre, showlegend=lado == 1,
                                      line=dict(color=color, width=2), hoverinfo="name"))
-    for ang in (crit, math.pi - crit):
+    for k, ang in enumerate((crit, math.pi - crit)):
         for lado in (1, -1):
             fig.add_trace(go.Scatter(x=[0, lado * 2.2 * math.sin(ang)], y=[0, 2.2 * math.cos(ang)], mode="lines",
-                                     showlegend=False, line=dict(color="white", width=1.5, dash="dash"),
+                                     name="conos nodales", legendgroup="nodal", showlegend=(k == 0 and lado == 1),
+                                     line=dict(color="white", width=1.5, dash="dash"),
                                      hovertemplate=f"nodo: θ = {math.degrees(ang):.2f}°<extra></extra>"))
-    fig.update_xaxes(title_text="x", scaleanchor="y", scaleratio=1, zeroline=False)
-    fig.update_yaxes(title_text="z")
-    return aplicar_tema_plotly(fig, f"|Y₂⁰| (corte xz): nodos en θ = {math.degrees(crit):.2f}° y {180 - math.degrees(crit):.2f}°", altura=520)
+    fig.update_xaxes(title_text="x  (unidades arbitrarias)", range=[-2.6, 2.6], scaleanchor="y", scaleratio=1, zeroline=False, constrain="domain")
+    fig.update_yaxes(title_text="z  (unidades arbitrarias)", range=[-2.6, 2.6], constrain="domain")
+    return _acabado(fig, f"|Y₂⁰|: nodos en {math.degrees(crit):.2f}° y {180 - math.degrees(crit):.2f}°", altura=580)
 
 
 # ---------------------------------------------------------------------
@@ -223,15 +256,15 @@ def fig_caja_tercio(_=None) -> go.Figure:
     medio = (x >= 1 / 3) & (x <= 2 / 3)
     p = 1 / 3 + math.sqrt(3) / (2 * math.pi)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=dens, name="|ψ₁|²", line=dict(color=COLORES["densidad"], width=3),
-                             hovertemplate="x/a = %{x:.3f}<br>a|ψ|² = %{y:.3f}<extra></extra>"))
-    fig.add_trace(go.Scatter(x=x[medio], y=dens[medio], fill="tozeroy", name=f"P = {p:.3f}", mode="lines",
+    fig.add_trace(go.Scatter(x=x, y=dens, name="densidad cuántica |ψ₁|²", line=dict(color=COLORES["densidad"], width=3),
+                             hovertemplate="x/a = %{x:.3f}<br>a·|ψ|² = %{y:.3f}<extra></extra>"))
+    fig.add_trace(go.Scatter(x=x[medio], y=dens[medio], fill="tozeroy", name=f"tercio central: P = {p:.3f}", mode="lines",
                              line=dict(color=COLORES["onda"], width=0), fillcolor="rgba(0,212,255,0.35)"))
-    fig.add_trace(go.Scatter(x=x, y=np.ones_like(x), name="clásica (uniforme)", line=dict(color=COLORES["gris"], width=2, dash="dash"),
+    fig.add_trace(go.Scatter(x=x, y=np.ones_like(x), name="clásica (uniforme): P = 0.333", line=dict(color=COLORES["gris"], width=2, dash="dash"),
                              hoverinfo="skip"))
-    fig.update_xaxes(title_text="x / a")
-    fig.update_yaxes(title_text="a·|ψ|²")
-    return aplicar_tema_plotly(fig, f"Estado fundamental: el tercio central contiene el {100 * p:.1f} % (la clásica daría 33.3 %)", altura=430)
+    fig.update_xaxes(title_text="x / a  (posición dentro de la caja)")
+    fig.update_yaxes(title_text="a·|ψ|²  (densidad de probabilidad)", range=[0, 2.2])
+    return _acabado(fig, f"Estado fundamental: {100 * p:.1f} % en el tercio central", altura=470)
 
 
 # ---------------------------------------------------------------------
