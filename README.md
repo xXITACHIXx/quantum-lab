@@ -12,6 +12,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 |---|---|
 | `quantum_lab.py` | Menú principal (portada, acceso a los seis simuladores y al Centro de teoría, pruebas globales) |
 | `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
+| `talleres/` | **Talleres de repaso**: `__init__.py` (índice, página y pruebas), `_calificar.py` (lectura de números y tolerancias), `_modelo.py` (preguntas y calificación por partes), `_fisica.py` (cálculos verificados) y un archivo por taller (`t1_espectros.py`…) |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
 | `particula_esfera.py` | 03 · Armónicos esféricos Yₗᵐ en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
@@ -124,6 +125,13 @@ la barra lateral que aparece el número de versión esperado.
   tiene pestañas de *Teoría* (con calculadoras y gráficas interactivas), *Simulación y práctica* (cuando hay simulador)
   y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Un tema se enlaza con
   `?sim=teoria&tema=bohr`.
+* **Talleres de repaso** (barra lateral → «Teoría y repaso»): problemas al estilo de los talleres del curso. Se escriben los
+  resultados (acepta `1.256e12` y `1,256 x 10^12`), cada pregunta se califica por partes con una tolerancia del 2 %, se
+  señala el error típico (factor 2π, unidades, signo…) y se muestra la solución justificada. Con «Datos nuevos» cada
+  intento cambia los valores. Un taller se enlaza con `?sim=talleres&taller=espectros`.
+* **Añadir un taller:** crear `talleres/tN_<tema>.py` con una función `construir(datos)` que devuelva sus `Pregunta` y un
+  `TALLER = Taller(...)`, y añadirlo a `TALLERES` en `talleres/__init__.py`. Las pruebas comprueban que las respuestas
+  correctas obtienen el puntaje completo en todas las variantes.
 * **Añadir un tema nuevo:** crear `teoria/<id>.py` con una función `mostrar()` (y, opcionalmente, una lista `PREGUNTAS`) y
   registrarlo en la lista `UNIDADES` de `teoria/__init__.py` (las instrucciones están en la cabecera de ese archivo).
 * Los **parámetros** están arriba de cada simulador; los resultados se recalculan al instante.

@@ -8,7 +8,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 APP = str(Path(__file__).parent / "quantum_lab.py")
-PAGINAS = ["inicio", "caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "teoria", "verificacion",
+PAGINAS = ["inicio", "caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "teoria", "talleres", "verificacion",
            "pruebas"]
 
 
