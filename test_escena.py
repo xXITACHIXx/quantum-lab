@@ -196,38 +196,59 @@ def test_emergencia_desde_abajo_y_nube_orbital():
     assert "innerHTML" not in js                                   # el JS no lleva etiquetas HTML (st.html lo descartaba)
     assert "Math.min(90" in js                                     # límite de partículas
     assert "p.orb" in js and "destination-out" in js               # órbitas con estela
-    assert "st-key-nav_" in js and "st-key-ql_item_" in js and "ql_volver" in js
+    assert "st-key-ql_item_" in js and "ql_volver" in js and "ql_categoria" in js
 
 
 
-def test_menu_cinetico_es_la_vista_predeterminada():
-    import quantum_lab_portada as portada
+def test_portada_muestra_solo_los_cuatro_capitulos():
     at = _abrir(vista=None)
     assert not at.exception, [e.value for e in at.exception]
     claves = {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")}
-    assert claves == {f"ql_menu_{m[0]}" for m in portada.MODULOS}
+    assert claves == {f"ql_menu_{c}" for c in portada.CAT_CLAVE.values()} and len(claves) == 4
     assert not any(b.key and b.key.startswith("ql_abrir_") for b in at.button)       # las tarjetas quedan en la otra vista
     html = " ".join(m.value for m in at.markdown)
-    assert html.count('class="ql-esc-item ql-esc-') == len(portada.MODULOS)           # una escena por destino
-    assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html   # los botones del hero siguen funcionando
+    assert html.count('class="ql-esc-item ql-esc-') == 4                              # una escena por capítulo
+    assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
 
 
-def test_menu_cinetico_navega_con_su_boton():
+def test_no_hay_barra_lateral():
     at = _abrir(vista=None)
-    at.button(key="ql_menu_oscilador").click().run()
-    assert at.session_state["ql_pagina"] == "oscilador" and not at.exception
+    assert len(at.sidebar.button) == 0 and len(at.sidebar.markdown) == 0
+    assert "collapsed" in open(APP, encoding="utf-8").read()
 
 
-def test_menu_cinetico_css_por_destino_y_accesibilidad():
-    import quantum_lab_portada as portada
+@pytest.mark.parametrize("categoria", portada.CATEGORIAS)
+def test_subportada_lista_los_temas_del_capitulo(categoria):
+    at = _abrir(portada.CAT_CLAVE[categoria], vista=None)
+    assert not at.exception, [e.value for e in at.exception]
+    esperados = {f"ql_menu_{m[0]}" for m in portada.MODULOS if m[2] == categoria}
+    assert {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")} == esperados
+    assert any(b.key == "ql_volver" for b in at.button)
+    assert not any('class="ql-ubicacion"' in m.value for m in at.markdown)
+
+
+def test_navegacion_completa_inicio_capitulo_tema_y_regreso():
+    at = _abrir(vista=None)
+    at.button(key="ql_menu_cat2").click().run()
+    assert at.session_state["ql_pagina"] == "cat2" and not at.exception
+    at.button(key="ql_menu_bohr").click().run()
+    assert at.session_state["ql_pagina"] == "bohr" and not at.exception
+    at.button(key="ql_categoria").click().run()
+    assert at.session_state["ql_pagina"] == "cat2"
+    at.button(key="ql_volver").click().run()
+    assert at.session_state["ql_pagina"] == "inicio"
+
+
+def test_menu_css_por_elemento_y_accesibilidad():
     import quantum_lab_escena as e
-    css = portada._css_menu()
-    for m in portada.MODULOS:
-        assert f".ql-esc-{m[0]}" in css and f"st-key-ql_item_{m[0]}" in css
+    css = portada._css_menu(portada._entradas())
+    for c in portada.CAT_CLAVE.values():
+        assert f".ql-esc-{c}" in css and f"st-key-ql_item_{c}" in css
     assert ":focus-within" in css                         # el teclado enciende el mismo escenario que el cursor
     base = e.css()
     assert "@keyframes ql-menu-entra" in base and "@keyframes ql-esc-entra" in base
     assert ".ql-esc { display: none; }" in base           # en pantallas pequeñas queda solo la lista
+    assert "calc(var(--k, 0) * 2.6rem)" in base           # escalera semi-diagonal
 
 
 def test_atomo_de_fondo_es_conceptual_y_accesible():
@@ -240,17 +261,12 @@ def test_atomo_de_fondo_es_conceptual_y_accesible():
     assert len(s) < 120_000                                       # ligero: nubes como un solo trazo por grupo
 
 
-def test_inicio_a_pantalla_completa_y_barra_lateral_angular():
+def test_inicio_a_pantalla_completa():
     import quantum_lab_escena as e
     css = e.css()
     assert 'stMainBlockContainer"]:has(.st-key-ql_menu)' in css   # solo la portada anula el ancho máximo
-    assert "min-height: 100vh" in css
-    assert 'section[data-testid="stSidebar"] [class*="st-key-nav_"]' in css and "skewX(-14deg)" in css
+    assert "min-height: 100vh" in css and "skewX(-14deg)" in css
     assert ".ql-velo" in css                                      # velo que garantiza el contraste del texto sobre el átomo
     at = _abrir("caja", vista=None)
     html = " ".join(m.value for m in at.markdown)
-    assert "st-key-nav_caja" in html                              # acento por página en la barra lateral
     assert "stMainBlockContainer" in html and not any(b.key == "ql_menu_caja" for b in at.button)   # el menú solo existe en la portada
-    ini = _abrir(vista=None)
-    claves = [b.key for b in ini.sidebar.button]
-    assert "nav_inicio" in claves and "nav_caja" in claves        # la navegación de respaldo sigue en la barra lateral

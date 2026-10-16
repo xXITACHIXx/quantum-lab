@@ -432,6 +432,25 @@ section[data-testid="stSidebar"] [class*="st-key-nav_"]:is(:hover, :focus-within
 section[data-testid="stSidebar"] [class*="st-key-nav_"]:is(:hover, :focus-within) button::after { animation: ql-corte .7s cubic-bezier(.3, .7, .2, 1) both; }
 section[data-testid="stSidebar"] [class*="st-key-nav_"]:has(button:focus-visible) button { outline: 2px solid var(--ql-texto); outline-offset: 2px; }
 section[data-testid="stSidebar"] .ql-menu-cab { padding: 1rem 0 .3rem .3rem; }
+
+/* Capítulos de la portada: barras grandes en escalera (semi-diagonal) y sub-portadas de cada capítulo. */
+.st-key-ql_cats { margin-top: 1.6rem; gap: .7rem !important; }
+.st-key-ql_cats [class*="st-key-ql_item_"] { max-width: 27rem; margin-left: calc(var(--k, 0) * 2.6rem); }
+.st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button { min-height: 4rem; padding-left: 1.6rem !important; }
+.st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button p { font-size: 1.25rem !important; letter-spacing: .06em; }
+.st-key-ql_temas { margin-top: .8rem; }
+.st-key-ql_menu .st-key-ql_temas [class*="st-key-ql_item_"] button { min-height: 2.6rem; }
+.st-key-ql_menu .st-key-ql_temas [class*="st-key-ql_item_"] button p { font-size: .98rem !important; }
+.ql-sub-titulo { font-size: clamp(2rem, 3.4vw, 3rem); }
+.st-key-ql_sub_volver { margin: 0 0 .6rem .1rem; }
+.st-key-ql_sub_volver button { color: var(--ql-tenue) !important; }
+.st-key-ql_pie { padding: 1.2rem clamp(1rem, 4vw, 4.5rem) 1.6rem; margin-top: 1rem; border-top: 1px solid var(--ql-borde); gap: .4rem; }
+.st-key-ql_pie .ql-pie { margin: 0; }
+[data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], [data-testid="stExpandSidebarButton"] { display: none !important; }
+@media (max-width: 900px) {
+  .st-key-ql_cats [class*="st-key-ql_item_"] { margin-left: calc(var(--k, 0) * .9rem); }
+  .st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button { min-height: 3.4rem; }
+}
 @media (max-width: 900px) {
   .st-key-ql_menu { padding-top: 3.8rem; }
   .ql-velo { background: linear-gradient(0deg, rgba(11, 16, 32, .5), rgba(11, 16, 32, .12)); }
@@ -674,12 +693,13 @@ JS = r"""
     var titulo = m ? m[2] : texto;
     var cont = boton.closest('[class*="st-key-ql_dest_"]');
     if (cont) { var h = cont.querySelector('h3'); if (h) { titulo = h.textContent.trim(); } }
-    if (boton.closest('.st-key-ql_volver')) { titulo = 'Observatorio'; }
+    if (boton.closest('.st-key-ql_volver')) { titulo = 'Inicio'; }
+    var esCat = !!boton.closest('[class*="st-key-ql_item_cat"]');
     var host = boton.closest('[class*="st-key-ql_item_"], [class*="st-key-nav_"], [class*="st-key-ql_dest_"]');
     var acento = host ? getComputedStyle(host).getPropertyValue('--acento').trim() : '';
     emergeEl.style.setProperty('--acento', acento && acento.indexOf('var(') < 0 ? acento : '');
     if (!acento || acento.indexOf('var(') === 0) { emergeEl.style.removeProperty('--acento'); }
-    emergeEl.querySelector('.ql-em-tipo').textContent = m ? 'Destino ' + m[1] + ' · 15' : 'Quantum Lab';
+    emergeEl.querySelector('.ql-em-tipo').textContent = m ? (esCat ? 'Capítulo ' + m[1] + ' · 04' : 'Destino ' + m[1] + ' · 15') : 'Quantum Lab';
     emergeEl.querySelector('.ql-em-titulo').textContent = titulo;
     emergeEl.classList.remove('ql-em-baja'); void emergeEl.offsetWidth; emergeEl.classList.add('ql-em-sube');
     emergeVisible = true; emergeListo = false; emergeInicio = Date.now();
@@ -696,7 +716,7 @@ JS = r"""
   document.addEventListener('click', function (e) {
     var t = e.target && e.target.closest ? e.target.closest('button') : null;
     if (!t || t.disabled) { return; }
-    var navegacion = t.closest('[class*="st-key-nav_"], [class*="st-key-ql_item_"], .st-key-ql_volver, [class*="st-key-ql_dest_"]');
+    var navegacion = t.closest('[class*="st-key-nav_"], [class*="st-key-ql_item_"], .st-key-ql_volver, .st-key-ql_categoria, [class*="st-key-ql_dest_"]');
     if (navegacion) { emergerDesde(t); }
   }, true);
 

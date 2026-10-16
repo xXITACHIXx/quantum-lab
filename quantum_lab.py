@@ -78,42 +78,26 @@ def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
 
 
 # ---------------------------------------------------------------------
-# Barra lateral
+# Pie de página (sin barra lateral: se navega desde la portada y las sub-portadas)
 # ---------------------------------------------------------------------
-def _boton_nav(clave: str) -> None:
-    titulo, icono, _ = PAGINAS[clave]
-    activa = st.session_state["ql_pagina"] == clave
-    st.button(titulo, key=f"nav_{clave}", icon=icono, type="primary" if activa else "secondary",
-              on_click=_ir_a, args=(clave,), width="stretch")
-
-
-def _barra_lateral() -> None:
-    with st.sidebar:
-        st.markdown('<div class="ql-marca"><div class="ql-marca-nombre">Quantum Lab</div>'
-                    '<div class="ql-marca-sub">Mecánica cuántica</div></div>' + portada.css_navegacion(), unsafe_allow_html=True)
-        _boton_nav("inicio")
-        for titulo, claves, _abierto in GRUPOS:
-            num = portada.CAPITULOS[titulo][0]
-            st.markdown(f'<div class="ql-menu-cab"><b>{num}</b>{titulo}</div>', unsafe_allow_html=True)
-            for clave in claves:
-                _boton_nav(clave)
-        st.markdown("")
+def _pie() -> None:
+    with st.container(key="ql_pie"):
         qc.interruptor_movil()
         escena.instalar_efectos(st)
-        st.markdown('<div class="ql-pie">Cálculo con NumPy y SciPy.<br>La dirección de la página guarda la '
-                    f'configuración: cópiala para compartirla.<br><br>Versión {qc.VERSION} · 6 simuladores</div>',
-                    unsafe_allow_html=True)
+        st.markdown(portada.css_navegacion() + '<div class="ql-pie">Cálculo con NumPy y SciPy. La dirección de la página guarda la '
+                    f'configuración: cópiala para compartirla. Versión {qc.VERSION} · 6 simuladores</div>', unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------
 # Páginas
 # ---------------------------------------------------------------------
 def _ubicacion(pagina: str) -> None:
-    """Barra de ubicación (categoría / página / número) y regreso al observatorio."""
+    """Barra de ubicación (categoría / página / número) con regreso al capítulo y a la portada."""
     m = portada.modulo(pagina)
-    c1, c2 = st.columns([5, 1.25], vertical_alignment="center")
+    c1, c2, c3 = st.columns([4, 1.5, 1.25], vertical_alignment="center")
     c1.markdown(escena.ubicacion_html(m[2], m[4], m[1], len(portada.MODULOS)), unsafe_allow_html=True)
-    c2.button("Observatorio", key="ql_volver", icon=":material/arrow_back:", type="tertiary", on_click=_ir_a, args=("inicio",), width="stretch")
+    c2.button(m[2], key="ql_categoria", icon=":material/arrow_back:", type="tertiary", on_click=_ir_a, args=(portada.CAT_CLAVE[m[2]],), width="stretch")
+    c3.button("Inicio", key="ql_volver", icon=":material/home:", type="tertiary", on_click=_ir_a, args=("inicio",), width="stretch")
 
 
 def _pagina_inicio() -> None:
@@ -135,7 +119,7 @@ def _pagina_pruebas() -> None:
 
 def main() -> None:
     st.set_page_config(page_title="Quantum Lab", page_icon=":material/science:", layout="wide",
-                       initial_sidebar_state="auto")
+                       initial_sidebar_state="collapsed")
     qc.inyectar_css()
     qc.preparar_sesion()
     if "ql_pagina" not in st.session_state:          # primera carga: la página puede venir en el enlace (?sim=…)
@@ -144,22 +128,24 @@ def main() -> None:
             sim = "teoria"
             st.session_state["ql_tema"] = "schrodinger"
         st.session_state["ql_pagina"] = sim if sim in PAGINAS else "inicio"
-    _barra_lateral()
     pagina = st.session_state["ql_pagina"]
-    if pagina in ("inicio", "pruebas", "verificacion"):
+    if pagina in ("inicio", "pruebas", "verificacion") or pagina in portada.CLAVE_CAT:
         qc.escribir_en_url(None)
     # La clave del contenedor cambia solo al cambiar de página: la animación de entrada se reproduce al navegar y no al mover un control.
     with st.container(key=f"ql_escena_{pagina}"):
-        if pagina != "inicio":
+        if pagina != "inicio" and pagina not in portada.CLAVE_CAT:
             _ubicacion(pagina)
         if pagina == "inicio":
             _pagina_inicio()
+        elif pagina in portada.CLAVE_CAT:
+            portada.pagina_subinicio(_ir_a, portada.CLAVE_CAT[pagina])
         elif pagina == "pruebas":
             _pagina_pruebas()
         elif pagina == "verificacion":
             verificacion.interfaz()
         else:
             PAGINAS[pagina][2].interfaz()
+    _pie()
 
 
 def _bajo_streamlit() -> bool:

@@ -121,19 +121,19 @@ la barra lateral que aparece el número de versión esperado.
 
 ## 5. Uso
 
-* **Centro de teoría** (barra lateral → «Teoría y verificación»): toda la teoría del curso en un solo lugar, organizada
+* **Centro de teoría** (inicio → capítulo «Teoría y verificación»): toda la teoría del curso en un solo lugar, organizada
   por unidades según las diapositivas. Los temas sin material aún aparecen como «en preparación». Cada tema
   tiene pestañas de *Teoría* (con calculadoras y gráficas interactivas), *Simulación y práctica* (cuando hay simulador)
   y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Un tema se enlaza con
   `?sim=teoria&tema=bohr`.
-* **Talleres de repaso** (barra lateral → «Teoría y repaso»): problemas al estilo de los talleres del curso. Se escriben los
+* **Talleres de repaso** (inicio → capítulo «Teoría y repaso»): problemas al estilo de los talleres del curso. Se escriben los
   resultados (acepta `1.256e12` y `1,256 x 10^12`), cada pregunta se califica por partes con una tolerancia del 2 %, se
   señala el error típico (factor 2π, unidades, signo…) y se muestra la solución justificada. Con «Datos nuevos» cada
   intento cambia los valores. Un taller se enlaza con `?sim=talleres&taller=espectros`.
 * **Añadir un taller:** crear `talleres/tN_<tema>.py` con una función `construir(datos)` que devuelva sus `Pregunta` y un
   `TALLER = Taller(...)`, y añadirlo a `TALLERES` en `talleres/__init__.py`. Las pruebas comprueban que las respuestas
   correctas obtienen el puntaje completo en todas las variantes.
-* **Ejercicios de práctica** (barra lateral → «Teoría y repaso»): 59 ejercicios, los *Example Problems* y *Classwork* de las
+* **Ejercicios de práctica** (inicio → capítulo «Teoría y repaso»): 59 ejercicios, los *Example Problems* y *Classwork* de las
   diapositivas y los ejercicios del libro trabajados en el cuaderno. Se filtran por fuente, tema o texto; cada uno tiene
   pistas y una **solución paso a paso** que se puede abrir sin responder, y las partes numéricas o de opción se pueden
   comprobar con el mismo calificador de los talleres. Las erratas encontradas en las fuentes se señalan en la nota del
@@ -167,13 +167,13 @@ la barra lateral que aparece el número de versión esperado.
   órbitas). Los indicadores de los simuladores destellan cuando su valor cambia. El JavaScript es una mejora progresiva (`st.html` con
   `unsafe_allow_javascript`, detectado en tiempo de ejecución); sin él quedan todas las animaciones CSS. Con `prefers-reduced-motion` todo se
   detiene, y en móviles se suprimen el plano y las partículas.
-* **Ruta de estudio** (barra lateral → «Teoría y repaso»): recorrido por dominio de cada tema, sin depender de fechas. Los 13 temas siguen un orden de
+* **Ruta de estudio** (inicio → capítulo «Teoría y repaso»): recorrido por dominio de cada tema, sin depender de fechas. Los 13 temas siguen un orden de
   dependencias físicas (`ORDEN` y `PREREQ` en `ejercicios/_ruta.py`). Cada tema tiene tres pasos: *teoría leída* (se marca a mano; no aplica si la
   teoría aún no existe), *ejercicios resueltos* (al menos el 75 %) y *mini-examen aprobado* (3 ejercicios del tema, nota de 3.0 o más sobre 5.0).
   Avisa de los prerrequisitos incompletos o con precisión menor de 60 % y propone el «Siguiente paso»: primero el tema de bajo desempeño y, si no hay,
   el primer tema pendiente con prerrequisitos cumplidos. También aparece en el inicio. Las marcas viajan en la dirección (parámetro `rut`) y en la
   copia de seguridad.
-* **Formulario** (barra lateral → «Teoría y repaso»): constantes fundamentales con valor CODATA e incertidumbre relativa (las del SI
+* **Formulario** (inicio → capítulo «Teoría y repaso»): constantes fundamentales con valor CODATA e incertidumbre relativa (las del SI
   exactas), unidades atómicas, combinaciones frecuentes (hc, ħc, e²/4πε₀, k_BT…), conversor de energía (J, eV, hartree, cm⁻¹, Hz, nm, kJ/mol,
   kcal/mol, K) con región espectral, conversores de longitud, masa y ángulo, 149 fórmulas agrupadas en 18 temas (con definición de símbolos y
   condiciones de validez, buscador y enlaces a la teoría y a los ejercicios del tema), masas isotópicas (AME2020) y calculadora de masa reducida.
@@ -301,4 +301,4 @@ La portada muestra por defecto un menú de barras angulares (una por destino) y,
 
 ## Portada a pantalla completa
 
-La primera pantalla es un átomo ilustrado a pantalla completa (nubes de probabilidad muestreadas de densidades hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, el menú de destinos en barras angulares. Al apuntar una barra aparece, abajo a la derecha, la ilustración de ese tema. Las mismas barras forman la barra lateral, que sigue siendo la navegación de respaldo en todas las páginas. Debajo de la primera pantalla están el siguiente paso sugerido, el interruptor «Ver también los destinos como tarjetas» y las ayudas. El átomo es una ilustración conceptual: las escalas de cada nube se ajustan para componer la imagen y no son un resultado del simulador.
+La primera pantalla es un átomo ilustrado a pantalla completa (nubes de probabilidad muestreadas de densidades hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, el menú de destinos en barras angulares. Al apuntar una barra aparece, abajo a la derecha, la ilustración de ese tema. La portada muestra solo los cuatro capítulos, en escalera; cada uno abre una sub-portada con sus temas (misma animación de emergencia). No hay barra lateral: cada página tiene arriba su ubicación con regreso al capítulo y al inicio. Debajo de la primera pantalla están el siguiente paso sugerido, el interruptor «Ver también los destinos como tarjetas» y las ayudas. El átomo es una ilustración conceptual: las escalas de cada nube se ajustan para componer la imagen y no son un resultado del simulador.
