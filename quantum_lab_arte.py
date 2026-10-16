@@ -191,7 +191,148 @@ def incertidumbre() -> str:
     return _envolver("".join(partes), "Ilustración conceptual: paquete estrecho en posición y ancho en momento, con el límite de Heisenberg")
 
 
-ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre}
+def _caja_texto(x, y, w, h, color=None, rx=6, relleno=None) -> str:
+    return f'<rect x="{_n(x)}" y="{_n(y)}" width="{_n(w)}" height="{_n(h)}" rx="{rx}" fill="{relleno or "none"}" stroke="{color or P["borde"]}" stroke-width="1.4"/>'
+
+
+def _lineas_texto(x, y, ancho, n, paso=11, color=None) -> str:
+    color = color or P["borde"]
+    return "".join(f'<line x1="{_n(x)}" y1="{_n(y + i * paso)}" x2="{_n(x + ancho * (0.55 if i == n - 1 else 1))}" y2="{_n(y + i * paso)}" stroke="{color}" stroke-width="2.2" stroke-linecap="round"/>' for i in range(n))
+
+
+def ruta() -> str:
+    """Grafo de dependencias entre los temas, calculado con los prerrequisitos reales de la Ruta de estudio."""
+    from ejercicios import _ruta
+    prof: dict[str, int] = {}
+    for t in _ruta.ORDEN:
+        prof[t] = 1 + max((prof[q] for q in _ruta.PREREQ[t]), default=-1)
+    niveles = max(prof.values()) + 1
+    columnas: dict[int, list[str]] = {}
+    for t in _ruta.ORDEN:
+        columnas.setdefault(prof[t], []).append(t)
+    pos = {}
+    for d, temas in columnas.items():
+        for i, t in enumerate(temas):
+            pos[t] = (34 + d * (292 / (niveles - 1)), 100 + (i - (len(temas) - 1) / 2) * 38)
+    partes = []
+    for t in _ruta.ORDEN:
+        for q in _ruta.PREREQ[t]:
+            (x1, y1), (x2, y2) = pos[q], pos[t]
+            partes.append(f'<path d="M{_n(x1)} {_n(y1)} C{_n((x1 + x2) / 2)} {_n(y1)} {_n((x1 + x2) / 2)} {_n(y2)} {_n(x2)} {_n(y2)}" fill="none" stroke="{P["borde"]}" stroke-width="1.6"/>')
+    for t, (x, y) in pos.items():
+        raiz = not _ruta.PREREQ[t]
+        partes.append(f'<circle cx="{_n(x)}" cy="{_n(y)}" r="7" fill="{P["panel"]}" stroke="{P["violeta"] if raiz else P["cian"]}" stroke-width="2"/>')
+    partes.append(_texto(180, 192, "temas y prerrequisitos (orden de dependencias)", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: grafo de dependencias entre los temas de la ruta de estudio")
+
+
+def teoria() -> str:
+    x = np.linspace(40, 168, 80)
+    partes = [f'<path d="M180 40 C150 30 90 30 40 40 V158 C90 148 150 148 180 158 Z" fill="{P["fondo"]}" stroke="{P["tenue"]}" stroke-width="1.8"/>',
+              f'<path d="M180 40 C210 30 270 30 320 40 V158 C270 148 210 148 180 158 Z" fill="{P["fondo"]}" stroke="{P["tenue"]}" stroke-width="1.8"/>',
+              _linea(x, 96 - 26 * np.sin((x - 40) / 128 * 3 * math.pi) * np.sin((x - 40) / 128 * math.pi) ** 0.5, S["onda"], 2.4),
+              f'<line x1="44" y1="96" x2="172" y2="96" stroke="{P["borde"]}" stroke-width="1" stroke-dasharray="3 4"/>',
+              _texto(250, 70, "Ĥψ = Eψ", P["texto"], 18, peso=600), _lineas_texto(200, 92, 100, 4), _lineas_texto(200, 140, 70, 1),
+              _texto(180, 190, "teoría de cada tema, con su simulador", P["tenue"], 10)]
+    return _envolver("".join(partes), "Ilustración conceptual: libro abierto con una función de onda y la ecuación de Schrödinger")
+
+
+def formulario() -> str:
+    partes = []
+    constantes = (("h", "6.626×10⁻³⁴ J s"), ("c", "2.998×10⁸ m/s"), ("ħ", "1.055×10⁻³⁴ J s"), ("k_B", "1.381×10⁻²³ J/K"))
+    for i, (sim, val) in enumerate(constantes):
+        y = 30 + i * 32
+        partes.append(_caja_texto(24, y, 190, 26, P["borde"], 5, P["panel"]))
+        partes.append(_texto(40, y + 18, sim, P["violeta"], 14, "start", 700)); partes.append(_texto(206, y + 18, val, P["tenue"], 10, "end"))
+    partes.append(_flecha(224, 99, 262, 99, P["cian"], 1.8))
+    for i, u in enumerate(("eV", "cm⁻¹", "nm", "kJ/mol")):
+        partes.append(_caja_texto(268, 30 + i * 32, 70, 26, P["cian"], 5)); partes.append(_texto(303, 48 + i * 32, u, P["texto"], 11, peso=600))
+    partes.append(_texto(180, 192, "constantes, conversiones y fórmulas", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: constantes fundamentales y conversión entre unidades de energía")
+
+
+def talleres() -> str:
+    partes = [_caja_texto(60, 12, 190, 164, P["tenue"], 8, P["panel"]), _lineas_texto(78, 36, 150, 3),
+              _texto(78, 92, "a)", P["texto"], 12, "start", 600), _caja_texto(98, 80, 130, 16, P["cian"], 4),
+              _texto(78, 120, "b)", P["texto"], 12, "start", 600), _caja_texto(98, 108, 130, 16, P["cian"], 4),
+              _texto(78, 148, "c)", P["texto"], 12, "start", 600), _caja_texto(98, 136, 130, 16, P["cian"], 4)]
+    partes.append(f'<g transform="rotate(38 300 70)"><rect x="288" y="20" width="14" height="96" rx="3" fill="{P["amarillo"]}"/><path d="M288 116h14l-7 16z" fill="{P["tenue"]}"/></g>')
+    partes.append(_texto(180, 197, "preguntas por partes con resultado numérico", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: hoja de taller con preguntas por partes y un lápiz")
+
+
+def ejercicios() -> str:
+    partes = []
+    for i, (txt, col) in enumerate((("Paso 1 · Planteamiento", P["cian"]), ("Paso 2 · Desarrollo", P["cian"]), ("Paso 3 · Resultado", P["verde"]))):
+        y = 22 + i * 52
+        partes.append(_caja_texto(30, y, 210, 40, col, 7, P["panel"]))
+        partes.append(_texto(46, y + 25, txt, P["texto"], 12, "start", 600))
+        if i < 2:
+            partes.append(_flecha(135, y + 41, 135, y + 51, P["tenue"], 1.4))
+    partes.append(f'<circle cx="300" cy="62" r="22" fill="{P["panel"]}" stroke="{P["amarillo"]}" stroke-width="2"/><path d="M292 70h16M294 76h12M300 44a12 12 0 0 0-7 22h14a12 12 0 0 0-7-22z" fill="none" stroke="{P["amarillo"]}" stroke-width="1.8" stroke-linecap="round" transform="translate(0 -2)"/>')
+    partes.append(_texto(300, 104, "pistas", P["amarillo"], 11, peso=600))
+    partes.append(_texto(180, 197, "solución explicada paso a paso", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: solución en tres pasos y una pista")
+
+
+def examen() -> str:
+    cx, cy, R = 110, 100, 62
+    th = np.linspace(0, 2 * math.pi, 120)
+    partes = [f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="{P["panel"]}" stroke="{P["tenue"]}" stroke-width="2"/>',
+              f'<rect x="{cx - 10}" y="{cy - R - 14}" width="20" height="8" rx="2" fill="{P["tenue"]}"/>']
+    for k in range(12):
+        a = k * math.pi / 6
+        partes.append(f'<line x1="{_n(cx + (R - 6) * math.sin(a))}" y1="{_n(cy - (R - 6) * math.cos(a))}" x2="{_n(cx + (R - 12) * math.sin(a))}" y2="{_n(cy - (R - 12) * math.cos(a))}" stroke="{P["tenue"]}" stroke-width="1.6"/>')
+    partes.append(f'<path d="M{cx} {cy} L{cx} {cy - R + 16}" stroke="{P["cian"]}" stroke-width="3" stroke-linecap="round"/><path d="M{cx} {cy} L{_n(cx + 34)} {_n(cy + 14)}" stroke="{P["amarillo"]}" stroke-width="3" stroke-linecap="round"/><circle cx="{cx}" cy="{cy}" r="4" fill="{P["texto"]}"/>')
+    partes.append(_texto(250, 70, "0 – 5.0", P["texto"], 18, peso=600))
+    partes.append(_caja_texto(205, 92, 120, 12, P["borde"], 6))
+    partes.append(_texto(265, 126, "cronometrado, sin pistas", P["tenue"], 10))
+    partes.append(_texto(265, 142, "corrección al entregar", P["tenue"], 10))
+    partes.append(_texto(180, 197, "evaluación con tiempo límite", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: cronómetro y escala de calificación de 0 a 5")
+
+
+def repaso() -> str:
+    base = 150
+    partes = [f'<line x1="40" y1="{base}" x2="330" y2="{base}" stroke="{P["tenue"]}" stroke-width="1.4"/>', f'<line x1="40" y1="30" x2="40" y2="{base}" stroke="{P["tenue"]}" stroke-width="1.4"/>']
+    for i, h in enumerate((92, 58, 108, 40, 76)):
+        x = 62 + i * 54
+        partes.append(f'<rect x="{x}" y="{base - h}" width="34" height="{h}" rx="3" fill="{P["violeta"]}" fill-opacity=".28" stroke="{P["violeta"]}" stroke-width="1.6" stroke-dasharray="5 3"/>')
+        partes.append(_texto(x + 17, base + 14, f"tema {i + 1}", P["tenue"], 9))
+    partes.append(f'<line x1="40" y1="{base - 60}" x2="330" y2="{base - 60}" stroke="{P["amarillo"]}" stroke-width="1.4" stroke-dasharray="4 4"/>')
+    partes.append(_texto(330, 20, "- - umbral de repaso", P["amarillo"], 10, "end"))
+    partes.append(_texto(180, 197, "temas con menor precisión y errores frecuentes", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: barras de precisión por tema con un umbral de repaso (valores ilustrativos)")
+
+
+def verificacion() -> str:
+    x = np.linspace(30, 330, 200)
+    u = (x - 30) / 300
+    f = 100 - 56 * np.sin(2.5 * math.pi * u) * np.exp(-1.2 * u)
+    g = f + 1.5 * np.sin(14 * math.pi * u)
+    partes = [f'<line x1="30" y1="170" x2="330" y2="170" stroke="{P["tenue"]}" stroke-width="1.2"/>',
+              _linea(x, f, S["onda"], 3.2), _linea(x, g, S["densidad"], 1.6, 1.0, 'stroke-dasharray="5 3"'),
+              _texto(46, 24, "simulador", S["onda"], 11, "start", 600), _texto(46, 40, "referencia independiente", S["densidad"], 11, "start", 600)]
+    partes.append(f'<circle cx="296" cy="34" r="16" fill="{P["panel"]}" stroke="{P["verde"]}" stroke-width="2"/><path d="M288 34l6 6 11-12" fill="none" stroke="{P["verde"]}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>')
+    partes.append(_texto(180, 192, "diferencia dentro de la tolerancia", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: curva del simulador y curva de referencia que coinciden dentro de la tolerancia")
+
+
+def pruebas() -> str:
+    partes = []
+    filas = ("Eₙ de la caja", "normalización ∫|ψ|²dx = 1", "ortogonalidad ⟨ψₘ|ψₙ⟩ = 0", "Kₘₐₓ = hν − Φ", "Δx·Δp ≥ ħ/2")
+    for i, txt in enumerate(filas):
+        y = 18 + i * 34
+        partes.append(_caja_texto(40, y, 280, 28, P["borde"], 5, P["panel"]))
+        partes.append(_texto(56, y + 19, txt, P["texto"], 11, "start"))
+        partes.append(f'<circle cx="298" cy="{y + 14}" r="9" fill="none" stroke="{P["verde"]}" stroke-width="1.8"/><path d="M293 {y + 14}l4 4 7-8" fill="none" stroke="{P["verde"]}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>')
+    partes.append(_texto(180, 195, "comprobaciones numéricas con su tolerancia", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: lista de comprobaciones numéricas superadas")
+
+
+ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre,
+                 "ruta": ruta, "teoria": teoria, "formulario": formulario, "talleres": talleres, "ejercicios": ejercicios, "examen": examen,
+                 "repaso": repaso, "verificacion": verificacion, "pruebas": pruebas}
 _CACHE: dict[str, str] = {}
 
 

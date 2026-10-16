@@ -2,7 +2,7 @@
 quantum_lab_portada.py — Página de inicio de QUANTUM LAB
 ========================================================
 
-Cabecera con ilustración y tarjetas de navegación por categoría. `MODULOS` es la única lista de módulos de la portada (número, categoría,
+Cabecera con ilustración y tarjetas (cada módulo con su ilustración conceptual) de navegación por categoría. `MODULOS` es la única lista de módulos de la portada (número, categoría,
 título, descripción); las claves son las de `quantum_lab.PAGINAS`. Las tarjetas solo usan datos reales: no muestran estadísticas de uso
 ni indicadores de progreso (el progreso del estudiante vive en la Ruta de estudio).
 """
@@ -60,10 +60,7 @@ ID_SIMULADORES = "ql-simuladores"
 def tarjeta_html(clave: str, numero: str, categoria: str, tipo: str, titulo: str, descripcion: str, lema: str) -> str:
     """HTML de una tarjeta (los textos se escapan; los SVG son los generados por `quantum_lab_arte`)."""
     e = html.escape
-    if tipo == SIMULADOR:
-        cabecera = f'<div class="ql-miniatura">{arte.svg(clave)}</div>'
-    else:
-        cabecera = f'<div class="ql-icono-caja">{arte.icono(clave, "var(--ql-verde)" if tipo == VERIFICACION else None)}</div>'
+    cabecera = f'<div class="ql-miniatura">{arte.svg(clave)}</div>'
     ecuacion = f'<div class="ql-ecuacion">{e(lema)}</div>' if lema else ""
     return (f'<div class="ql-card ql-card-{tipo}">{cabecera}'
             f'<div class="ql-card-cab"><span class="ql-num">{e(numero)}</span><span class="ql-chip">{e(categoria)}</span></div>'

@@ -14,13 +14,14 @@ import quantum_lab_tema as tema
 APP = str(Path(__file__).parent / "quantum_lab.py")
 PERMITIDOS = {c.upper() for c in tema.PALETA.values()} | {tema.PANEL_2.upper(), tema.SERIES["potencial"].upper(), tema.SERIES["interferencia"].upper()}
 SIMULADORES = ["caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre"]
+ESTUDIO = ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso", "verificacion", "pruebas"]
 
 
 def _todas():
-    return {**{k: arte.svg(k) for k in SIMULADORES}, "portada": arte.portada()}
+    return {**{k: arte.svg(k) for k in SIMULADORES + ESTUDIO}, "portada": arte.portada()}
 
 
-@pytest.mark.parametrize("clave", SIMULADORES + ["portada"])
+@pytest.mark.parametrize("clave", SIMULADORES + ESTUDIO + ["portada"])
 def test_svg_valido_ligero_y_sin_recursos_externos(clave):
     s = _todas()[clave]
     minidom.parseString(s)                                              # XML bien formado
@@ -30,7 +31,7 @@ def test_svg_valido_ligero_y_sin_recursos_externos(clave):
     assert 'role="img"' in s and "<title>" in s and "Ilustración conceptual" in s
 
 
-@pytest.mark.parametrize("clave", SIMULADORES + ["portada"])
+@pytest.mark.parametrize("clave", SIMULADORES + ESTUDIO + ["portada"])
 def test_svg_usa_solo_colores_de_la_paleta(clave):
     colores = {c.upper() for c in re.findall(r"#[0-9A-Fa-f]{6}", _todas()[clave])}
     ajenos = colores - PERMITIDOS
@@ -74,11 +75,16 @@ def test_tarjeta_escapa_el_texto():
     assert "<b>x</b>" not in h and "&lt;b&gt;" in h and "a &amp; b" in h
 
 
-def test_las_tarjetas_de_simulador_llevan_ilustracion_y_las_demas_icono():
-    sim = portada.tarjeta_html(*portada.MODULOS[0])
-    est = portada.tarjeta_html(*[m for m in portada.MODULOS if m[0] == "ruta"][0])
-    assert "ql-miniatura" in sim and "<svg" in sim
-    assert "ql-icono-caja" in est and "ql-miniatura" not in est
+def test_todas_las_tarjetas_llevan_su_ilustracion():
+    for m in portada.MODULOS:
+        h = portada.tarjeta_html(*m)
+        assert "ql-miniatura" in h and "<svg" in h and arte.svg(m[0]) in h
+
+
+def test_la_ruta_se_dibuja_con_los_prerrequisitos_reales():
+    from ejercicios import _ruta
+    n_aristas = sum(len(v) for v in _ruta.PREREQ.values())
+    assert arte.ruta().count("<path") == n_aristas and arte.ruta().count("<circle") == len(_ruta.ORDEN)
 
 
 def test_la_portada_no_inventa_indicadores():
@@ -111,8 +117,15 @@ def test_cada_simulador_muestra_su_ilustracion(clave):
     assert any('class="ql-cab-arte"' in m.value for m in at.markdown)
 
 
-def test_paginas_sin_ilustracion_no_la_muestran():
-    at = _abrir("formulario")
+@pytest.mark.parametrize("clave", ESTUDIO)
+def test_cada_pagina_de_estudio_muestra_su_ilustracion(clave):
+    at = _abrir(clave)
+    assert not at.exception, [e.value for e in at.exception]
+    assert any('class="ql-cab-arte"' in m.value for m in at.markdown)
+
+
+def test_la_portada_no_usa_cabecera_con_ilustracion_de_pagina():
+    at = _abrir()
     assert not any('class="ql-cab-arte"' in m.value for m in at.markdown)
 
 

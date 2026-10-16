@@ -445,6 +445,7 @@ a.ql-boton:focus-visible { outline: 2px solid var(--ql-texto); outline-offset: 3
 .ql-card { padding: 1.1rem 1.2rem 1rem 1.2rem; border: 1px solid var(--ql-borde); border-radius: 10px; background: var(--ql-panel);
   min-height: 15rem; display: flex; flex-direction: column; margin-bottom: .5rem; }
 .ql-card-simulador { border-top: 3px solid var(--ql-violeta); min-height: 25rem; }
+.ql-card-estudio, .ql-card-verificacion { min-height: 21rem; }
 .ql-card-verificacion { border-top: 3px solid var(--ql-verde); }
 .ql-card-estudio { border-top: 3px solid var(--ql-borde); }
 .ql-card h3 { font-family: var(--ql-serif); font-size: 1.2rem; font-weight: 600; margin: .5rem 0 .4rem 0; color: var(--ql-texto); }
