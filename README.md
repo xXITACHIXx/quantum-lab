@@ -298,3 +298,7 @@ el orbital **complejo** sí (L_z = mħ).
 ## Menú cinético de la portada
 
 La portada muestra por defecto un menú de barras angulares (una por destino) y, a la derecha, el escenario con la ilustración conceptual del tema apuntado con el cursor o con el teclado. Cada barra es un `st.button` real (clic, toque y Enter). La vista «Tarjetas» conserva la rejilla anterior. En pantallas menores de 900 px solo queda la lista; con movimiento reducido no hay animaciones. Es una interpretación propia del lenguaje de menús cinéticos: no reproduce el diseño de ningún juego.
+
+## Portada a pantalla completa
+
+La primera pantalla es un átomo ilustrado a pantalla completa (nubes de probabilidad muestreadas de densidades hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, el menú de destinos en barras angulares. Al apuntar una barra aparece, abajo a la derecha, la ilustración de ese tema. Las mismas barras forman la barra lateral, que sigue siendo la navegación de respaldo en todas las páginas. Debajo de la primera pantalla están el siguiente paso sugerido, el interruptor «Ver también los destinos como tarjetas» y las ayudas. El átomo es una ilustración conceptual: las escalas de cada nube se ajustan para componer la imagen y no son un resultado del simulador.

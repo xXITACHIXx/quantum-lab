@@ -315,7 +315,7 @@ body.ql-viajando [class*="st-key-ql_escena_"] { animation: ql-acerca .55s cubic-
 @keyframes ql-esc-entra { from { clip-path: polygon(0 0, 0 0, -12% 100%, -12% 100%); transform: translateX(-26px); }
                           to { clip-path: polygon(0 0, 112% 0, 100% 100%, -12% 100%); transform: none; } }
 @keyframes ql-corte { 0% { transform: translateX(-120%) skewX(-24deg); } 100% { transform: translateX(260%) skewX(-24deg); } }
-.ql-menu-cab { display: flex; align-items: baseline; gap: .7rem; margin: 1.1rem 0 .45rem .3rem; font: 600 .72rem/1 var(--ql-mono);
+.ql-menu-cab { display: flex; align-items: baseline; gap: .7rem; margin: 0; padding: 1rem 0 .35rem .3rem; font: 600 .72rem/1 var(--ql-mono);
   letter-spacing: .22em; text-transform: uppercase; color: var(--ql-tenue); }
 .ql-menu-cab b { color: var(--ql-cian); font-weight: 600; }
 .ql-menu-cab::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--ql-borde), transparent); transform: skewX(-40deg); }
@@ -360,10 +360,77 @@ body.ql-viajando [class*="st-key-ql_escena_"] { animation: ql-acerca .55s cubic-
   [class*="st-key-ql_item_"]:is(:hover, :focus-within) button { transform: translateX(8px); }
 }
 
+
+/* =============== 10. Portada a pantalla completa y barra lateral angular =============== */
+/* La portada ocupa toda la ventana: se anulan el ancho máximo y el relleno solo mientras existe la escena de inicio. */
+[data-testid="stMainBlockContainer"]:has(.st-key-ql_menu) { max-width: none !important; padding: 0 !important; }
+.st-key-ql_menu { position: relative; isolation: isolate; min-height: 100vh; overflow: hidden; gap: 0 !important;
+  padding: 3.6rem clamp(1rem, 4vw, 4.5rem) 2.4rem clamp(1rem, 4vw, 4.5rem); }
+.st-key-ql_menu > [data-testid="stElementContainer"]:has(.ql-fondo-atomo) { position: absolute !important; inset: 0; z-index: 0; margin: 0 !important;
+  width: auto !important; height: auto !important; pointer-events: none; }
+.st-key-ql_menu > [data-testid="stHorizontalBlock"] { position: relative; z-index: 2; }
+.ql-fondo-atomo { --px: 0; --py: 0; position: absolute; inset: 0; overflow: hidden; background:
+  radial-gradient(60% 70% at 78% 48%, rgba(167, 139, 250, .16), transparent 70%), radial-gradient(40% 50% at 20% 100%, rgba(66, 217, 255, .1), transparent 70%), #0B1020; }
+.ql-atomo { position: absolute; inset: 0; transform: translate3d(calc(var(--px) * -14px), calc(var(--py) * -9px), 0) scale(1.03); transition: transform .9s cubic-bezier(.2, .7, .2, 1); }
+.ql-atomo svg { display: block; width: 100%; height: 100%; }
+.ql-fondo-atomo .ql-obs-particulas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ql-velo { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(11, 16, 32, .94) 0%, rgba(11, 16, 32, .72) 30%, rgba(11, 16, 32, .1) 62%, transparent 100%),
+              linear-gradient(0deg, rgba(11, 16, 32, .85) 0%, transparent 22%); }
+.ql-lectura-inicio { position: absolute; right: clamp(1rem, 4vw, 4.5rem); bottom: 1.2rem; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .3rem 1.4rem;
+  font: 500 .7rem/1.2 var(--ql-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ql-tenue); }
+.ql-lectura-inicio b { color: var(--ql-texto); font-weight: 600; margin-right: .35rem; }
+.ql-lectura-inicio .ql-obs-pulso { color: var(--ql-verde); }
+.ql-lectura-inicio .ql-obs-pulso::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .5rem; background: var(--ql-verde);
+  box-shadow: 0 0 10px var(--ql-verde); animation: ql-latido 2.4s ease-in-out infinite; }
+.ql-inicio-marca { margin: 0 0 1.1rem .3rem; }
+.ql-inicio-eyebrow { display: block; font: 600 .72rem/1 var(--ql-mono); letter-spacing: .26em; text-transform: uppercase; color: var(--ql-cian); margin-bottom: .6rem; }
+.ql-inicio-titulo { font-family: var(--ql-serif); font-weight: 600; font-size: clamp(2.4rem, 4.2vw, 3.8rem); line-height: .95; letter-spacing: -.02em; color: var(--ql-texto);
+  animation: ql-titulo 1s .15s cubic-bezier(.2, .7, .2, 1) both; }
+.ql-inicio-sub { margin: .6rem 0 0 0; color: var(--ql-tenue); font-size: 1rem; max-width: 26rem; }
+/* En la portada las barras son más compactas para que los 15 destinos quepan en la primera pantalla. */
+.st-key-ql_menu [class*="st-key-ql_item_"] { margin-bottom: 0; max-width: 25rem; }
+.st-key-ql_menu [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] { gap: .2rem; }
+.st-key-ql_menu [data-testid="stColumn"]:first-child [data-testid="stElementContainer"] { flex-shrink: 0; }
+.st-key-ql_menu [class*="st-key-ql_item_"] button { min-height: 1.95rem; padding-top: 0 !important; padding-bottom: 0 !important; }
+.st-key-ql_menu [class*="st-key-ql_item_"] button p { font-size: .86rem !important; }
+.st-key-ql_menu .ql-menu-cab { padding: .75rem 0 .25rem .3rem; }
+.st-key-ql_menu [data-testid="stColumn"]:last-child { position: static; align-self: stretch; display: flex; flex-direction: column; justify-content: flex-end; }
+.st-key-ql_menu [data-testid="stColumn"]:last-child [data-testid="stElementContainer"] { position: sticky; bottom: 1.4rem; }
+.st-key-ql_menu .ql-esc { min-height: 30.5rem; max-width: 30rem; margin-left: auto; }
+.st-key-ql_menu .ql-esc-item { justify-content: flex-end; }
+.st-key-ql_menu .ql-esc-info { background: linear-gradient(90deg, rgba(11, 16, 32, .82), rgba(11, 16, 32, .35)); padding: .7rem .9rem .8rem 1.1rem; }
+[class*="st-key-ql_inicio_resto"] { padding: 2.2rem clamp(1rem, 4vw, 4.5rem) 3rem clamp(1rem, 4vw, 4.5rem); }
+
+/* Barra lateral: las mismas barras angulares de la portada, con la sección activa invertida. */
+section[data-testid="stSidebar"] [class*="st-key-nav_"] { margin: .14rem .9rem .14rem .25rem; transform: skewX(-14deg); transform-origin: 0 50%;
+  animation: ql-menu-entra .5s cubic-bezier(.2, .8, .2, 1) calc(var(--n, 0) * 30ms) both; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button { position: relative; overflow: hidden; border: 0 !important; border-radius: 0 !important; min-height: 2.2rem;
+  justify-content: flex-start !important; padding: 0 .8rem 0 1.1rem !important; color: var(--ql-texto) !important; box-shadow: inset 3px 0 0 var(--acento, var(--ql-cian)) !important;
+  background: linear-gradient(95deg, #17233C 0%, #101A2E 100%) !important; transition: transform .3s cubic-bezier(.2, .8, .2, 1), background .3s, color .2s; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button > div { justify-content: flex-start !important; width: 100%; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button > div > span, section[data-testid="stSidebar"] [class*="st-key-nav_"] button p { transform: skewX(14deg); }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button p { font: 600 .78rem/1 var(--ql-mono) !important; letter-spacing: .03em; margin: 0; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button::before { display: none; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 22%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .34), transparent); transform: translateX(-120%) skewX(-24deg); }
+section[data-testid="stSidebar"] [class*="st-key-nav_"]:is(:hover, :focus-within) button, section[data-testid="stSidebar"] [class*="st-key-nav_"] button[data-testid="stBaseButton-primary"] {
+  color: var(--ql-fondo) !important; transform: translateX(10px);
+  background: linear-gradient(95deg, var(--acento, var(--ql-cian)), color-mix(in srgb, var(--acento, var(--ql-cian)) 55%, #ffffff)) !important; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"]:is(:hover, :focus-within) button::after { animation: ql-corte .7s cubic-bezier(.3, .7, .2, 1) both; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"]:has(button:focus-visible) button { outline: 2px solid var(--ql-texto); outline-offset: 2px; }
+section[data-testid="stSidebar"] .ql-menu-cab { padding: 1rem 0 .3rem .3rem; }
+@media (max-width: 900px) {
+  .st-key-ql_menu { padding-top: 3.8rem; }
+  .ql-velo { background: linear-gradient(0deg, rgba(11, 16, 32, .5), rgba(11, 16, 32, .12)); }
+  .ql-lectura-inicio { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .ql-trazo { stroke-dasharray: none !important; }
   .ql-obs-particulas, #ql-fondo-vivo, #ql-tunel { display: none; }
+  .ql-atomo { transform: none; }
   [data-testid="stApp"]::before { animation: none; }
 }
 html { scroll-behavior: smooth; }
@@ -407,6 +474,11 @@ JS = r"""
       d.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
       d.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
     }
+    var f = document.querySelector('.ql-fondo-atomo');     // el fondo de la portada no recibe el puntero: se usa la ventana completa
+    if (f) {
+      f.style.setProperty('--px', ((e.clientX / W.innerWidth) * 2 - 1).toFixed(3));
+      f.style.setProperty('--py', ((e.clientY / W.innerHeight) * 2 - 1).toFixed(3));
+    }
     var o = e.target.closest('.ql-obs');
     if (o) {
       var q = o.getBoundingClientRect();
@@ -421,7 +493,7 @@ JS = r"""
   var lienzo = null, ctx = null, puntos = [], anima = 0, dpr = 1, ancho = 0, alto = 0, obs = null, escenaEl = null, tPrev = 0;
   var COLORES = ['66,217,255', '167,139,250', '244,114,208'];
   function preparar(c) {
-    lienzo = c; ctx = c.getContext('2d'); obs = c.closest('.ql-obs'); escenaEl = obs ? obs.querySelector('.ql-obs-escena') : null;
+    lienzo = c; ctx = c.getContext('2d'); obs = c.closest('.ql-obs, .ql-fondo-atomo'); escenaEl = obs ? obs.querySelector('.ql-obs-escena, .ql-atomo') : null;
     dpr = Math.min(W.devicePixelRatio || 1, 2);
     medir(); tPrev = 0;
     var n = Math.round(Math.min(90, Math.max(36, ancho * alto / 9000)));
@@ -455,13 +527,14 @@ JS = r"""
     var px = estilo ? parseFloat(estilo.getPropertyValue('--px')) || 0 : 0;
     var py = estilo ? parseFloat(estilo.getPropertyValue('--py')) || 0 : 0;
     // Centro y tamaño de la ilustración, en coordenadas del lienzo.
-    var cx = ancho * 0.72, cy = alto * 0.5, ex = ancho * 0.34, ey = alto * 0.42;
+    var cx = ancho * 0.72, cy = alto * 0.5, ex = ancho * 0.34, ey = alto * 0.42, esc = 1;
     if (escenaEl) {
       var q = escenaEl.getBoundingClientRect();
-      cx = q.left - r.left + q.width / 2; cy = q.top - r.top + q.height / 2; ex = q.width * 0.55; ey = q.height * 0.55;
+      cx = q.left - r.left + q.width * (escenaEl.classList.contains('ql-atomo') ? 0.7214 : 0.5); cy = q.top - r.top + q.height / 2;
+      ex = Math.min(q.width, q.height * 1.55) * 0.5; ey = Math.min(q.height, q.width / 1.55) * 0.5;
     }
     // Las estelas se obtienen desvaneciendo el cuadro anterior en lugar de borrarlo.
-    ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.fillRect(0, 0, ancho, alto);
+    ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(0, 0, ancho, alto);
     ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
     for (var i = 0; i < puntos.length; i++) {
       var p = puntos[i], x, y;
@@ -651,6 +724,17 @@ def observatorio_html(escena_svg: str, lecturas: list[tuple[str, str]], ancla: s
         f'<div class="ql-obs-escena">{escena_svg}</div></div>'
         f'<div class="ql-obs-lectura"><span class="ql-obs-pulso">Inventario del laboratorio</span>{lectura}</div>'
         '</div>')
+
+
+def fondo_atomo_html(atomo_svg: str, lecturas: list[tuple[str, str]]) -> str:
+    """Capa de fondo de la portada a pantalla completa: átomo ilustrado, lienzo de partículas y cifras reales del laboratorio."""
+    e = html.escape
+    lectura = "".join(f"<span><b>{e(v)}</b>{e(k)}</span>" for v, k in lecturas)
+    return ('<div class="ql-fondo-atomo" aria-hidden="false">'
+            f'<div class="ql-atomo">{atomo_svg}</div>'
+            '<canvas id="ql-particulas" class="ql-obs-particulas" aria-hidden="true"></canvas>'
+            '<div class="ql-velo" aria-hidden="true"></div>'
+            f'<div class="ql-lectura-inicio"><span class="ql-obs-pulso">Inventario del laboratorio</span>{lectura}</div></div>')
 
 
 def capitulo_html(numero: str, etiqueta: str, titulo: str, descripcion: str, ancla: str = "") -> str:

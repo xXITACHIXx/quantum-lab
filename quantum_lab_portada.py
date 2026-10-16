@@ -119,7 +119,7 @@ def _hero() -> None:
 _ACENTO = {SIMULADOR: "var(--ql-cian)", ESTUDIO: "var(--ql-violeta)", VERIFICACION: "var(--ql-verde)"}
 
 
-def _css_menu() -> str:
+def _css_menu(por_defecto: bool = False) -> str:
     """Reglas por elemento del menú: color de acento, orden de entrada y qué escenario se muestra al apuntar a cada barra."""
     reglas = []
     for i, m in enumerate(MODULOS):
@@ -128,9 +128,23 @@ def _css_menu() -> str:
         reglas.append(f'.st-key-ql_menu:has(.st-key-ql_item_{k}:is(:hover,:focus-within)) .ql-esc-{k}{{visibility:visible;opacity:1;'
                       f'animation:ql-esc-entra .6s cubic-bezier(.2,.7,.2,1) both;z-index:2}}')
         reglas.append(f'.st-key-ql_menu:has(.st-key-ql_item_{k}:is(:hover,:focus-within)) .ql-esc-{k} .ql-trazo{{animation:ql-trazar 1s .1s cubic-bezier(.4,.1,.2,1) both}}')
-    primero = MODULOS[0][0]
-    # Sin ninguna barra apuntada se muestra el primer destino (el menú nunca queda con el escenario vacío).
-    reglas.append(f'.st-key-ql_menu:not(:has([class*="st-key-ql_item_"]:is(:hover,:focus-within))) .ql-esc-{primero}{{visibility:visible;opacity:1;z-index:2}}')
+    for categoria in CATEGORIAS:
+        primera = next(m for m in MODULOS if m[2] == categoria)[0]
+        num = CAPITULOS[categoria][0]
+        reglas.append(f'.st-key-ql_menu .st-key-ql_item_{primera}{{margin-top:1.75rem;position:relative}}'
+                      f'.st-key-ql_menu .st-key-ql_item_{primera}::before{{content:"{num}  {categoria}";position:absolute;left:.3rem;top:-1.4rem;'
+                      f'transform:skewX(14deg);transform-origin:0 100%;font:600 .7rem/1 var(--ql-mono);letter-spacing:.22em;text-transform:uppercase;color:var(--ql-tenue);white-space:pre}}')
+    if por_defecto:
+        primero = MODULOS[0][0]
+        reglas.append(f'.st-key-ql_menu:not(:has([class*="st-key-ql_item_"]:is(:hover,:focus-within))) .ql-esc-{primero}{{visibility:visible;opacity:1;z-index:2}}')
+    return "<style>" + "".join(reglas) + "</style>"
+
+
+def css_navegacion() -> str:
+    """Color de acento y orden de entrada de las barras de la barra lateral (una por página)."""
+    reglas = [f'.st-key-nav_inicio{{--n:0;--acento:var(--ql-cian);}}']
+    for i, m in enumerate(MODULOS, start=1):
+        reglas.append(f'.st-key-nav_{m[0]}{{--n:{i};--acento:{_ACENTO[m[3]]};}}')
     return "<style>" + "".join(reglas) + "</style>"
 
 
@@ -153,48 +167,50 @@ def _escenario_html() -> str:
 
 def menu_cinetico(ir_a) -> None:
     """
-    Menú de destinos: barras angulares a la izquierda y, a la derecha, la ilustración del tema apuntado (con el cursor o el teclado).
-    Cada barra es un `st.button` real: navega con clic, toque y Enter; en pantallas pequeñas solo queda la lista.
+    Pantalla de inicio: un átomo ilustrado a pantalla completa y, sobre él, el menú de destinos en barras angulares. Al apuntar una barra
+    (cursor o teclado) aparece, abajo a la derecha, la ilustración de ese tema. Cada barra es un `st.button` real (clic, toque y Enter);
+    en pantallas pequeñas queda solo la lista sobre el fondo.
     """
     with st.container(key="ql_menu"):
+        st.markdown(escena.fondo_atomo_html(arte.atomo(), lecturas()), unsafe_allow_html=True)
         izq, der = st.columns([1, 1.3], gap="large")
         with izq:
+            st.markdown('<div class="ql-inicio-marca"><span class="ql-inicio-eyebrow">Observatorio cuántico</span>'
+                        '<div class="ql-inicio-titulo" role="heading" aria-level="1">Quantum Lab</div>'
+                        '<p class="ql-inicio-sub">Laboratorio interactivo de mecánica cuántica</p>'
+                        f'<span id="{ID_SIMULADORES}"></span><span id="{ID_ESTUDIO}"></span></div>', unsafe_allow_html=True)
             for categoria in CATEGORIAS:
-                num, _etiqueta, _descripcion = CAPITULOS[categoria]
-                ancla = {"Mecánica cuántica": ID_SIMULADORES, "Teoría y repaso": ID_ESTUDIO}.get(categoria, "")
-                id_ = f' id="{ancla}"' if ancla else ""
-                st.markdown(f'<div class="ql-menu-cab"{id_}><b>{html.escape(num)}</b>{html.escape(categoria)}</div>', unsafe_allow_html=True)
                 for clave, numero, cat, tipo, titulo, *_ in (m for m in MODULOS if m[2] == categoria):
                     with st.container(key=f"ql_item_{clave}"):
-                        st.button(f"{numero}   {titulo}", key=f"ql_menu_{clave}", on_click=ir_a, args=(clave,), width="stretch",
-                                  help=None)
+                        st.button(f"{numero}   {titulo}", key=f"ql_menu_{clave}", on_click=ir_a, args=(clave,), width="stretch")
         with der:
             st.markdown(_escenario_html(), unsafe_allow_html=True)
 
 
 def pagina_inicio(ir_a, sugerencia=None) -> None:
-    """Portada. `ir_a(clave)` es el callback de navegación; `sugerencia()` dibuja la tarjeta «Siguiente paso sugerido» (opcional)."""
-    _hero()
-    vista = st.segmented_control("Vista de los destinos", ["Menú", "Tarjetas"], default="Menú", key="ql_vista",
-                                 label_visibility="collapsed", width="content")
-    if vista != "Tarjetas":
+    """
+    Portada. Primera pantalla: átomo a pantalla completa con el menú de destinos (`menu_cinetico`). Debajo: el siguiente paso sugerido,
+    la vista alternativa en tarjetas y las ayudas. `ir_a(clave)` es el callback de navegación.
+    """
+    menu_cinetico(ir_a)
+    with st.container(key="ql_inicio_resto"):
         if sugerencia:
             sugerencia()
-        menu_cinetico(ir_a)
-        vista = None
-    for categoria in (CATEGORIAS if vista == "Tarjetas" else ()):
+        tarjetas = st.toggle("Ver también los destinos como tarjetas", key="ql_vista")
+        _resto(ir_a, tarjetas)
+
+
+def _resto(ir_a, tarjetas: bool) -> None:
+    for categoria in (CATEGORIAS if tarjetas else ()):
         modulos = [m for m in MODULOS if m[2] == categoria]
         num, etiqueta, descripcion = CAPITULOS[categoria]
-        ancla = {"Mecánica cuántica": ID_SIMULADORES, "Teoría y repaso": ID_ESTUDIO}.get(categoria, "")
-        st.markdown(escena.capitulo_html(num, etiqueta, categoria, descripcion, ancla), unsafe_allow_html=True)
+        st.markdown(escena.capitulo_html(num, etiqueta, categoria, descripcion), unsafe_allow_html=True)
         if categoria in COMPOSICION:
             proporciones, mayor = COMPOSICION[categoria]
             for i, (col, m) in enumerate(zip(st.columns(proporciones, gap="medium"), modulos)):
                 with col:
                     destino(m, ir_a, mayor=(i == mayor))
             continue
-        if categoria == "Teoría y repaso" and sugerencia:
-            sugerencia()
         for i in range(0, len(modulos), 2):
             for col, m in zip(st.columns(2, gap="medium"), modulos[i:i + 2]):
                 with col:

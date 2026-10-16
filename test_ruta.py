@@ -143,7 +143,7 @@ def test_mini_examen_en_blanco_no_marca():
 
 def test_inicio_muestra_la_sugerencia():
     at = AppTest.from_file(APP, default_timeout=180)
-    at.session_state["ql_vista"] = "Tarjetas"
+    at.session_state["ql_vista"] = True
     at.run()
     assert not at.exception, [e.value for e in at.exception]
     assert any(b.key == "ql_abrir_ruta" for b in at.button)

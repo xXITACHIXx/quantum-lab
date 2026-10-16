@@ -101,7 +101,7 @@ def test_tarjeta_mayor_y_compacta():
 def _abrir(pagina=None, vista="Tarjetas"):
     at = AppTest.from_file(APP, default_timeout=180)
     if vista:
-        at.session_state["ql_vista"] = vista
+        at.session_state["ql_vista"] = (vista == "Tarjetas")
     if pagina:
         at.session_state["ql_pagina"] = pagina
     at.run()
@@ -112,7 +112,7 @@ def test_portada_destinos_y_observatorio():
     at = _abrir()
     assert not at.exception, [e.value for e in at.exception]
     html = " ".join(m.value for m in at.markdown)
-    assert 'id="ql-particulas"' in html and 'class="ql-obs"' in html
+    assert 'id="ql-particulas"' in html and 'class="ql-fondo-atomo"' in html and 'class="ql-atomo"' in html
     assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
     etiquetas = {b.key: b.label for b in at.button if b.key and b.key.startswith("ql_abrir_")}
     assert len(etiquetas) == 15 and etiquetas["ql_abrir_caja"] == "Abrir el simulador: Partícula en una caja"
@@ -225,3 +225,29 @@ def test_menu_cinetico_css_por_destino_y_accesibilidad():
     base = e.css()
     assert "@keyframes ql-menu-entra" in base and "@keyframes ql-esc-entra" in base
     assert ".ql-esc { display: none; }" in base           # en pantallas pequeñas queda solo la lista
+
+
+def test_atomo_de_fondo_es_conceptual_y_accesible():
+    import quantum_lab_arte as a
+    s = a.atomo()
+    assert 'role="img"' in s and "aria-label=" in s and "<title>" in s
+    assert "ILUSTRACIÓN CONCEPTUAL" in s                          # se declara como ilustración, no como resultado
+    assert s.count('class="ql-obs-giro ') == 4                    # órbitas de referencia que giran con CSS
+    assert "http" not in s.replace("http://www.w3.org/2000/svg", "")   # sin recursos externos
+    assert len(s) < 120_000                                       # ligero: nubes como un solo trazo por grupo
+
+
+def test_inicio_a_pantalla_completa_y_barra_lateral_angular():
+    import quantum_lab_escena as e
+    css = e.css()
+    assert 'stMainBlockContainer"]:has(.st-key-ql_menu)' in css   # solo la portada anula el ancho máximo
+    assert "min-height: 100vh" in css
+    assert 'section[data-testid="stSidebar"] [class*="st-key-nav_"]' in css and "skewX(-14deg)" in css
+    assert ".ql-velo" in css                                      # velo que garantiza el contraste del texto sobre el átomo
+    at = _abrir("caja", vista=None)
+    html = " ".join(m.value for m in at.markdown)
+    assert "st-key-nav_caja" in html                              # acento por página en la barra lateral
+    assert "stMainBlockContainer" in html and not any(b.key == "ql_menu_caja" for b in at.button)   # el menú solo existe en la portada
+    ini = _abrir(vista=None)
+    claves = [b.key for b in ini.sidebar.button]
+    assert "nav_inicio" in claves and "nav_caja" in claves        # la navegación de respaldo sigue en la barra lateral
