@@ -34,7 +34,8 @@ class Figura:
         return self.crear(self.parametro[3] if valor is None else valor)
 
 
-_ROJO, _AZUL = "#FF4D6D", "#00D4FF"
+from quantum_lab_tema import PALETA as _P
+_ROJO, _AZUL = _P["rojo"], _P["cian"]
 
 
 def _sub(n: int) -> str:
