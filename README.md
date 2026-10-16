@@ -113,7 +113,7 @@ cada vez que se sube un cambio y cada lunes, para detectar a tiempo si una versi
 La insignia de la parte superior de este archivo muestra el resultado. `dependabot.yml` propone cada semana las
 actualizaciones de dependencias.
 
-**Versiones.** `requirements.txt` fija solo límites (por ejemplo `streamlit>=1.50,<2`) para que una versión mayor
+**Versiones.** `requirements.txt` fija solo límites (por ejemplo `streamlit>=1.65,<2`) para que una versión mayor
 futura no rompa la aplicación sin aviso; las versiones exactas probadas están en `requirements-lock.txt`
 (`python -m pip install -r requirements-lock.txt` reproduce ese entorno). Al actualizar la versión publicada en
 Streamlit Cloud hay que pulsar **«Reboot app»** (la nube conserva en memoria los módulos ya importados) y comprobar en
@@ -292,5 +292,5 @@ el orbital **complejo** sí (L_z = mħ).
 | El puerto 8501 está ocupado | `python -m streamlit run quantum_lab.py --server.port 8502` |
 | Gráficos lentos | Reduce la resolución angular (esfera), los puntos (caja/oscilador) o el número de medidas (nube 3D) |
 | En Streamlit Cloud la app no arranca y el registro termina en «Welcome to Streamlit!» | Comprueba que `.streamlit/config.toml` tenga `headless = true` (con `false` se queda esperando un correo por teclado) |
-| Se ve el diseño antiguo o un aviso sobre `theme` | `python -m pip install -U -r requirements.txt` (Streamlit 1.50 o superior) y reinicia |
+| Se ve el diseño antiguo o un aviso sobre `theme` | `python -m pip install -U -r requirements.txt` (Streamlit 1.65 o superior) y reinicia |
 | Símbolos como ₙ o ⟨⟩ salen como recuadros | La app incrusta una fuente de símbolos; si persiste, recarga la página sin caché (`Ctrl + F5`) |
