@@ -179,3 +179,17 @@ def test_trazos_numerados_para_la_secuencia():
     svg = a.svg("oscilador")
     indices = [int(x) for x in __import__("re").findall(r'--i:(\d+)', svg)]
     assert indices == list(range(1, len(indices) + 1)) and len(indices) >= 2
+
+
+def test_viaje_entre_paginas_y_nube_orbital():
+    import quantum_lab_escena as e
+    css, js = e.css(), e.JS
+    for k in ("ql-tunel-in", "ql-acerca", "ql-emerge"):
+        assert f"@keyframes {k}" in css
+    movimiento = css[css.index("prefers-reduced-motion: reduce"):]
+    assert "#ql-tunel" in movimiento                              # el túnel se oculta con movimiento reducido
+    assert "if (reducir.matches) { return; }" in js[js.index("function viajar"):][:120]
+    assert "pointer-events: none" in css[css.index("#ql-tunel {"):][:160]
+    assert "Math.min(90" in js                                    # límite de partículas del observatorio
+    assert "p.orb" in js and "destination-out" in js              # órbitas con estela
+    assert "navegacion" in js and "ql_volver" in js

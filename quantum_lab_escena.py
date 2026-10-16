@@ -295,10 +295,23 @@ div[data-baseweb="slider"] div[role] { transition: transform .2s, box-shadow .3s
 div[data-baseweb="slider"] div[role]:hover, div[data-baseweb="slider"] div[role]:focus { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(66, 217, 255, .2); }
 @media (max-width: 640px) { [data-testid="stApp"]::before { animation: none; } #ql-fondo-vivo { display: none; } }
 
+/* =============== 8. Viaje entre páginas =============== */
+@keyframes ql-tunel-in { from { opacity: 0; transform: scale(.6); } 30% { opacity: 1; } to { opacity: 0; transform: scale(2.4); } }
+@keyframes ql-acerca { to { opacity: 0; transform: scale(1.07); filter: blur(7px); } }
+@keyframes ql-emerge { from { opacity: 0; transform: scale(.93); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+#ql-tunel { position: fixed; inset: 0; z-index: 7; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 0 18%, rgba(11, 16, 32, .0) 40%, rgba(11, 16, 32, .75) 100%),
+              repeating-conic-gradient(from 0deg at 50% 50%, rgba(66, 217, 255, .34) 0deg 1.2deg, transparent 1.2deg 7.5deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 6%, #000 30%); mask-image: radial-gradient(circle, transparent 0 8%, #000 38%); }
+body.ql-tunel #ql-tunel { animation: ql-tunel-in .9s cubic-bezier(.3, .6, .2, 1) both; }
+body.ql-viajando [class*="st-key-ql_escena_"] { animation: ql-acerca .55s cubic-bezier(.5, 0, .9, .4) forwards; transform-origin: 50% 40%; }
+/* La página nueva emerge desde el fondo (acercamiento): sustituye la entrada por desplazamiento. */
+[class*="st-key-ql_escena_"] { animation: ql-emerge .7s cubic-bezier(.2, .7, .2, 1) both; transform-origin: 50% 35%; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .ql-trazo { stroke-dasharray: none !important; }
-  .ql-obs-particulas, #ql-fondo-vivo { display: none; }
+  .ql-obs-particulas, #ql-fondo-vivo, #ql-tunel { display: none; }
   [data-testid="stApp"]::before { animation: none; }
 }
 html { scroll-behavior: smooth; }
@@ -350,19 +363,27 @@ JS = r"""
     }
   }, { passive: true });
 
-  // Partículas del observatorio: pocas, lentas, con tres profundidades; se pausan fuera de pantalla o con la pestaña oculta.
-  var lienzo = null, ctx = null, puntos = [], anima = 0, dpr = 1, ancho = 0, alto = 0, obs = null;
+  // Nube de electrones del observatorio: la mayoría de las partículas orbita en elipses inclinadas alrededor de la ilustración (más lentas
+  // cuanto más lejos, con estela), y el resto deriva como polvo de fondo. Es una ilustración, no una simulación física.
+  // Límite de 90 partículas; se pausa fuera de pantalla o con la pestaña oculta; no se inicia con movimiento reducido ni en pantallas pequeñas.
+  var lienzo = null, ctx = null, puntos = [], anima = 0, dpr = 1, ancho = 0, alto = 0, obs = null, escenaEl = null, tPrev = 0;
   var COLORES = ['66,217,255', '167,139,250', '244,114,208'];
   function preparar(c) {
-    lienzo = c; ctx = c.getContext('2d'); obs = c.closest('.ql-obs');
+    lienzo = c; ctx = c.getContext('2d'); obs = c.closest('.ql-obs'); escenaEl = obs ? obs.querySelector('.ql-obs-escena') : null;
     dpr = Math.min(W.devicePixelRatio || 1, 2);
-    medir();
-    var n = Math.round(Math.min(70, Math.max(24, ancho * alto / 14000)));
+    medir(); tPrev = 0;
+    var n = Math.round(Math.min(90, Math.max(36, ancho * alto / 9000)));
     puntos = [];
     for (var i = 0; i < n; i++) {
-      var z = 0.25 + Math.random() * 0.75;
-      puntos.push({ x: Math.random() * ancho, y: Math.random() * alto, z: z, vx: (Math.random() - .5) * .08 * z, vy: -(.04 + Math.random() * .12) * z,
-                    c: COLORES[i % 3], f: Math.random() * 6.28 });
+      var orbita = i % 10 < 7;
+      var z = 0.3 + Math.random() * 0.7;
+      var rx = 0.28 + Math.random() * 0.5;
+      puntos.push({
+        orb: orbita, z: z, c: COLORES[i % 3], f: Math.random() * 6.28,
+        x: Math.random() * ancho, y: Math.random() * alto, vx: (Math.random() - .5) * .06 * z, vy: -(.03 + Math.random() * .1) * z,
+        th: Math.random() * 6.2832, rx: rx, ry: rx * (0.25 + Math.random() * 0.55), tilt: (Math.random() - .5) * 2.2,
+        w: (Math.random() < .5 ? -1 : 1) * (0.00018 + 0.00022 / (0.4 + rx)) , px: 0, py: 0, listo: false
+      });
     }
   }
   function medir() {
@@ -375,21 +396,44 @@ JS = r"""
     anima = 0;
     if (!lienzo || !lienzo.isConnected) { lienzo = null; return; }
     var r = lienzo.getBoundingClientRect();
-    if (document.hidden || r.bottom < 0 || r.top > W.innerHeight) { anima = W.requestAnimationFrame(cuadro); return; }
+    if (document.hidden || r.bottom < 0 || r.top > W.innerHeight) { tPrev = 0; anima = W.requestAnimationFrame(cuadro); return; }
     if (Math.abs(r.width - ancho) > 2 || Math.abs(r.height - alto) > 2) { medir(); }
-    var px = obs ? parseFloat(getComputedStyle(obs).getPropertyValue('--px')) || 0 : 0;
-    var py = obs ? parseFloat(getComputedStyle(obs).getPropertyValue('--py')) || 0 : 0;
-    ctx.clearRect(0, 0, ancho, alto);
-    for (var i = 0; i < puntos.length; i++) {
-      var p = puntos[i];
-      p.x += p.vx; p.y += p.vy;
-      if (p.y < -10) { p.y = alto + 10; p.x = Math.random() * ancho; }
-      if (p.x < -10) { p.x = ancho + 10; } else if (p.x > ancho + 10) { p.x = -10; }
-      var x = p.x - px * 22 * p.z, y = p.y - py * 16 * p.z;
-      var brillo = 0.25 + 0.45 * p.z * (0.75 + 0.25 * Math.sin(t / 1400 + p.f));
-      ctx.beginPath(); ctx.arc(x, y, 0.6 + 1.5 * p.z, 0, 6.2832);
-      ctx.fillStyle = 'rgba(' + p.c + ',' + brillo.toFixed(3) + ')'; ctx.fill();
+    var dt = tPrev ? Math.min(60, t - tPrev) : 16; tPrev = t;
+    var estilo = obs ? getComputedStyle(obs) : null;
+    var px = estilo ? parseFloat(estilo.getPropertyValue('--px')) || 0 : 0;
+    var py = estilo ? parseFloat(estilo.getPropertyValue('--py')) || 0 : 0;
+    // Centro y tamaño de la ilustración, en coordenadas del lienzo.
+    var cx = ancho * 0.72, cy = alto * 0.5, ex = ancho * 0.34, ey = alto * 0.42;
+    if (escenaEl) {
+      var q = escenaEl.getBoundingClientRect();
+      cx = q.left - r.left + q.width / 2; cy = q.top - r.top + q.height / 2; ex = q.width * 0.55; ey = q.height * 0.55;
     }
+    // Las estelas se obtienen desvaneciendo el cuadro anterior en lugar de borrarlo.
+    ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.fillRect(0, 0, ancho, alto);
+    ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    for (var i = 0; i < puntos.length; i++) {
+      var p = puntos[i], x, y;
+      if (p.orb) {
+        p.th += p.w * dt;
+        var u = p.rx * ex * Math.cos(p.th), v = p.ry * ey * Math.sin(p.th) * (1 + 0.08 * Math.sin(t / 2600 + p.f));
+        x = cx + u * Math.cos(p.tilt) - v * Math.sin(p.tilt) - px * 18 * p.z;
+        y = cy + u * Math.sin(p.tilt) + v * Math.cos(p.tilt) - py * 12 * p.z;
+      } else {
+        p.x += p.vx * dt / 16; p.y += p.vy * dt / 16;
+        if (p.y < -10) { p.y = alto + 10; p.x = Math.random() * ancho; }
+        if (p.x < -10) { p.x = ancho + 10; } else if (p.x > ancho + 10) { p.x = -10; }
+        x = p.x - px * 22 * p.z; y = p.y - py * 16 * p.z;
+      }
+      var brillo = 0.3 + 0.5 * p.z * (0.75 + 0.25 * Math.sin(t / 1100 + p.f));
+      var col = 'rgba(' + p.c + ',' + brillo.toFixed(3) + ')';
+      if (p.listo && p.orb) {
+        ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(x, y);
+        ctx.strokeStyle = col; ctx.lineWidth = 0.8 + 1.4 * p.z; ctx.stroke();
+      }
+      ctx.beginPath(); ctx.arc(x, y, 0.6 + 1.4 * p.z, 0, 6.2832); ctx.fillStyle = col; ctx.fill();
+      p.px = x; p.py = y; p.listo = true;
+    }
+    ctx.globalCompositeOperation = 'source-over';
     anima = W.requestAnimationFrame(cuadro);
   }
   // Al cambiar de página (cambia la clave del contenedor de escena) se vuelve al principio: Streamlit conserva el desplazamiento.
@@ -402,6 +446,11 @@ JS = r"""
       var modo = reducir.matches ? 'auto' : 'smooth';
       if (m && m.scrollTop > 0) { m.scrollTo({ top: 0, behavior: modo }); }
       if (W.scrollY > 0) { W.scrollTo({ top: 0, behavior: modo }); }
+    }
+    if (nombre && escenaActual !== null && nombre !== escenaActual) {
+      document.body.classList.remove('ql-viajando');   // la página nueva no hereda la salida de la anterior
+      W.clearTimeout(viajeTimer);                      // pero el túnel termina su recorrido (≈0,9 s) antes de retirarse
+      viajeTimer = W.setTimeout(function () { document.body.classList.remove('ql-tunel'); }, Math.max(0, 950 - (Date.now() - viajeInicio)));
     }
     if (nombre) { escenaActual = nombre; }
     W.setTimeout(seguirEscena, 150);
@@ -464,6 +513,27 @@ JS = r"""
     fanim = W.requestAnimationFrame(fondoCuadro);
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden && fondo && !fanim) { fanim = W.requestAnimationFrame(fondoCuadro); } });
+
+  // Viaje hacia el tema elegido (barra lateral, «Observatorio» y tarjetas): mientras Streamlit carga, la escena actual se acerca y se
+  // difumina con un túnel de luz; la página nueva emerge desde el fondo (ver ql-entrada). Si no llega la navegación, se retira solo.
+  var tunel = null, viajeTimer = 0, viajeInicio = 0;
+  function viajar() {
+    if (reducir.matches) { return; }
+    if (!tunel) {
+      tunel = document.createElement('div'); tunel.id = 'ql-tunel'; tunel.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(tunel);
+    }
+    document.body.classList.remove('ql-viajando', 'ql-tunel'); void document.body.offsetWidth; document.body.classList.add('ql-viajando', 'ql-tunel');
+    W.clearTimeout(viajeTimer); viajeInicio = Date.now();
+    viajeTimer = W.setTimeout(function () { document.body.classList.remove('ql-viajando', 'ql-tunel'); }, 2600);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('button') : null;
+    if (!t) { return; }
+    var navegacion = t.closest('section[data-testid="stSidebar"]') && t.closest('[data-testid="stExpanderDetails"], [data-testid="stSidebarUserContent"]')
+      || t.closest('.st-key-ql_volver') || t.closest('[class*="st-key-ql_dest_"]');
+    if (navegacion && !t.disabled) { viajar(); }
+  }, true);
 
   // Elección de una tarjeta: se expande la elegida y se apartan las demás mientras Streamlit carga la página destino.
   // Si la navegación no ocurre (p. ej., error de red), el estado se retira solo.
