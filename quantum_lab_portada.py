@@ -64,6 +64,8 @@ CAPITULOS = {
     "Teoría y repaso": ("03", "Estaciones de estudio", "Teoría, fórmulas, práctica y evaluación conectadas con cada simulador."),
     "Verificación": ("04", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
 }
+CAT_CLAVE = {c: f"cat{i}" for i, c in enumerate(CATEGORIAS, start=1)}      # página de cada capítulo (sub-portada)
+CLAVE_CAT = {v: k for k, v in CAT_CLAVE.items()}
 ID_SIMULADORES = "ql-simuladores"
 ID_ESTUDIO = "ql-estudio"
 _CLASE = {SIMULADOR: "ql-dest-sim", ESTUDIO: "ql-dest-est", VERIFICACION: "ql-dest-ver"}
@@ -119,72 +121,96 @@ def _hero() -> None:
 _ACENTO = {SIMULADOR: "var(--ql-cian)", ESTUDIO: "var(--ql-violeta)", VERIFICACION: "var(--ql-verde)"}
 
 
-def _css_menu(por_defecto: bool = False) -> str:
+def _entradas(categoria: str | None = None) -> list[dict]:
+    """Elementos del menú: los cuatro capítulos en la portada, o los temas de un capítulo en su sub-portada."""
+    prefijo = {SIMULADOR: "Simulador", ESTUDIO: "Estación de estudio", VERIFICACION: "Verificación"}
+    if categoria is None:
+        salida = []
+        for c in CATEGORIAS:
+            ms = [m for m in MODULOS if m[2] == c]
+            num, etiqueta, desc = CAPITULOS[c]
+            salida.append(dict(clave=CAT_CLAVE[c], boton=f"{num}   {c}", acento=_ACENTO[ms[0][3]], arte=ms[0][0], tipo=f"Capítulo · {num} · {etiqueta}",
+                               titulo=c, desc=desc, lema=f"{len(ms)} destinos: " + ", ".join(m[4] for m in ms[:3]) + ("…" if len(ms) > 3 else ""),
+                               destino=CAT_CLAVE[c]))
+        return salida
+    return [dict(clave=m[0], boton=f"{m[1]}   {m[4]}", acento=_ACENTO[m[3]], arte=m[0], tipo=f"{prefijo[m[3]]} · {m[1]}", titulo=m[4], desc=m[5],
+                 lema=m[6], destino=m[0]) for m in MODULOS if m[2] == categoria]
+
+
+def _css_menu(entradas: list[dict], por_defecto: bool = False) -> str:
     """Reglas por elemento del menú: color de acento, orden de entrada y qué escenario se muestra al apuntar a cada barra."""
     reglas = []
-    for i, m in enumerate(MODULOS):
-        k = m[0]
-        reglas.append(f'.st-key-ql_item_{k}{{--n:{i};--acento:{_ACENTO[m[3]]};}}')
+    for i, en in enumerate(entradas):
+        k = en["clave"]
+        reglas.append(f'.st-key-ql_item_{k}{{--n:{i};--k:{i};--acento:{en["acento"]};}}')
         reglas.append(f'.st-key-ql_menu:has(.st-key-ql_item_{k}:is(:hover,:focus-within)) .ql-esc-{k}{{visibility:visible;opacity:1;'
                       f'animation:ql-esc-entra .6s cubic-bezier(.2,.7,.2,1) both;z-index:2}}')
         reglas.append(f'.st-key-ql_menu:has(.st-key-ql_item_{k}:is(:hover,:focus-within)) .ql-esc-{k} .ql-trazo{{animation:ql-trazar 1s .1s cubic-bezier(.4,.1,.2,1) both}}')
-    for categoria in CATEGORIAS:
-        primera = next(m for m in MODULOS if m[2] == categoria)[0]
-        num = CAPITULOS[categoria][0]
-        reglas.append(f'.st-key-ql_menu .st-key-ql_item_{primera}{{margin-top:1.75rem;position:relative}}'
-                      f'.st-key-ql_menu .st-key-ql_item_{primera}::before{{content:"{num}  {categoria}";position:absolute;left:.3rem;top:-1.4rem;'
-                      f'transform:skewX(14deg);transform-origin:0 100%;font:600 .7rem/1 var(--ql-mono);letter-spacing:.22em;text-transform:uppercase;color:var(--ql-tenue);white-space:pre}}')
     if por_defecto:
-        primero = MODULOS[0][0]
+        primero = entradas[0]["clave"]
         reglas.append(f'.st-key-ql_menu:not(:has([class*="st-key-ql_item_"]:is(:hover,:focus-within))) .ql-esc-{primero}{{visibility:visible;opacity:1;z-index:2}}')
     return "<style>" + "".join(reglas) + "</style>"
 
 
 def css_navegacion() -> str:
-    """Color de acento y orden de entrada de las barras de la barra lateral (una por página)."""
+    """Color de acento y orden de entrada de las barras de navegación de una página."""
     reglas = [f'.st-key-nav_inicio{{--n:0;--acento:var(--ql-cian);}}']
     for i, m in enumerate(MODULOS, start=1):
         reglas.append(f'.st-key-nav_{m[0]}{{--n:{i};--acento:{_ACENTO[m[3]]};}}')
     return "<style>" + "".join(reglas) + "</style>"
 
 
-def _escenario_html() -> str:
-    """Escenario del menú: una ilustración grande por destino, apiladas; el CSS muestra la de la barra apuntada."""
+def _escenario_html(entradas: list[dict], por_defecto: bool = False) -> str:
+    """Escenario del menú: una ilustración grande por elemento, apiladas; el CSS muestra la de la barra apuntada."""
     e = html.escape
-    prefijo = {SIMULADOR: "Simulador", ESTUDIO: "Estación de estudio", VERIFICACION: "Verificación"}
     piezas = []
-    for clave, numero, categoria, tipo, titulo, descripcion, lema in MODULOS:
-        ecuacion = f'<span class="ql-esc-ecuacion">{e(lema)}</span>' if lema else ""
+    for en in entradas:
+        ecuacion = f'<span class="ql-esc-ecuacion">{e(en["lema"])}</span>' if en["lema"] else ""
         piezas.append(
-            f'<div class="ql-esc-item ql-esc-{clave}" style="--acento:{_ACENTO[tipo]}">'
-            f'<div class="ql-esc-marco"><div class="ql-esc-arte">{arte.svg(clave)}</div></div>'
-            f'<div class="ql-esc-fantasma" aria-hidden="true">{e(numero)}</div>'
-            f'<div class="ql-esc-info"><span class="ql-esc-tipo">{prefijo[tipo]} · {e(numero)}</span>'
-            f'<h3>{e(titulo)}</h3><p>{e(descripcion)}</p>{ecuacion}'
+            f'<div class="ql-esc-item ql-esc-{en["clave"]}" style="--acento:{en["acento"]}">'
+            f'<div class="ql-esc-marco"><div class="ql-esc-arte">{arte.svg(en["arte"])}</div></div>'
+            f'<div class="ql-esc-fantasma" aria-hidden="true">{e(en["boton"][:2])}</div>'
+            f'<div class="ql-esc-info"><span class="ql-esc-tipo">{e(en["tipo"])}</span>'
+            f'<h3>{e(en["titulo"])}</h3><p>{e(en["desc"])}</p>{ecuacion}'
             f'<span class="ql-esc-entrar">Enter o clic para abrir<i>→</i></span></div></div>')
-    return f'<div class="ql-esc">{"".join(piezas)}</div>' + _css_menu()
+    return f'<div class="ql-esc">{"".join(piezas)}</div>' + _css_menu(entradas, por_defecto)
 
 
-def menu_cinetico(ir_a) -> None:
+def menu_cinetico(ir_a, categoria: str | None = None) -> None:
     """
-    Pantalla de inicio: un átomo ilustrado a pantalla completa y, sobre él, el menú de destinos en barras angulares. Al apuntar una barra
-    (cursor o teclado) aparece, abajo a la derecha, la ilustración de ese tema. Cada barra es un `st.button` real (clic, toque y Enter);
-    en pantallas pequeñas queda solo la lista sobre el fondo.
+    Portada (`categoria=None`): el átomo ilustrado a pantalla completa y, sobre él, los cuatro capítulos como barras angulares en escalera.
+    Sub-portada (`categoria="Fundamentos"`, por ejemplo): los temas de ese capítulo con el mismo estilo. Al apuntar una barra (cursor o
+    teclado) aparece, abajo a la derecha, su ilustración. Cada barra es un `st.button` real (clic, toque y Enter); en pantallas pequeñas
+    queda solo la lista sobre el fondo.
     """
+    entradas = _entradas(categoria)
     with st.container(key="ql_menu"):
         st.markdown(escena.fondo_atomo_html(arte.atomo(), lecturas()), unsafe_allow_html=True)
-        izq, der = st.columns([1, 1.3], gap="large")
+        izq, der = st.columns([1.35, 1] if categoria is None else [1, 1.3], gap="large")
         with izq:
-            st.markdown('<div class="ql-inicio-marca"><span class="ql-inicio-eyebrow">Observatorio cuántico</span>'
-                        '<div class="ql-inicio-titulo" role="heading" aria-level="1">Quantum Lab</div>'
-                        '<p class="ql-inicio-sub">Laboratorio interactivo de mecánica cuántica</p>'
-                        f'<span id="{ID_SIMULADORES}"></span><span id="{ID_ESTUDIO}"></span></div>', unsafe_allow_html=True)
-            for categoria in CATEGORIAS:
-                for clave, numero, cat, tipo, titulo, *_ in (m for m in MODULOS if m[2] == categoria):
-                    with st.container(key=f"ql_item_{clave}"):
-                        st.button(f"{numero}   {titulo}", key=f"ql_menu_{clave}", on_click=ir_a, args=(clave,), width="stretch")
+            if categoria is None:
+                st.markdown('<div class="ql-inicio-marca"><span class="ql-inicio-eyebrow">Observatorio cuántico</span>'
+                            '<div class="ql-inicio-titulo" role="heading" aria-level="1">Quantum Lab</div>'
+                            '<p class="ql-inicio-sub">Laboratorio interactivo de mecánica cuántica</p>'
+                            f'<span id="{ID_SIMULADORES}"></span><span id="{ID_ESTUDIO}"></span></div>', unsafe_allow_html=True)
+            else:
+                num, etiqueta, desc = CAPITULOS[categoria]
+                with st.container(key="ql_sub_volver"):
+                    st.button("Inicio", key="ql_volver", icon=":material/arrow_back:", type="tertiary", on_click=ir_a, args=("inicio",))
+                st.markdown(f'<div class="ql-inicio-marca"><span class="ql-inicio-eyebrow">Capítulo {html.escape(num)} · {html.escape(etiqueta)}</span>'
+                            f'<div class="ql-inicio-titulo ql-sub-titulo" role="heading" aria-level="1">{html.escape(categoria)}</div>'
+                            f'<p class="ql-inicio-sub">{html.escape(desc)}</p></div>', unsafe_allow_html=True)
+            with st.container(key="ql_cats" if categoria is None else "ql_temas"):
+                for en in entradas:
+                    with st.container(key=f"ql_item_{en['clave']}"):
+                        st.button(en["boton"], key=f"ql_menu_{en['clave']}", on_click=ir_a, args=(en["destino"],), width="stretch")
         with der:
-            st.markdown(_escenario_html(), unsafe_allow_html=True)
+            st.markdown(_escenario_html(entradas, por_defecto=categoria is not None), unsafe_allow_html=True)
+
+
+def pagina_subinicio(ir_a, categoria: str) -> None:
+    """Sub-portada de un capítulo: sus temas como barras angulares sobre el átomo, con la misma animación de entrada."""
+    menu_cinetico(ir_a, categoria)
 
 
 def pagina_inicio(ir_a, sugerencia=None) -> None:
@@ -219,7 +245,7 @@ def _resto(ir_a, tarjetas: bool) -> None:
     c1, c2 = st.columns(2, gap="large")
     with c1:
         with st.expander("Cómo usar la aplicación", icon=":material/help:"):
-            st.markdown("1. Seleccionar un destino en esta página o una sección en la barra lateral.\n"
+            st.markdown("1. Elegir un capítulo en la portada y, dentro de él, el tema que se quiere abrir.\n"
                         "2. Ajustar los **parámetros del sistema** en el panel superior; los resultados se recalculan al instante.\n"
                         "3. Recorrer las **pestañas**: resultados, visualización, valores detallados e interpretación.\n"
                         "4. «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al comienzo.\n"
