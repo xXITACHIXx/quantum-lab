@@ -1228,6 +1228,14 @@ def interfaz() -> None:
                          "Niveles de energía, transiciones y series espectrales del modelo de Bohr, y el átomo "
                          "cuántico en 3D: nubes de probabilidad, orbitales y principio de incertidumbre.")
     qc.enlace_teoria("bohr")
+    qc.ficha_simulador(
+        "Calcular niveles, transiciones y series espectrales del modelo de Bohr y compararlos con el átomo cuántico 3D.",
+        r"\begin{gathered}E_n=-\dfrac{\mu e^4}{8\varepsilon_0^2h^2}\dfrac{Z^2}{n^2}\\[4pt]"
+        r"\dfrac{1}{\lambda}=R\,Z^2\left(\dfrac{1}{n_1^2}-\dfrac{1}{n_2^2}\right)\end{gathered}",
+        [("n", "número cuántico principal"), ("Z", "carga nuclear"), ("μ", "masa reducida"),
+         ("n₁, n₂", "niveles inferior y superior")],
+        "El modelo de Bohr es semiclásico y solo describe sistemas hidrogenoides de un electrón; "
+        "los orbitales 3D provienen de la ecuación de Schrödinger.")
     t = _leer_parametros()
     if t is None:
         return

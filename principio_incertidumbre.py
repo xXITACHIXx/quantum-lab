@@ -917,6 +917,14 @@ def interfaz() -> None:
                          "Paquetes de ondas en posición y en momento, el límite Δx·Δp ≥ ħ/2, el ensanchamiento de "
                          "una partícula libre y la difracción por una rendija.")
     qc.enlace_teoria("incertidumbre")
+    qc.ficha_simulador(
+        "Comprobar el límite Δx·Δp ≥ ħ/2 con paquetes de ondas y ver cómo se ensancha una partícula libre.",
+        r"\begin{gathered}\Delta x\,\Delta p\ge\dfrac{\hbar}{2}\\[4pt]"
+        r"\tau=\dfrac{2m\sigma_0^2}{\hbar}\end{gathered}",
+        [("Δx", "incertidumbre en posición"), ("Δp", "incertidumbre en momento"),
+         ("σ₀", "anchura inicial del paquete"), ("τ", "tiempo característico de ensanchamiento")],
+        "Paquetes gaussianos en una dimensión y partícula libre; el producto mínimo ħ/2 se alcanza solo "
+        "con paquetes gaussianos sin chirp.")
     p = _leer_parametros()
     if p is None:
         return

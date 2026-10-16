@@ -602,6 +602,29 @@ def encabezado_pagina(etiqueta: str, titulo: str, subtitulo: str) -> None:
     st.markdown(texto + '<hr class="ql-regla">', unsafe_allow_html=True)
 
 
+def ficha_simulador(objetivo: str, ecuacion_latex: str, variables: list[tuple[str, str]], modelo: str = "") -> None:
+    """
+    Ficha de entrada de un simulador: objetivo, ecuación central, variables y alcance del modelo. Es texto estático
+    (no depende de los parámetros), por lo que no altera resultados ni se vuelve a animar al mover un control.
+    """
+    import streamlit as st
+    with st.container(key="ql_ficha"):
+        c1, c2, c3 = st.columns([1.1, 1.2, 1.2])
+        with c1:
+            st.markdown(f'<div class="ql-ficha-et">Objetivo</div><p class="ql-ficha-tx">{_esc(objetivo)}</p>',
+                        unsafe_allow_html=True)
+        with c2:
+            st.markdown('<div class="ql-ficha-et">Ecuación central</div>', unsafe_allow_html=True)
+            st.latex(ecuacion_latex)
+        with c3:
+            filas = "".join(f"<li><b>{_esc(a)}</b> {_esc(b)}</li>" for a, b in variables)
+            st.markdown(f'<div class="ql-ficha-et">Variables</div><ul class="ql-ficha-ls">{filas}</ul>',
+                        unsafe_allow_html=True)
+        if modelo:
+            st.markdown(f'<p class="ql-ficha-mod"><b>Alcance del modelo.</b> {_esc(modelo)}</p>',
+                        unsafe_allow_html=True)
+
+
 def seccion(titulo: str) -> None:
     """Título de sección pequeño, en versalitas, con un filete hasta el margen derecho."""
     import streamlit as st
