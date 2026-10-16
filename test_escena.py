@@ -132,3 +132,17 @@ def test_un_parametro_no_cambia_de_escena():
     at = _abrir("caja")
     at.number_input(key=at.number_input[0].key).set_value(2).run()
     assert not at.exception and at.session_state["ql_pagina"] == "caja"
+
+
+def test_ficha_simulador_caja_es_estatica():
+    """La ficha del simulador de la caja aparece y no depende de los parámetros."""
+    from streamlit.testing.v1 import AppTest
+    at = AppTest.from_file("particula_caja.py", default_timeout=60).run()
+    assert not at.exception
+    assert any("Objetivo" in m.value for m in at.markdown)
+    assert any("n_{" in l.value or "E_n" in l.value for l in at.latex)
+    antes = [m.value for m in at.markdown if "Objetivo" in m.value]
+    at.session_state["caja_n"] = 3
+    at.run()
+    assert not at.exception
+    assert antes == [m.value for m in at.markdown if "Objetivo" in m.value]

@@ -244,6 +244,13 @@ a.ql-boton:hover { box-shadow: 0 0 30px -4px rgba(66, 217, 255, .65); }
 }
 html { scroll-behavior: smooth; }
 </style>
+[class*="st-key-ql_ficha"]{background:linear-gradient(160deg,rgba(66,217,255,.06),rgba(167,139,250,.05));
+  border:1px solid var(--ql-borde,#263550);border-left:3px solid #42D9FF;border-radius:12px;padding:.9rem 1.1rem;margin:.2rem 0 1rem}
+.ql-ficha-et{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#42D9FF;margin-bottom:.35rem}
+.ql-ficha-tx{margin:0;font-size:.92rem;color:#F2F5FC}
+.ql-ficha-ls{margin:0;padding-left:1.1rem;font-size:.86rem;color:#A7B4CE}
+.ql-ficha-ls b{color:#F2F5FC;margin-right:.3rem}
+.ql-ficha-mod{margin:.6rem 0 0;font-size:.8rem;color:#A7B4CE;border-top:1px solid #263550;padding-top:.5rem}
 """
 
 
