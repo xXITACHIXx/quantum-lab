@@ -146,3 +146,17 @@ def test_ficha_simulador_caja_es_estatica():
     at.run()
     assert not at.exception
     assert antes == [m.value for m in at.markdown if "Objetivo" in m.value]
+
+
+import pytest
+
+
+@pytest.mark.parametrize("archivo", ["particula_caja", "oscilador_armonico", "particula_esfera",
+                                     "efecto_fotoelectrico", "modelo_bohr", "principio_incertidumbre"])
+def test_ficha_en_los_seis_simuladores(archivo):
+    from streamlit.testing.v1 import AppTest
+    at = AppTest.from_file(f"{archivo}.py", default_timeout=90).run()
+    assert not at.exception
+    assert any("Objetivo" in m.value and "Ecuación central" in "".join(x.value for x in at.markdown) for m in at.markdown)
+    assert len(at.latex) >= 1
+    assert any("Alcance del modelo" in m.value for m in at.markdown)

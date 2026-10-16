@@ -1239,6 +1239,14 @@ def interfaz() -> None:
                          "Armónicos Yₗᵐ sobre una esfera de radio fijo, sus nodos y simetrías, y el modelo opcional "
                          "de una partícula confinada en una esfera impenetrable.")
     qc.enlace_teoria("esfera")
+    qc.ficha_simulador(
+        "Visualizar los armónicos esféricos Yₗᵐ, sus nodos y simetrías, y la relación entre l, m y el momento angular.",
+        r"\begin{gathered}\hat L^2 Y_l^m=\hbar^2\,l(l+1)\,Y_l^m\\[4pt]"
+        r"\hat L_z Y_l^m=m\hbar\,Y_l^m,\quad |m|\le l\end{gathered}",
+        [("l", "número cuántico de momento angular, entero ≥ 0"), ("m", "proyección, de −l a +l"),
+         ("θ, φ", "ángulos polar y azimutal"), ("R", "radio, solo en el modelo opcional")],
+        "Los Yₗᵐ son soluciones exactas. La partícula en una esfera impenetrable es un modelo opcional "
+        "y se identifica como tal.")
     p = _leer_parametros()
     if p is None:
         return

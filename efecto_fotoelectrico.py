@@ -658,6 +658,13 @@ def interfaz() -> None:
                          "Ecuación de Einstein, frecuencia umbral, energía de los electrones emitidos, corriente "
                          "fotoeléctrica y determinación experimental de la constante de Planck.")
     qc.enlace_teoria("fotoelectrico")
+    qc.ficha_simulador(
+        "Aplicar la ecuación de Einstein para hallar la frecuencia umbral, la energía de los electrones emitidos "
+        "y la constante de Planck.",
+        r"\begin{gathered}K_{\max}=h\nu-\phi\\[4pt]\nu_0=\phi/h,\qquad eV_0=K_{\max}\end{gathered}",
+        [("ν", "frecuencia de la luz"), ("φ", "función de trabajo del metal"), ("ν₀", "frecuencia umbral"),
+         ("V₀", "potencial de frenado")],
+        "Modelo de Einstein: un fotón libera un electrón si hν ≥ φ. No incluye efectos de superficie ni de temperatura.")
     p = _leer_parametros()
     if p is None:
         return
