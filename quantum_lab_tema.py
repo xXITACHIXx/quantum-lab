@@ -30,7 +30,9 @@ PALETA = {
 # Derivados de la paleta base (mezclas con el fondo o el panel).
 PANEL_2 = "#1B2744"          # al pasar el cursor y fondos de controles flotantes
 LATERAL = "#0E1528"          # barra lateral
-PIE = "#7B89A8"              # texto de pie de página (contraste 4.6:1 sobre el fondo)
+PIE = "#7B89A8"
+MAGENTA = "#F472D0"          # acento puntual de la escena (órbitas, luz ambiental); nunca para estados
+PROFUNDO = "#070B17"         # fondo de la escena de la portada, más profundo que el fondo general              # texto de pie de página (contraste 4.6:1 sobre el fondo)
 
 # Series de las gráficas científicas (nombre semántico → color).
 SERIES = {
