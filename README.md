@@ -152,6 +152,12 @@ la barra lateral que aparece el número de versión esperado.
   `<<plantillas>>` sin rellenar. Para añadir una gráfica, registrar una `Figura` en `FIGURAS` de `_figuras.py`.
 * **Revisión antes de publicar:** `python -m ejercicios` imprime el informe de mantenimiento (cuántos ejercicios hay por
   fuente, semana y tema, reglas de calidad y contrastes numéricos) y termina con error si algo falla.
+* **Ruta de estudio** (barra lateral → «Teoría y repaso»): recorrido por dominio de cada tema, sin depender de fechas. Los 13 temas siguen un orden de
+  dependencias físicas (`ORDEN` y `PREREQ` en `ejercicios/_ruta.py`). Cada tema tiene tres pasos: *teoría leída* (se marca a mano; no aplica si la
+  teoría aún no existe), *ejercicios resueltos* (al menos el 75 %) y *mini-examen aprobado* (3 ejercicios del tema, nota de 3.0 o más sobre 5.0).
+  Avisa de los prerrequisitos incompletos o con precisión menor de 60 % y propone el «Siguiente paso»: primero el tema de bajo desempeño y, si no hay,
+  el primer tema pendiente con prerrequisitos cumplidos. También aparece en el inicio. Las marcas viajan en la dirección (parámetro `rut`) y en la
+  copia de seguridad.
 * **Formulario** (barra lateral → «Teoría y repaso»): constantes fundamentales con valor CODATA e incertidumbre relativa (las del SI
   exactas), unidades atómicas, combinaciones frecuentes (hc, ħc, e²/4πε₀, k_BT…), conversor de energía (J, eV, hartree, cm⁻¹, Hz, nm, kJ/mol,
   kcal/mol, K) con región espectral, conversores de longitud, masa y ángulo, 149 fórmulas agrupadas en 18 temas (con definición de símbolos y

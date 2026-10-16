@@ -19,7 +19,7 @@ import streamlit as st
 
 import ejercicios
 import quantum_lab_comun as qc
-from ejercicios import _estado
+from ejercicios import _estado, _ruta
 from ejercicios._modelo import FUENTES, TEMAS, calificar
 from examen import _logica
 from talleres._calificar import OK, VACIA
@@ -68,6 +68,7 @@ def _comenzar(ids: list[str], minutos: int) -> None:
 
 def _iniciar() -> None:
     """Callback del botón «Comenzar»: lee la configuración y arranca el examen."""
+    st.session_state["ex_mini"] = None
     fuentes = st.session_state.get("ex_fuentes", list(FUENTES))
     claves = [k for k, t in TEMAS.items() if t in st.session_state.get("ex_temas", [])]
     niveles = st.session_state.get("ex_niveles", list(NIVELES))
@@ -84,6 +85,7 @@ def _repetir() -> None:
 
 
 def _nuevo() -> None:
+    st.session_state["ex_mini"] = None
     _borrar_respuestas()
     st.session_state.update(ex_fase="config", ex_entrega=None, ex_confirmar=False)
 
@@ -111,11 +113,15 @@ def _entregar(motivo: str = "entrega") -> None:
         cals[ej_id] = calificar(ej, respuestas[ej_id])
         _estado.registrar_calificacion(ej_id, cals[ej_id])
     nota, pct = _logica.nota(c.fraccion for c in cals.values())
+    mini = st.session_state.get("ex_mini")
+    aprobado = bool(mini) and nota >= _ruta.NOTA_MINI
+    if aprobado:
+        _estado.marcar_ruta(_ruta.marca_mini(mini))
     usados = min(st.session_state["ex_dur"], RELOJ() - st.session_state["ex_inicio"])
     _estado.registrar_examen(ids, nota, pct, usados, st.session_state["ex_dur"], [TEMAS[ejercicios.buscar(i).tema] for i in ids])
     st.session_state.update(ex_fase="fin", ex_confirmar=False,
                             ex_entrega={"respuestas": respuestas, "cals": cals, "nota": nota, "pct": pct, "usados": usados,
-                                        "motivo": motivo})
+                                        "motivo": motivo, "mini": mini, "mini_aprobado": aprobado})
 
 
 def _restante() -> float:
@@ -243,6 +249,12 @@ def _vista_correccion() -> None:
         filas.append({"N.º": i, "Ejercicio": ej.titulo, "Tema": TEMAS.get(ej.tema, ej.tema),
                       "Resultado": f"{100 * cal.fraccion:.0f} %", "Veredicto": _logica.veredicto(cal.fraccion, resp)})
     st.dataframe(filas, hide_index=True, width="stretch")
+    if ent.get("mini"):
+        if ent.get("mini_aprobado"):
+            st.success(f"Mini-examen aprobado (nota mínima {_ruta.NOTA_MINI:.1f}): el tema quedó marcado en la Ruta de estudio.", icon=":material/check_circle:")
+        else:
+            st.info(f"Mini-examen no aprobado: se requiere una nota de {_ruta.NOTA_MINI:.1f} o más. Puede repetirse con otros ejercicios desde la Ruta de estudio.",
+                    icon=":material/info:")
     st.caption("Los ejercicios no acertados del todo quedaron en «Mi repaso».")
     qc.seccion("Corrección detallada")
     for i, ej_id in enumerate(ids, 1):

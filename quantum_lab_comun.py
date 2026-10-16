@@ -920,7 +920,7 @@ def cargar_desde_url(valores_iniciales: dict) -> None:
 
 
 # Parámetros de la dirección que se conservan al cambiar de página (se guardan en session_state["ql_fijo_<nombre>"]).
-PARAMETROS_FIJOS = ("prog", "rev")
+PARAMETROS_FIJOS = ("prog", "rev", "rut")
 
 
 def escribir_en_url(valores_iniciales: dict | None, extra: dict | None = None) -> None:

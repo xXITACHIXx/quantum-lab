@@ -33,6 +33,7 @@ import particula_caja
 import particula_esfera
 import principio_incertidumbre
 import repaso
+import ruta
 import talleres
 import teoria
 import verificacion
@@ -49,6 +50,7 @@ PAGINAS = {
     "teoria": ("Centro de teoría", ":material/menu_book:", teoria),
     "talleres": ("Talleres de repaso", ":material/edit_note:", talleres),
     "ejercicios": ("Ejercicios de práctica", ":material/calculate:", ejercicios),
+    "ruta": ("Ruta de estudio", ":material/route:", ruta),
     "examen": ("Modo examen", ":material/timer:", examen),
     "repaso": ("Repaso personalizado", ":material/history_edu:", repaso),
     "formulario": ("Formulario", ":material/functions:", formulario),
@@ -58,7 +60,7 @@ PAGINAS = {
 GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
-    ("Teoría y repaso", ["teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
+    ("Teoría y repaso", ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
     ("Verificación", ["verificacion", "pruebas"], True),
 ]
 
@@ -70,7 +72,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -141,6 +143,10 @@ def _pagina_inicio() -> None:
                             f'<p>{texto}</p><div class="ql-ecuacion">{ecuacion}</div></div>', unsafe_allow_html=True)
                 st.button("Abrir simulador", key=f"ql_abrir_{clave}", on_click=_ir_a, args=(clave,),
                           icon=":material/arrow_forward:", width="stretch")
+    qc.seccion("Ruta de estudio")
+    st.markdown("La **Ruta de estudio** ordena los temas por dependencias físicas, sin depender de fechas, y propone el siguiente paso según el desempeño registrado.")
+    ruta.tarjeta_sugerencia(ruta.estados(), "ru_inicio")
+    st.button("Abrir la ruta de estudio", key="ql_abrir_ruta", on_click=_ir_a, args=("ruta",), icon=":material/route:")
     qc.seccion("Teoría del curso")
     st.markdown("El **Centro de teoría** reúne la teoría de cada tema con enlaces a su simulador, experimentos guiados y autoevaluación. "
                 "Los temas que el curso aún no desarrolla figuran con su lugar reservado.")

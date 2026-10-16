@@ -37,6 +37,20 @@ def repasar() -> set:
     return _conjunto("ej_repasar", "rev")
 
 
+def marcas() -> set:
+    """Marcas de la Ruta de estudio: «teoría leída» y «mini-examen aprobado» (ver `_ruta`)."""
+    from ejercicios import _ruta
+    if "ej_ruta" not in st.session_state:
+        codigo = st.session_state.get("ql_fijo_rut") or st.query_params.get("rut")
+        st.session_state["ej_ruta"] = _progreso.decodificar(codigo, _ruta.todas_las_marcas())
+    return st.session_state["ej_ruta"]
+
+
+def marcar_ruta(marca: str, valor: bool = True) -> None:
+    (marcas().add if valor else marcas().discard)(marca)
+    guardar_url()
+
+
 def bitacora() -> dict:
     return st.session_state.setdefault("ej_bitacora", {})
 
@@ -49,6 +63,8 @@ def guardar_url() -> None:
     ids = _ids()
     st.session_state["ql_fijo_prog"] = _progreso.codificar(hechos(), ids)
     st.session_state["ql_fijo_rev"] = _progreso.codificar(repasar(), ids)
+    from ejercicios import _ruta
+    st.session_state["ql_fijo_rut"] = _progreso.codificar(marcas(), _ruta.todas_las_marcas())
 
 
 def marcar(ej_id: str, resuelto: bool) -> None:
@@ -99,23 +115,26 @@ def borrar_todo() -> None:
     repasar().clear()
     bitacora().clear()
     historial().clear()
+    marcas().clear()
     st.session_state.get("ej_res", {}).clear()
     guardar_url()
 
 
 def copia_json() -> str:
-    return _progreso.a_json(hechos(), _ids(), repasar(), bitacora(), historial())
+    return _progreso.a_json(hechos(), _ids(), repasar(), bitacora(), historial(), marcas())
 
 
 def cargar_copia(datos: bytes | str) -> str:
     """Combina un archivo exportado con lo que ya hay. Devuelve un mensaje de resultado; lanza ValueError si el archivo no sirve."""
-    copia = _progreso.leer_copia(datos, _ids())
+    from ejercicios import _ruta
+    copia = _progreso.leer_copia(datos, _ids(), _ruta.todas_las_marcas())
     antes = len(hechos())
     hechos().update(copia["resueltos"])
     repasar().update(copia["repasar"])
     repasar().difference_update(hechos())
     st.session_state["ej_bitacora"] = _bitacora.combinar(bitacora(), copia["bitacora"])
     historial().extend(x for x in copia["examenes"] if x not in historial())
+    marcas().update(copia["ruta"])
     guardar_url()
     return (f"Se cargaron {len(copia['resueltos'])} ejercicios resueltos ({len(hechos()) - antes} nuevos), "
             f"{len(copia['repasar'])} por repasar y {len(copia['examenes'])} exámenes.")
