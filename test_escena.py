@@ -183,18 +183,21 @@ def test_trazos_numerados_para_la_secuencia():
     assert indices == list(range(1, len(indices) + 1)) and len(indices) >= 2
 
 
-def test_viaje_entre_paginas_y_nube_orbital():
+def test_emergencia_desde_abajo_y_nube_orbital():
     import quantum_lab_escena as e
     css, js = e.css(), e.JS
-    for k in ("ql-tunel-in", "ql-acerca", "ql-emerge"):
+    for k in ("ql-em-fondo", "ql-em-sube", "ql-em-baja", "ql-em-texto", "ql-pagina-sube"):
         assert f"@keyframes {k}" in css
     movimiento = css[css.index("prefers-reduced-motion: reduce"):]
-    assert "#ql-tunel" in movimiento                              # el túnel se oculta con movimiento reducido
-    assert "if (reducir.matches) { return; }" in js[js.index("function viajar"):][:120]
-    assert "pointer-events: none" in css[css.index("#ql-tunel {"):][:160]
-    assert "Math.min(90" in js                                    # límite de partículas del observatorio
-    assert "p.orb" in js and "destination-out" in js              # órbitas con estela
-    assert "navegacion" in js and "ql_volver" in js
+    assert "#ql-emerge" in movimiento                              # la emergencia se oculta con movimiento reducido
+    assert "if (reducir.matches) { return; }" in js[js.index("function emergerDesde"):][:120]
+    assert "pointer-events: none" in css[css.index("#ql-emerge {"):][:260]   # nunca bloquea clics ni desplazamiento
+    assert "MAX_EMERGE" in js and "MIN_EMERGE" in js               # se retira sola si la navegación no ocurre
+    assert "innerHTML" not in js                                   # el JS no lleva etiquetas HTML (st.html lo descartaba)
+    assert "Math.min(90" in js                                     # límite de partículas
+    assert "p.orb" in js and "destination-out" in js               # órbitas con estela
+    assert "st-key-nav_" in js and "st-key-ql_item_" in js and "ql_volver" in js
+
 
 
 def test_menu_cinetico_es_la_vista_predeterminada():

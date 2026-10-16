@@ -367,7 +367,7 @@ def figura_compresion(p: Paquete, compacto: bool = False):
                 f"Δx·Δp = {c['producto']:.4f} ħ  (mínimo 0.5 ħ)")
 
     def anotacion(w, c):
-        return [dict(text=texto(w, c), x=0.5, y=1.13 if not compacto else 1.17, xref="paper", yref="paper",
+        return [dict(text=texto(w, c), x=0.5, y=1.17 if not compacto else 1.17, xref="paper", yref="paper",
                      showarrow=False, font=dict(size=13, color="white", family=qc.FUENTE_CIFRAS))]
 
     marcos = []
@@ -389,7 +389,7 @@ def figura_compresion(p: Paquete, compacto: bool = False):
     qc.aplicar_tema_plotly(fig, None, altura=altura)
     fig.update_layout(annotations=list(fig.layout.annotations[:2]) + anotacion(*calculos[idx_activo]),
                       legend=dict(orientation="h", y=-0.13, x=0), showlegend=not compacto,
-                      margin=dict(t=140 if compacto else 90))
+                      margin=dict(t=140 if compacto else 112))
     fig.update_xaxes(range=[-x_lim, x_lim], title_text="x [nm]", row=1, col=1)
     fig.update_xaxes(range=list(k_lim), title_text="p [ħ/nm]", row=pos2[0], col=pos2[1])
     fig.update_yaxes(range=[1.08 * ymn, 1.08 * ymx], title_text="densidad [1/nm]", row=1, col=1)
