@@ -45,7 +45,7 @@ N_MAX = 200               # número cuántico máximo permitido
 PUNTOS_MIN = 200
 PUNTOS_MAX = 20000
 PUNTOS_POR_N = 20         # puntos mínimos por unidad de n para resolver las oscilaciones
-ESTADOS_MAX = 10          # filas de la tabla de superposición (la «lista rápida» admite hasta N_MAX estados)
+ESTADOS_MAX = 20          # filas de la tabla de superposición (la «lista rápida» admite hasta N_MAX estados)
 
 
 @dataclass(frozen=True)
@@ -416,7 +416,9 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     nodos_vis = d["nodos"] / fx
     maximos_vis = d["maximos"] / fx
 
-    fig, ejes = qc.rejilla(2, 2, (14, 8.6), constrained_layout=True)
+    fig, ejes = qc.rejilla(2, 2, (14, 9.4), constrained_layout=True)
+    # Márgenes explícitos entre paneles: los títulos y las etiquetas del eje x de la fila de arriba no deben tocar los de abajo.
+    fig.get_layout_engine().set(h_pad=0.16, w_pad=0.12, hspace=0.12, wspace=0.08)
     fig.suptitle(f"Partícula en una caja 1D — estado n = {n}", fontsize=17, fontweight="bold")
 
     # Panel 1: función de onda (lóbulos positivo/negativo sombreados)
@@ -447,7 +449,7 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     ax.set_title("Densidad de probabilidad")
     ax.set_xlabel(f"x [{L}]")
     ax.set_ylabel(rf"$|\psi_n(x)|^2\ [{Ltex}^{{-1}}]$")
-    ax.set_ylim(-0.04 * rho_vis.max(), 1.28 * rho_vis.max())
+    ax.set_ylim(-0.04 * rho_vis.max(), 1.55 * rho_vis.max())      # espacio arriba para la leyenda y el recuadro de n
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right")
 
@@ -966,7 +968,8 @@ def _leer_superposicion():
         st.caption("Se usa la lista rápida; la tabla de abajo está desactivada mientras la lista no esté vacía.")
         return leer_lista_estados(lista)
     c1, c2, c3, _ = st.columns(4, vertical_alignment="bottom")
-    cantidad = c1.slider("Número de estados", 1, ESTADOS_MAX, key="caja_sup_cantidad")
+    cantidad = c1.number_input("Número de estados a superponer", min_value=1, max_value=ESTADOS_MAX, step=1, key="caja_sup_cantidad",
+                               help=f"Cuántos estados se superponen (1 a {ESTADOS_MAX}). Para más, usar la lista rápida (hasta {N_MAX}).")
     modo = c2.radio("Coeficientes cₙ", ["Amplitud y fase", "Parte real e imaginaria"], key="caja_sup_modo",
                     help="cₙ = Aₙ·e^{iφₙ}  o  cₙ = Re + i·Im")
     c3.toggle("Normalizar coeficientes", key="caja_sup_normalizar",
@@ -985,10 +988,10 @@ def _leer_superposicion():
         numeros.append(f1.number_input(f"n{i}", min_value=1, max_value=N_MAX, step=1, key=f"caja_sup_n{i}",
                                        label_visibility="collapsed"))
         if amplitud_fase:
-            amplitudes.append(f2.slider(f"A{i}", 0.0, 1.0, step=0.05, key=f"caja_sup_A{i}",
-                                        label_visibility="collapsed"))
-            fases.append(f3.slider(f"φ{i}", -float(np.pi), float(np.pi), step=float(np.pi / 24), format="%.3f",
-                                   key=f"caja_sup_fase{i}", label_visibility="collapsed"))
+            amplitudes.append(f2.number_input(f"A{i}", min_value=0.0, step=0.05, format="%.4f", key=f"caja_sup_A{i}",
+                                              label_visibility="collapsed"))
+            fases.append(f3.number_input(f"φ{i}", min_value=-100.0, max_value=100.0, step=0.1, format="%.4f",
+                                         key=f"caja_sup_fase{i}", label_visibility="collapsed"))
         else:
             res.append(f2.number_input(f"Re c{i}", step=0.1, format="%.4f", key=f"caja_sup_re{i}",
                                        label_visibility="collapsed"))
