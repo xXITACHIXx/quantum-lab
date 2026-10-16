@@ -1153,8 +1153,8 @@ def interfaz() -> None:
     qc.ficha_simulador(
         "Relacionar el número cuántico n con la energía, los nodos y la forma de ψ, y observar la interferencia "
         "de una superposición de estados.",
-        r"\psi_n(x)=\sqrt{\tfrac{2}{a}}\,\sin\!\left(\tfrac{n\pi x}{a}\right),\qquad "
-        r"E_n=\dfrac{n^2\pi^2\hbar^2}{2ma^2}",
+        r"\begin{gathered}\psi_n(x)=\sqrt{\tfrac{2}{a}}\,\sin\!\left(\tfrac{n\pi x}{a}\right)\\[4pt]"
+        r"E_n=\dfrac{n^2\pi^2\hbar^2}{2ma^2}\end{gathered}",
         [("n", "número cuántico, entero ≥ 1"), ("a", "longitud de la caja"), ("m", "masa de la partícula"),
          ("E", "energía del estado")],
         "Pozo infinito unidimensional, estados estacionarios exactos; resultados numéricos calculados, "
