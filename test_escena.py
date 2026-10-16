@@ -160,3 +160,22 @@ def test_ficha_en_los_seis_simuladores(archivo):
     assert any("Objetivo" in m.value and "Ecuación central" in "".join(x.value for x in at.markdown) for m in at.markdown)
     assert len(at.latex) >= 1
     assert any("Alcance del modelo" in m.value for m in at.markdown)
+
+
+def test_fondo_vivo_y_microinteracciones_respetan_accesibilidad():
+    import quantum_lab_escena as e
+    css = e.css()
+    movimiento = css[css.index("prefers-reduced-motion: reduce"):]
+    assert "#ql-fondo-vivo" in movimiento                       # el fondo se oculta con movimiento reducido
+    assert "ql-fondo-vivo" in css and "max-width: 640px" in css  # y en pantallas pequeñas
+    assert "pointer-events: none" in css[css.index("#ql-fondo-vivo {"):][:200]   # nunca bloquea el desplazamiento ni los clics
+    for k in ("ql-aparece", "ql-relleno", "ql-fundir", "ql-aviso", "ql-resalte"):
+        assert f"@keyframes {k}" in css
+    assert "ql-abriendo" in e.JS and "ql-aparta" in e.JS and "reducir.matches" in e.JS
+
+
+def test_trazos_numerados_para_la_secuencia():
+    import quantum_lab_arte as a
+    svg = a.svg("oscilador")
+    indices = [int(x) for x in __import__("re").findall(r'--i:(\d+)', svg)]
+    assert indices == list(range(1, len(indices) + 1)) and len(indices) >= 2

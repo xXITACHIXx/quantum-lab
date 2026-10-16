@@ -237,10 +237,69 @@ a.ql-boton:hover { box-shadow: 0 0 30px -4px rgba(66, 217, 255, .65); }
   .ql-dest-mayor .ql-dest-arte { border-right: 0; border-bottom: 1px solid var(--ql-borde); }
   .ql-ubicacion { letter-spacing: .1em; font-size: .66rem; flex-wrap: wrap; }
 }
+
+/* =============== 4. Narración de la ilustración =============== */
+/* Los trazos se dibujan en el orden en que están construidos (--i): primero el potencial o el dominio, después los estados. */
+@keyframes ql-aparece { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ql-relleno { from { fill-opacity: 0; } }
+.ql-cab-arte .ql-trazo { animation-duration: 1.15s; animation-delay: calc(.35s + (var(--i, 1) - 1) * .55s); }
+.ql-cab-arte path.ql-trazo:not([fill="none"]) { animation: ql-trazar 1.15s calc(.35s + (var(--i, 1) - 1) * .55s) cubic-bezier(.4, .1, .2, 1) both,
+  ql-relleno 1s calc(1.2s + (var(--i, 1) - 1) * .55s) ease-out both; }
+.ql-cab-arte svg text, .ql-cab-arte svg circle, .ql-cab-arte svg line, .ql-cab-arte svg path:not(.ql-trazo) { animation: ql-aparece .8s 1.1s ease-out both; }
+
+/* =============== 5. Fondo vivo =============== */
+/* Capa fija detrás de todo el contenido: dos luces que derivan despacio y, si hay JavaScript, unas pocas partículas. */
+[data-testid="stApp"]::before { content: ""; position: fixed; inset: -10%; z-index: 0; pointer-events: none;
+  background: radial-gradient(40vw 40vw at 15% 10%, rgba(66, 217, 255, .07), transparent 70%),
+              radial-gradient(45vw 45vw at 90% 85%, rgba(167, 139, 250, .08), transparent 70%);
+  animation: ql-deriva-a 28s ease-in-out infinite alternate; }
+#ql-fondo-vivo { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: .75; }
+[data-testid="stMain"] { position: relative; z-index: 1; }
+
+/* =============== 6. Elección de una tarjeta =============== */
+/* Al pulsar un destino, su ilustración se expande y las demás tarjetas se apartan mientras Streamlit carga la página. */
+[class*="st-key-ql_dest_"].ql-abriendo { z-index: 8; }
+[class*="st-key-ql_dest_"].ql-abriendo .ql-dest { transform: translateY(-8px) scale(1.035); border-color: var(--acento); box-shadow: 0 30px 70px -26px var(--acento); }
+[class*="st-key-ql_dest_"].ql-abriendo .ql-dest-arte svg { transform: scale(1.18); filter: brightness(1.25); }
+[class*="st-key-ql_dest_"].ql-abriendo .ql-dest-luz { opacity: 1; }
+[class*="st-key-ql_dest_"].ql-abriendo .ql-dest-linea { transform: scaleX(1); }
+[class*="st-key-ql_dest_"].ql-aparta .ql-dest { opacity: .38; filter: blur(1.5px) saturate(.7); transform: scale(.975); transition: all .5s cubic-bezier(.2, .7, .2, 1); }
+
+/* =============== 7. Microinteracciones de la interfaz =============== */
+@keyframes ql-resalte { from { box-shadow: 0 0 0 0 rgba(66, 217, 255, .55); } to { box-shadow: 0 0 0 10px rgba(66, 217, 255, 0); } }
+@keyframes ql-aviso { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+@keyframes ql-fundir { from { opacity: 0; transform: translateY(10px) scale(.992); } to { opacity: 1; transform: none; } }
+/* Gráficas y tablas se funden al montarse (no se reproducen al mover un parámetro: el nodo se conserva). */
+[data-testid="stImage"], [data-testid="stPlotlyChart"], [data-testid="stDataFrame"], [data-testid="stTable"] { animation: ql-fundir .7s cubic-bezier(.2, .7, .2, 1) both; }
+div[data-testid="stAlert"] { animation: ql-aviso .5s cubic-bezier(.2, .7, .2, 1) both; }
+/* Botones: elevación y brillo; pulso al pulsar. */
+.stButton > button, .stDownloadButton > button { transition: transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .3s, border-color .3s, background .3s; }
+@media (hover: hover) {
+  .stButton > button:hover, .stDownloadButton > button:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -16px var(--ql-cian); border-color: rgba(66, 217, 255, .6); }
+  section[data-testid="stSidebar"] .stButton > button:hover { transform: translateX(4px); box-shadow: none; }
+}
+.stButton > button:active, .stDownloadButton > button:active { transform: scale(.97); animation: ql-resalte .5s ease-out; }
+/* Pestañas: el indicador se desliza y el texto se ilumina. */
+button[data-baseweb="tab"] { transition: color .3s, transform .3s; }
+@media (hover: hover) { button[data-baseweb="tab"]:hover { transform: translateY(-1px); color: var(--ql-cian); } }
+div[data-baseweb="tab-highlight"] { transition: left .4s cubic-bezier(.2, .8, .2, 1), width .4s cubic-bezier(.2, .8, .2, 1) !important;
+  box-shadow: 0 0 12px var(--ql-cian); }
+/* Campos: halo al enfocar. */
+div[data-baseweb="input"], div[data-baseweb="select"] > div { transition: box-shadow .3s, border-color .3s; }
+div[data-baseweb="input"]:focus-within, div[data-baseweb="select"] > div:focus-within { box-shadow: 0 0 0 3px rgba(66, 217, 255, .22); }
+/* Desplegables: encabezado que se ilumina. */
+[data-testid="stExpander"] details { transition: border-color .35s, box-shadow .35s; }
+@media (hover: hover) { [data-testid="stExpander"] details:hover { border-color: rgba(66, 217, 255, .4) !important; box-shadow: 0 10px 28px -22px var(--ql-cian); } }
+/* Deslizadores: la perilla crece al arrastrar. */
+div[data-baseweb="slider"] div[role] { transition: transform .2s, box-shadow .3s; }
+div[data-baseweb="slider"] div[role]:hover, div[data-baseweb="slider"] div[role]:focus { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(66, 217, 255, .2); }
+@media (max-width: 640px) { [data-testid="stApp"]::before { animation: none; } #ql-fondo-vivo { display: none; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .ql-trazo { stroke-dasharray: none !important; }
-  .ql-obs-particulas { display: none; }
+  .ql-obs-particulas, #ql-fondo-vivo { display: none; }
+  [data-testid="stApp"]::before { animation: none; }
 }
 html { scroll-behavior: smooth; }
 [class*="st-key-ql_ficha"] .katex-display{overflow-x:auto;overflow-y:hidden;margin:.2rem 0}
@@ -366,7 +425,63 @@ JS = r"""
     }).observe(document.body, { subtree: true, characterData: true, childList: true });
   }
 
+  // Fondo vivo: una capa fija con pocas partículas lentas detrás de todas las páginas. Se omite con movimiento reducido o pantalla pequeña,
+  // se pausa con la pestaña oculta y no intercepta el puntero ni el desplazamiento.
+  var fondo = null, fctx = null, fpts = [], fanim = 0, fw = 0, fh = 0, fdpr = 1;
+  function fondoPreparar() {
+    var app = document.querySelector('[data-testid="stApp"]');
+    if (!app) { return; }
+    fondo = document.createElement('canvas'); fondo.id = 'ql-fondo-vivo'; fondo.setAttribute('aria-hidden', 'true');
+    app.insertBefore(fondo, app.firstChild);
+    fctx = fondo.getContext('2d'); fdpr = Math.min(W.devicePixelRatio || 1, 2); fondoMedir();
+    var n = Math.round(Math.min(46, Math.max(18, fw * fh / 30000)));
+    fpts = [];
+    for (var i = 0; i < n; i++) {
+      var z = 0.25 + Math.random() * 0.75;
+      fpts.push({ x: Math.random() * fw, y: Math.random() * fh, z: z, vx: (Math.random() - .5) * .05 * z, vy: -(.03 + Math.random() * .08) * z,
+                  c: COLORES[i % 3], f: Math.random() * 6.28 });
+    }
+  }
+  function fondoMedir() {
+    fw = W.innerWidth; fh = W.innerHeight;
+    fondo.width = Math.round(fw * fdpr); fondo.height = Math.round(fh * fdpr); fctx.setTransform(fdpr, 0, 0, fdpr, 0, 0);
+  }
+  function fondoCuadro(t) {
+    fanim = 0;
+    if (!fondo || !fondo.isConnected) { fondo = null; return; }
+    if (document.hidden) { return; }
+    if (fw !== W.innerWidth || fh !== W.innerHeight) { fondoMedir(); }
+    fctx.clearRect(0, 0, fw, fh);
+    for (var i = 0; i < fpts.length; i++) {
+      var p = fpts[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.y < -10) { p.y = fh + 10; p.x = Math.random() * fw; }
+      if (p.x < -10) { p.x = fw + 10; } else if (p.x > fw + 10) { p.x = -10; }
+      var b = 0.12 + 0.3 * p.z * (0.7 + 0.3 * Math.sin(t / 1800 + p.f));
+      fctx.beginPath(); fctx.arc(p.x, p.y, 0.5 + 1.2 * p.z, 0, 6.2832);
+      fctx.fillStyle = 'rgba(' + p.c + ',' + b.toFixed(3) + ')'; fctx.fill();
+    }
+    fanim = W.requestAnimationFrame(fondoCuadro);
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && fondo && !fanim) { fanim = W.requestAnimationFrame(fondoCuadro); } });
+
+  // Elección de una tarjeta: se expande la elegida y se apartan las demás mientras Streamlit carga la página destino.
+  // Si la navegación no ocurre (p. ej., error de red), el estado se retira solo.
+  document.addEventListener('click', function (e) {
+    if (!e.target || !e.target.closest) { return; }
+    var d = e.target.closest('[class*="st-key-ql_dest_"]');
+    if (!d || reducir.matches) { return; }
+    var todas = document.querySelectorAll('[class*="st-key-ql_dest_"]');
+    d.classList.add('ql-abriendo');
+    for (var i = 0; i < todas.length; i++) { if (todas[i] !== d) { todas[i].classList.add('ql-aparta'); } }
+    W.setTimeout(function () {
+      for (var j = 0; j < todas.length; j++) { todas[j].classList.remove('ql-abriendo', 'ql-aparta'); }
+    }, 2500);
+  }, true);
+
   function vigilar() {
+    if (!fondo && !reducir.matches && W.innerWidth >= 640) { fondoPreparar(); }
+    if (fondo && !fanim) { fanim = W.requestAnimationFrame(fondoCuadro); }
     var c = document.getElementById('ql-particulas');
     if (c && c !== lienzo && !reducir.matches && W.innerWidth >= 640) { preparar(c); }
     if (lienzo && !anima) { anima = W.requestAnimationFrame(cuadro); }

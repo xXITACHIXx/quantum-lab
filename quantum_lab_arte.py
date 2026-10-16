@@ -17,6 +17,7 @@ se indica en el texto alternativo y en el pie de la portada.
 from __future__ import annotations
 
 import math
+import re
 
 import numpy as np
 from numpy.polynomial import hermite as _herm
@@ -55,7 +56,14 @@ def _texto(x, y, txt, color=None, tam=11, ancla="middle", peso=500) -> str:
             f'font-weight="{peso}" text-anchor="{ancla}">{txt}</text>')
 
 
+def _numerar_trazos(contenido: str) -> str:
+    """Añade --i (orden de aparición) a cada trazo animable, para que el CSS los dibuje uno tras otro como una secuencia."""
+    contador = iter(range(1, 10_000))
+    return re.sub(r'class="ql-trazo"', lambda m: f'class="ql-trazo" style="--i:{next(contador)}"', contenido)
+
+
 def _envolver(contenido: str, titulo: str, ancho=ANCHO, alto=ALTO) -> str:
+    contenido = _numerar_trazos(contenido)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" role="img" aria-label="{titulo}" preserveAspectRatio="xMidYMid meet">'
             f'<title>{titulo}</title>{contenido}</svg>')
 
