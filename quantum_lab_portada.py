@@ -116,10 +116,73 @@ def _hero() -> None:
     st.markdown(escena.observatorio_html(arte.observatorio(), lecturas(), ID_SIMULADORES, ID_ESTUDIO), unsafe_allow_html=True)
 
 
+_ACENTO = {SIMULADOR: "var(--ql-cian)", ESTUDIO: "var(--ql-violeta)", VERIFICACION: "var(--ql-verde)"}
+
+
+def _css_menu() -> str:
+    """Reglas por elemento del menú: color de acento, orden de entrada y qué escenario se muestra al apuntar a cada barra."""
+    reglas = []
+    for i, m in enumerate(MODULOS):
+        k = m[0]
+        reglas.append(f'.st-key-ql_item_{k}{{--n:{i};--acento:{_ACENTO[m[3]]};}}')
+        reglas.append(f'.st-key-ql_menu:has(.st-key-ql_item_{k}:is(:hover,:focus-within)) .ql-esc-{k}{{visibility:visible;opacity:1;'
+                      f'animation:ql-esc-entra .6s cubic-bezier(.2,.7,.2,1) both;z-index:2}}')
+        reglas.append(f'.st-key-ql_menu:has(.st-key-ql_item_{k}:is(:hover,:focus-within)) .ql-esc-{k} .ql-trazo{{animation:ql-trazar 1s .1s cubic-bezier(.4,.1,.2,1) both}}')
+    primero = MODULOS[0][0]
+    # Sin ninguna barra apuntada se muestra el primer destino (el menú nunca queda con el escenario vacío).
+    reglas.append(f'.st-key-ql_menu:not(:has([class*="st-key-ql_item_"]:is(:hover,:focus-within))) .ql-esc-{primero}{{visibility:visible;opacity:1;z-index:2}}')
+    return "<style>" + "".join(reglas) + "</style>"
+
+
+def _escenario_html() -> str:
+    """Escenario del menú: una ilustración grande por destino, apiladas; el CSS muestra la de la barra apuntada."""
+    e = html.escape
+    prefijo = {SIMULADOR: "Simulador", ESTUDIO: "Estación de estudio", VERIFICACION: "Verificación"}
+    piezas = []
+    for clave, numero, categoria, tipo, titulo, descripcion, lema in MODULOS:
+        ecuacion = f'<span class="ql-esc-ecuacion">{e(lema)}</span>' if lema else ""
+        piezas.append(
+            f'<div class="ql-esc-item ql-esc-{clave}" style="--acento:{_ACENTO[tipo]}">'
+            f'<div class="ql-esc-marco"><div class="ql-esc-arte">{arte.svg(clave)}</div></div>'
+            f'<div class="ql-esc-fantasma" aria-hidden="true">{e(numero)}</div>'
+            f'<div class="ql-esc-info"><span class="ql-esc-tipo">{prefijo[tipo]} · {e(numero)}</span>'
+            f'<h3>{e(titulo)}</h3><p>{e(descripcion)}</p>{ecuacion}'
+            f'<span class="ql-esc-entrar">Enter o clic para abrir<i>→</i></span></div></div>')
+    return f'<div class="ql-esc">{"".join(piezas)}</div>' + _css_menu()
+
+
+def menu_cinetico(ir_a) -> None:
+    """
+    Menú de destinos: barras angulares a la izquierda y, a la derecha, la ilustración del tema apuntado (con el cursor o el teclado).
+    Cada barra es un `st.button` real: navega con clic, toque y Enter; en pantallas pequeñas solo queda la lista.
+    """
+    with st.container(key="ql_menu"):
+        izq, der = st.columns([1, 1.3], gap="large")
+        with izq:
+            for categoria in CATEGORIAS:
+                num, _etiqueta, _descripcion = CAPITULOS[categoria]
+                ancla = {"Mecánica cuántica": ID_SIMULADORES, "Teoría y repaso": ID_ESTUDIO}.get(categoria, "")
+                id_ = f' id="{ancla}"' if ancla else ""
+                st.markdown(f'<div class="ql-menu-cab"{id_}><b>{html.escape(num)}</b>{html.escape(categoria)}</div>', unsafe_allow_html=True)
+                for clave, numero, cat, tipo, titulo, *_ in (m for m in MODULOS if m[2] == categoria):
+                    with st.container(key=f"ql_item_{clave}"):
+                        st.button(f"{numero}   {titulo}", key=f"ql_menu_{clave}", on_click=ir_a, args=(clave,), width="stretch",
+                                  help=None)
+        with der:
+            st.markdown(_escenario_html(), unsafe_allow_html=True)
+
+
 def pagina_inicio(ir_a, sugerencia=None) -> None:
     """Portada. `ir_a(clave)` es el callback de navegación; `sugerencia()` dibuja la tarjeta «Siguiente paso sugerido» (opcional)."""
     _hero()
-    for categoria in CATEGORIAS:
+    vista = st.segmented_control("Vista de los destinos", ["Menú", "Tarjetas"], default="Menú", key="ql_vista",
+                                 label_visibility="collapsed", width="content")
+    if vista != "Tarjetas":
+        if sugerencia:
+            sugerencia()
+        menu_cinetico(ir_a)
+        vista = None
+    for categoria in (CATEGORIAS if vista == "Tarjetas" else ()):
         modulos = [m for m in MODULOS if m[2] == categoria]
         num, etiqueta, descripcion = CAPITULOS[categoria]
         ancla = {"Mecánica cuántica": ID_SIMULADORES, "Teoría y repaso": ID_ESTUDIO}.get(categoria, "")

@@ -93,8 +93,10 @@ def test_la_portada_no_inventa_indicadores():
         assert prohibido not in texto
 
 
-def _abrir(pagina=None):
+def _abrir(pagina=None, vista="Tarjetas"):
     at = AppTest.from_file(APP, default_timeout=180)
+    if vista:
+        at.session_state["ql_vista"] = vista
     if pagina:
         at.session_state["ql_pagina"] = pagina
     at.run()

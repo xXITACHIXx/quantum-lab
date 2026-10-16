@@ -294,3 +294,7 @@ el orbital **complejo** sí (L_z = mħ).
 | En Streamlit Cloud la app no arranca y el registro termina en «Welcome to Streamlit!» | Comprueba que `.streamlit/config.toml` tenga `headless = true` (con `false` se queda esperando un correo por teclado) |
 | Se ve el diseño antiguo o un aviso sobre `theme` | `python -m pip install -U -r requirements.txt` (Streamlit 1.65 o superior) y reinicia |
 | Símbolos como ₙ o ⟨⟩ salen como recuadros | La app incrusta una fuente de símbolos; si persiste, recarga la página sin caché (`Ctrl + F5`) |
+
+## Menú cinético de la portada
+
+La portada muestra por defecto un menú de barras angulares (una por destino) y, a la derecha, el escenario con la ilustración conceptual del tema apuntado con el cursor o con el teclado. Cada barra es un `st.button` real (clic, toque y Enter). La vista «Tarjetas» conserva la rejilla anterior. En pantallas menores de 900 px solo queda la lista; con movimiento reducido no hay animaciones. Es una interpretación propia del lenguaje de menús cinéticos: no reproduce el diseño de ningún juego.

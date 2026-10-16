@@ -98,8 +98,10 @@ def test_tarjeta_mayor_y_compacta():
     assert "ql-dest-compacta" in portada.tarjeta_html(*portada.modulo("ruta"), compacta=True)
 
 
-def _abrir(pagina=None):
+def _abrir(pagina=None, vista="Tarjetas"):
     at = AppTest.from_file(APP, default_timeout=180)
+    if vista:
+        at.session_state["ql_vista"] = vista
     if pagina:
         at.session_state["ql_pagina"] = pagina
     at.run()
@@ -193,3 +195,33 @@ def test_viaje_entre_paginas_y_nube_orbital():
     assert "Math.min(90" in js                                    # límite de partículas del observatorio
     assert "p.orb" in js and "destination-out" in js              # órbitas con estela
     assert "navegacion" in js and "ql_volver" in js
+
+
+def test_menu_cinetico_es_la_vista_predeterminada():
+    import quantum_lab_portada as portada
+    at = _abrir(vista=None)
+    assert not at.exception, [e.value for e in at.exception]
+    claves = {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")}
+    assert claves == {f"ql_menu_{m[0]}" for m in portada.MODULOS}
+    assert not any(b.key and b.key.startswith("ql_abrir_") for b in at.button)       # las tarjetas quedan en la otra vista
+    html = " ".join(m.value for m in at.markdown)
+    assert html.count('class="ql-esc-item ql-esc-') == len(portada.MODULOS)           # una escena por destino
+    assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html   # los botones del hero siguen funcionando
+
+
+def test_menu_cinetico_navega_con_su_boton():
+    at = _abrir(vista=None)
+    at.button(key="ql_menu_oscilador").click().run()
+    assert at.session_state["ql_pagina"] == "oscilador" and not at.exception
+
+
+def test_menu_cinetico_css_por_destino_y_accesibilidad():
+    import quantum_lab_portada as portada
+    import quantum_lab_escena as e
+    css = portada._css_menu()
+    for m in portada.MODULOS:
+        assert f".ql-esc-{m[0]}" in css and f"st-key-ql_item_{m[0]}" in css
+    assert ":focus-within" in css                         # el teclado enciende el mismo escenario que el cursor
+    base = e.css()
+    assert "@keyframes ql-menu-entra" in base and "@keyframes ql-esc-entra" in base
+    assert ".ql-esc { display: none; }" in base           # en pantallas pequeñas queda solo la lista

@@ -308,6 +308,58 @@ body.ql-viajando [class*="st-key-ql_escena_"] { animation: ql-acerca .55s cubic-
 /* La página nueva emerge desde el fondo (acercamiento): sustituye la entrada por desplazamiento. */
 [class*="st-key-ql_escena_"] { animation: ql-emerge .7s cubic-bezier(.2, .7, .2, 1) both; transform-origin: 50% 35%; }
 
+
+/* =============== 9. Menú cinético =============== */
+/* Barras angulares que se desplazan y se encienden al apuntarlas; a la derecha, el escenario con la ilustración del tema. */
+@keyframes ql-menu-entra { from { opacity: 0; transform: translateX(-46px) skewX(-14deg); } to { opacity: 1; transform: skewX(-14deg); } }
+@keyframes ql-esc-entra { from { clip-path: polygon(0 0, 0 0, -12% 100%, -12% 100%); transform: translateX(-26px); }
+                          to { clip-path: polygon(0 0, 112% 0, 100% 100%, -12% 100%); transform: none; } }
+@keyframes ql-corte { 0% { transform: translateX(-120%) skewX(-24deg); } 100% { transform: translateX(260%) skewX(-24deg); } }
+.ql-menu-cab { display: flex; align-items: baseline; gap: .7rem; margin: 1.1rem 0 .45rem .3rem; font: 600 .72rem/1 var(--ql-mono);
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ql-tenue); }
+.ql-menu-cab b { color: var(--ql-cian); font-weight: 600; }
+.ql-menu-cab::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--ql-borde), transparent); transform: skewX(-40deg); }
+[class*="st-key-ql_item_"] { margin: 0 0 .42rem 0; animation: ql-menu-entra .55s cubic-bezier(.2, .8, .2, 1) calc(var(--n, 0) * 45ms) both;
+  transform: skewX(-14deg); transform-origin: 0 50%; }
+[class*="st-key-ql_item_"] button { position: relative; overflow: hidden; width: 100%; min-height: 2.9rem; border: 0 !important; border-radius: 0 !important;
+  justify-content: flex-start !important; padding: 0 1.1rem 0 1.5rem !important; background: linear-gradient(95deg, #17233C 0%, #101A2E 100%) !important;
+  box-shadow: inset 4px 0 0 var(--acento, var(--ql-cian)); color: var(--ql-texto) !important;
+  transition: transform .32s cubic-bezier(.2, .8, .2, 1), background .32s, box-shadow .32s, color .2s; }
+[class*="st-key-ql_item_"] button > div { justify-content: flex-start !important; width: 100%; }
+[class*="st-key-ql_item_"] button p { transform: skewX(14deg); text-align: left; font: 600 .98rem/1 var(--ql-mono) !important; letter-spacing: .04em; margin: 0; white-space: pre; }
+[class*="st-key-ql_item_"] button::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 22%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .34), transparent); transform: translateX(-120%) skewX(-24deg); }
+[class*="st-key-ql_item_"]:is(:hover, :focus-within) button { transform: translateX(20px); color: var(--ql-fondo) !important;
+  background: linear-gradient(95deg, var(--acento, var(--ql-cian)), color-mix(in srgb, var(--acento, var(--ql-cian)) 55%, #ffffff)) !important;
+  box-shadow: 0 0 0 1px var(--acento, var(--ql-cian)), 14px 10px 0 -2px rgba(244, 114, 208, .75); }
+[class*="st-key-ql_item_"]:is(:hover, :focus-within) button::after { animation: ql-corte .7s cubic-bezier(.3, .7, .2, 1) both; }
+[class*="st-key-ql_item_"]:has(button:focus-visible) button { outline: 2px solid var(--ql-texto); outline-offset: 3px; }
+[class*="st-key-ql_item_"] button:active { transform: translateX(26px) scale(.985); transition-duration: .1s; }
+
+/* Escenario: sticky para acompañar la lectura de la lista; ilustración dentro de un marco diagonal. */
+[class*="st-key-ql_menu"] [data-testid="stColumn"]:last-child { position: sticky; top: 3.4rem; align-self: flex-start; }
+.ql-esc { position: relative; min-height: 31rem; }
+.ql-esc-item { position: absolute; inset: 0; visibility: hidden; opacity: 0; display: flex; flex-direction: column; gap: 1rem; }
+.ql-esc-marco { position: relative; padding: 0; filter: drop-shadow(0 22px 40px rgba(0, 0, 0, .45)) drop-shadow(0 0 22px color-mix(in srgb, var(--acento) 35%, transparent)); }
+.ql-esc-arte { background: var(--ql-fondo); clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); padding: 1.1rem 1.6rem;
+  border-bottom: 3px solid var(--acento); }
+.ql-esc-arte svg { display: block; width: 100%; height: auto; }
+.ql-esc-fantasma { position: absolute; right: .4rem; top: -1.4rem; font: 600 7.5rem/1 var(--ql-serif); color: transparent; pointer-events: none;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--acento) 45%, transparent); }
+.ql-esc-info { position: relative; padding: 0 .4rem 0 1.1rem; border-left: 3px solid var(--acento); }
+.ql-esc-tipo { font: 600 .72rem/1 var(--ql-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--acento); }
+.ql-esc-info h3 { font-family: var(--ql-serif); font-weight: 600; font-size: 1.8rem; line-height: 1.1; margin: .5rem 0 .45rem 0; color: var(--ql-texto); }
+.ql-esc-info p { color: var(--ql-tenue); font-size: .95rem; line-height: 1.55; margin: 0 0 .7rem 0; }
+.ql-esc-ecuacion { display: inline-block; font: 500 .9rem/1.3 var(--ql-mono); color: var(--ql-texto); padding: .25rem .6rem; background: rgba(255, 255, 255, .04);
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); margin-right: .8rem; }
+.ql-esc-entrar { font: 600 .7rem/1 var(--ql-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--acento); }
+.ql-esc-entrar i { font-style: normal; margin-left: .4rem; }
+@media (max-width: 900px) {
+  .ql-esc { display: none; }
+  [class*="st-key-ql_menu"] [data-testid="stColumn"]:last-child { display: none; }
+  [class*="st-key-ql_item_"]:is(:hover, :focus-within) button { transform: translateX(8px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .ql-trazo { stroke-dasharray: none !important; }
