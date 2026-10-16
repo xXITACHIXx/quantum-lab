@@ -36,17 +36,17 @@ def decodificar(codigo: str | None, ids_validos) -> set[str]:
     return {i for i in ids_validos if token(i) in presentes}
 
 
-def a_json(hechos, ids_validos, repasar=(), bitacora=None, examenes=None) -> str:
+def a_json(hechos, ids_validos, repasar=(), bitacora=None, examenes=None, ruta=()) -> str:
     """Copia de seguridad completa: resueltos, pendientes de repaso, bitácora de intentos e historial de exámenes."""
     return json.dumps({"quantum_lab": "ejercicios", "version": VERSION,
                        "resueltos": [i for i in ids_validos if i in hechos],
                        "repasar": [i for i in ids_validos if i in repasar],
-                       "bitacora": bitacora or {}, "examenes": examenes or []}, ensure_ascii=False, indent=1)
+                       "bitacora": bitacora or {}, "examenes": examenes or [], "ruta": sorted(ruta)}, ensure_ascii=False, indent=1)
 
 
-def leer_copia(datos: bytes | str, ids_validos) -> dict:
+def leer_copia(datos: bytes | str, ids_validos, marcas_validas=()) -> dict:
     """
-    Lee un archivo exportado y devuelve {"resueltos", "repasar", "bitacora", "examenes"} ya depurados.
+    Lee un archivo exportado y devuelve {"resueltos", "repasar", "bitacora", "examenes", "ruta"} ya depurados.
     Admite la versión 1 (solo resueltos). Lanza ValueError si no es un progreso de QUANTUM LAB.
     """
     from ejercicios import _bitacora
@@ -72,7 +72,8 @@ def leer_copia(datos: bytes | str, ids_validos) -> dict:
                              "minutos_totales": float(max(x.get("minutos_totales", 0.0), 0.0)),
                              "temas": [str(t)[:60] for t in x.get("temas", [])][:20]})
     return {"resueltos": ids("resueltos"), "repasar": ids("repasar"),
-            "bitacora": _bitacora.depurar(obj.get("bitacora"), ids_validos), "examenes": examenes}
+            "bitacora": _bitacora.depurar(obj.get("bitacora"), ids_validos), "examenes": examenes,
+            "ruta": {m for m in obj.get("ruta", []) if isinstance(m, str) and m in set(marcas_validas)} if isinstance(obj.get("ruta", []), list) else set()}
 
 
 def desde_json(datos: bytes | str, ids_validos) -> set[str]:
