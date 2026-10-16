@@ -90,13 +90,13 @@ def _boton_nav(clave: str) -> None:
 def _barra_lateral() -> None:
     with st.sidebar:
         st.markdown('<div class="ql-marca"><div class="ql-marca-nombre">Quantum Lab</div>'
-                    '<div class="ql-marca-sub">Mecánica cuántica</div></div>', unsafe_allow_html=True)
+                    '<div class="ql-marca-sub">Mecánica cuántica</div></div>' + portada.css_navegacion(), unsafe_allow_html=True)
         _boton_nav("inicio")
-        actual = st.session_state["ql_pagina"]
-        for titulo, claves, abierto in GRUPOS:
-            with st.expander(titulo, expanded=abierto or actual in claves):
-                for clave in claves:
-                    _boton_nav(clave)
+        for titulo, claves, _abierto in GRUPOS:
+            num = portada.CAPITULOS[titulo][0]
+            st.markdown(f'<div class="ql-menu-cab"><b>{num}</b>{titulo}</div>', unsafe_allow_html=True)
+            for clave in claves:
+                _boton_nav(clave)
         st.markdown("")
         qc.interruptor_movil()
         escena.instalar_efectos(st)

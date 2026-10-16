@@ -295,23 +295,154 @@ div[data-baseweb="slider"] div[role] { transition: transform .2s, box-shadow .3s
 div[data-baseweb="slider"] div[role]:hover, div[data-baseweb="slider"] div[role]:focus { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(66, 217, 255, .2); }
 @media (max-width: 640px) { [data-testid="stApp"]::before { animation: none; } #ql-fondo-vivo { display: none; } }
 
-/* =============== 8. Viaje entre páginas =============== */
-@keyframes ql-tunel-in { from { opacity: 0; transform: scale(.6); } 30% { opacity: 1; } to { opacity: 0; transform: scale(2.4); } }
-@keyframes ql-acerca { to { opacity: 0; transform: scale(1.07); filter: blur(7px); } }
-@keyframes ql-emerge { from { opacity: 0; transform: scale(.93); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
-#ql-tunel { position: fixed; inset: 0; z-index: 7; pointer-events: none; opacity: 0;
-  background: radial-gradient(circle at 50% 50%, transparent 0 18%, rgba(11, 16, 32, .0) 40%, rgba(11, 16, 32, .75) 100%),
-              repeating-conic-gradient(from 0deg at 50% 50%, rgba(66, 217, 255, .34) 0deg 1.2deg, transparent 1.2deg 7.5deg);
-  -webkit-mask-image: radial-gradient(circle, transparent 0 6%, #000 30%); mask-image: radial-gradient(circle, transparent 0 8%, #000 38%); }
-body.ql-tunel #ql-tunel { animation: ql-tunel-in .9s cubic-bezier(.3, .6, .2, 1) both; }
-body.ql-viajando [class*="st-key-ql_escena_"] { animation: ql-acerca .55s cubic-bezier(.5, 0, .9, .4) forwards; transform-origin: 50% 40%; }
-/* La página nueva emerge desde el fondo (acercamiento): sustituye la entrada por desplazamiento. */
-[class*="st-key-ql_escena_"] { animation: ql-emerge .7s cubic-bezier(.2, .7, .2, 1) both; transform-origin: 50% 35%; }
+/* =============== 8. Emergencia desde abajo =============== */
+@keyframes ql-em-fondo { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ql-em-sube { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 87%); } }
+@keyframes ql-em-baja { from { transform: translate(-50%, 87%); } to { transform: translate(-50%, 102%); } }
+@keyframes ql-em-texto { from { opacity: 0; transform: translateY(26px); letter-spacing: .42em; } to { opacity: 1; transform: none; letter-spacing: .16em; } }
+@keyframes ql-em-sale { to { opacity: 0; transform: translateY(-14px); } }
+@keyframes ql-pagina-sube { from { opacity: 0; transform: translateY(72px); } to { opacity: 1; transform: none; } }
+#ql-emerge { --acento: var(--ql-cian); position: fixed; inset: 0; z-index: 1000010; pointer-events: none; opacity: 0; visibility: hidden; overflow: hidden;
+  background: radial-gradient(70% 60% at 50% 100%, color-mix(in srgb, var(--acento) 18%, #070B16), #070B16 70%); }
+#ql-emerge.ql-em-sube { visibility: visible; animation: ql-em-fondo .35s ease-out forwards; }
+#ql-emerge.ql-em-baja { animation: ql-em-fondo .55s .15s ease-in reverse forwards; }
+.ql-em-cuerpo { position: absolute; left: 50%; bottom: 0; width: 170vmax; height: 170vmax; border-radius: 50%; transform: translate(-50%, 100%);
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--acento) 55%, #0B1020) 0%, #101A2E 22%, #070B16 60%);
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--acento) 80%, #fff), inset 0 30px 90px -30px var(--acento), 0 -30px 110px -20px color-mix(in srgb, var(--acento) 60%, transparent); }
+#ql-emerge.ql-em-sube .ql-em-cuerpo { animation: ql-em-sube 1s cubic-bezier(.16, .8, .2, 1) both; }
+#ql-emerge.ql-em-baja .ql-em-cuerpo { animation: ql-em-baja .7s cubic-bezier(.5, 0, .8, .4) both; }
+.ql-em-texto { position: absolute; left: 0; right: 0; top: 30%; text-align: center; padding: 0 1rem; }
+.ql-em-tipo { display: block; font: 600 .74rem/1 var(--ql-mono); letter-spacing: .3em; text-transform: uppercase; color: var(--acento); }
+.ql-em-titulo { margin-top: .9rem; font-family: var(--ql-serif); font-weight: 600; font-size: clamp(1.5rem, 4.6vw, 3.4rem); line-height: 1.12; text-transform: uppercase; text-wrap: balance;
+  max-width: 22ch; margin-left: auto; margin-right: auto; color: var(--ql-texto); }
+.ql-em-linea { display: block; width: 74px; height: 2px; margin: 1.2rem auto 0; background: var(--acento); box-shadow: 0 0 14px var(--acento); }
+#ql-emerge.ql-em-sube .ql-em-tipo, #ql-emerge.ql-em-sube .ql-em-titulo, #ql-emerge.ql-em-sube .ql-em-linea { animation: ql-em-texto .8s .3s cubic-bezier(.2, .8, .2, 1) both; }
+#ql-emerge.ql-em-baja .ql-em-texto { animation: ql-em-sale .35s ease-in both; }
+/* La página nueva emerge también desde abajo, con suavidad. */
+[class*="st-key-ql_escena_"] { animation: ql-pagina-sube .8s cubic-bezier(.16, .8, .2, 1) both; }
+
+/* =============== 9. Menú cinético =============== */
+/* Barras angulares que se desplazan y se encienden al apuntarlas; a la derecha, el escenario con la ilustración del tema. */
+@keyframes ql-menu-entra { from { opacity: 0; transform: translateX(-46px) skewX(-14deg); } to { opacity: 1; transform: skewX(-14deg); } }
+@keyframes ql-esc-entra { from { opacity: 0; transform: translateY(70px); clip-path: ellipse(70% 45% at 50% 100%); }
+                          to { opacity: 1; transform: none; clip-path: ellipse(150% 160% at 50% 100%); } }
+@keyframes ql-corte { 0% { transform: translateX(-120%) skewX(-24deg); } 100% { transform: translateX(260%) skewX(-24deg); } }
+.ql-menu-cab { display: flex; align-items: baseline; gap: .7rem; margin: 0; padding: 1rem 0 .35rem .3rem; font: 600 .72rem/1 var(--ql-mono);
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ql-tenue); }
+.ql-menu-cab b { color: var(--ql-cian); font-weight: 600; }
+.ql-menu-cab::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--ql-borde), transparent); transform: skewX(-40deg); }
+[class*="st-key-ql_item_"] { margin: 0 0 .42rem 0; animation: ql-menu-entra .55s cubic-bezier(.2, .8, .2, 1) calc(var(--n, 0) * 45ms) both;
+  transform: skewX(-14deg); transform-origin: 0 50%; }
+[class*="st-key-ql_item_"] button { position: relative; overflow: hidden; width: 100%; min-height: 2.9rem; border: 0 !important; border-radius: 0 !important;
+  justify-content: flex-start !important; padding: 0 1.1rem 0 1.5rem !important; background: linear-gradient(95deg, #17233C 0%, #101A2E 100%) !important;
+  box-shadow: inset 4px 0 0 var(--acento, var(--ql-cian)); color: var(--ql-texto) !important;
+  transition: transform .32s cubic-bezier(.2, .8, .2, 1), background .32s, box-shadow .32s, color .2s; }
+[class*="st-key-ql_item_"] button > div { justify-content: flex-start !important; width: 100%; }
+[class*="st-key-ql_item_"] button p { transform: skewX(14deg); text-align: left; font: 600 .98rem/1 var(--ql-mono) !important; letter-spacing: .04em; margin: 0; white-space: pre; }
+[class*="st-key-ql_item_"] button::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 22%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .34), transparent); transform: translateX(-120%) skewX(-24deg); }
+[class*="st-key-ql_item_"]:is(:hover, :focus-within) button { transform: translateX(20px); color: var(--ql-fondo) !important;
+  background: linear-gradient(95deg, var(--acento, var(--ql-cian)), color-mix(in srgb, var(--acento, var(--ql-cian)) 55%, #ffffff)) !important;
+  box-shadow: 0 0 0 1px var(--acento, var(--ql-cian)), 14px 10px 0 -2px rgba(244, 114, 208, .75); }
+[class*="st-key-ql_item_"]:is(:hover, :focus-within) button::after { animation: ql-corte .7s cubic-bezier(.3, .7, .2, 1) both; }
+[class*="st-key-ql_item_"]:has(button:focus-visible) button { outline: 2px solid var(--ql-texto); outline-offset: 3px; }
+[class*="st-key-ql_item_"] button:active { transform: translateX(26px) scale(.985); transition-duration: .1s; }
+
+/* Escenario: sticky para acompañar la lectura de la lista; ilustración dentro de un marco diagonal. */
+[class*="st-key-ql_menu"] [data-testid="stColumn"]:last-child { position: sticky; top: 3.4rem; align-self: flex-start; }
+.ql-esc { position: relative; min-height: 31rem; }
+.ql-esc-item { position: absolute; inset: 0; visibility: hidden; opacity: 0; display: flex; flex-direction: column; gap: 1rem; }
+.ql-esc-marco { position: relative; padding: 0; filter: drop-shadow(0 22px 40px rgba(0, 0, 0, .45)) drop-shadow(0 0 22px color-mix(in srgb, var(--acento) 35%, transparent)); }
+.ql-esc-arte { background: var(--ql-fondo); clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); padding: 1.1rem 1.6rem;
+  border-bottom: 3px solid var(--acento); }
+.ql-esc-arte svg { display: block; width: 100%; height: auto; }
+.ql-esc-fantasma { position: absolute; right: .4rem; top: -1.4rem; font: 600 7.5rem/1 var(--ql-serif); color: transparent; pointer-events: none;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--acento) 45%, transparent); }
+.ql-esc-info { position: relative; padding: 0 .4rem 0 1.1rem; border-left: 3px solid var(--acento); }
+.ql-esc-tipo { font: 600 .72rem/1 var(--ql-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--acento); }
+.ql-esc-info h3 { font-family: var(--ql-serif); font-weight: 600; font-size: 1.8rem; line-height: 1.1; margin: .5rem 0 .45rem 0; color: var(--ql-texto); }
+.ql-esc-info p { color: var(--ql-tenue); font-size: .95rem; line-height: 1.55; margin: 0 0 .7rem 0; }
+.ql-esc-ecuacion { display: inline-block; font: 500 .9rem/1.3 var(--ql-mono); color: var(--ql-texto); padding: .25rem .6rem; background: rgba(255, 255, 255, .04);
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); margin-right: .8rem; }
+.ql-esc-entrar { font: 600 .7rem/1 var(--ql-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--acento); }
+.ql-esc-entrar i { font-style: normal; margin-left: .4rem; }
+@media (max-width: 900px) {
+  .ql-esc { display: none; }
+  [class*="st-key-ql_menu"] [data-testid="stColumn"]:last-child { display: none; }
+  [class*="st-key-ql_item_"]:is(:hover, :focus-within) button { transform: translateX(8px); }
+}
+
+
+/* =============== 10. Portada a pantalla completa y barra lateral angular =============== */
+/* La portada ocupa toda la ventana: se anulan el ancho máximo y el relleno solo mientras existe la escena de inicio. */
+[data-testid="stMainBlockContainer"]:has(.st-key-ql_menu) { max-width: none !important; padding: 0 !important; }
+.st-key-ql_menu { position: relative; isolation: isolate; min-height: 100vh; overflow: hidden; gap: 0 !important;
+  padding: 3.6rem clamp(1rem, 4vw, 4.5rem) 2.4rem clamp(1rem, 4vw, 4.5rem); }
+.st-key-ql_menu > [data-testid="stElementContainer"]:has(.ql-fondo-atomo) { position: absolute !important; inset: 0; z-index: 0; margin: 0 !important;
+  width: auto !important; height: auto !important; pointer-events: none; }
+.st-key-ql_menu > [data-testid="stHorizontalBlock"] { position: relative; z-index: 2; }
+.ql-fondo-atomo { --px: 0; --py: 0; position: absolute; inset: 0; overflow: hidden; background:
+  radial-gradient(60% 70% at 78% 48%, rgba(167, 139, 250, .16), transparent 70%), radial-gradient(40% 50% at 20% 100%, rgba(66, 217, 255, .1), transparent 70%), #0B1020; }
+.ql-atomo { position: absolute; inset: 0; transform: translate3d(calc(var(--px) * -14px), calc(var(--py) * -9px), 0) scale(1.03); transition: transform .9s cubic-bezier(.2, .7, .2, 1); }
+.ql-atomo svg { display: block; width: 100%; height: 100%; }
+.ql-fondo-atomo .ql-obs-particulas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ql-velo { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(11, 16, 32, .94) 0%, rgba(11, 16, 32, .72) 30%, rgba(11, 16, 32, .1) 62%, transparent 100%),
+              linear-gradient(0deg, rgba(11, 16, 32, .85) 0%, transparent 22%); }
+.ql-lectura-inicio { position: absolute; right: clamp(1rem, 4vw, 4.5rem); bottom: 1.2rem; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .3rem 1.4rem;
+  font: 500 .7rem/1.2 var(--ql-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ql-tenue); }
+.ql-lectura-inicio b { color: var(--ql-texto); font-weight: 600; margin-right: .35rem; }
+.ql-lectura-inicio .ql-obs-pulso { color: var(--ql-verde); }
+.ql-lectura-inicio .ql-obs-pulso::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .5rem; background: var(--ql-verde);
+  box-shadow: 0 0 10px var(--ql-verde); animation: ql-latido 2.4s ease-in-out infinite; }
+.ql-inicio-marca { margin: 0 0 1.1rem .3rem; }
+.ql-inicio-eyebrow { display: block; font: 600 .72rem/1 var(--ql-mono); letter-spacing: .26em; text-transform: uppercase; color: var(--ql-cian); margin-bottom: .6rem; }
+.ql-inicio-titulo { font-family: var(--ql-serif); font-weight: 600; font-size: clamp(2.4rem, 4.2vw, 3.8rem); line-height: .95; letter-spacing: -.02em; color: var(--ql-texto);
+  animation: ql-titulo 1s .15s cubic-bezier(.2, .7, .2, 1) both; }
+.ql-inicio-sub { margin: .6rem 0 0 0; color: var(--ql-tenue); font-size: 1rem; max-width: 26rem; }
+/* En la portada las barras son más compactas para que los 15 destinos quepan en la primera pantalla. */
+.st-key-ql_menu [class*="st-key-ql_item_"] { margin-bottom: 0; max-width: 25rem; }
+.st-key-ql_menu [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] { gap: .2rem; }
+.st-key-ql_menu [data-testid="stColumn"]:first-child [data-testid="stElementContainer"] { flex-shrink: 0; }
+.st-key-ql_menu [class*="st-key-ql_item_"] button { min-height: 1.95rem; padding-top: 0 !important; padding-bottom: 0 !important; }
+.st-key-ql_menu [class*="st-key-ql_item_"] button p { font-size: .86rem !important; }
+.st-key-ql_menu .ql-menu-cab { padding: .75rem 0 .25rem .3rem; }
+.st-key-ql_menu [data-testid="stColumn"]:last-child { position: static; align-self: stretch; display: flex; flex-direction: column; justify-content: flex-end; }
+.st-key-ql_menu [data-testid="stColumn"]:last-child [data-testid="stElementContainer"] { position: sticky; bottom: 1.4rem; }
+.st-key-ql_menu .ql-esc { min-height: 30.5rem; max-width: 30rem; margin-left: auto; }
+.st-key-ql_menu .ql-esc-item { justify-content: flex-end; }
+.st-key-ql_menu .ql-esc-info { background: linear-gradient(90deg, rgba(11, 16, 32, .82), rgba(11, 16, 32, .35)); padding: .7rem .9rem .8rem 1.1rem; }
+[class*="st-key-ql_inicio_resto"] { padding: 2.2rem clamp(1rem, 4vw, 4.5rem) 3rem clamp(1rem, 4vw, 4.5rem); }
+
+/* Barra lateral: las mismas barras angulares de la portada, con la sección activa invertida. */
+section[data-testid="stSidebar"] [class*="st-key-nav_"] { margin: .14rem .9rem .14rem .25rem; transform: skewX(-14deg); transform-origin: 0 50%;
+  animation: ql-menu-entra .5s cubic-bezier(.2, .8, .2, 1) calc(var(--n, 0) * 30ms) both; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button { position: relative; overflow: hidden; border: 0 !important; border-radius: 0 !important; min-height: 2.2rem;
+  justify-content: flex-start !important; padding: 0 .8rem 0 1.1rem !important; color: var(--ql-texto) !important; box-shadow: inset 3px 0 0 var(--acento, var(--ql-cian)) !important;
+  background: linear-gradient(95deg, #17233C 0%, #101A2E 100%) !important; transition: transform .3s cubic-bezier(.2, .8, .2, 1), background .3s, color .2s; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button > div { justify-content: flex-start !important; width: 100%; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button > div > span, section[data-testid="stSidebar"] [class*="st-key-nav_"] button p { transform: skewX(14deg); }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button p { font: 600 .74rem/1 var(--ql-mono) !important; letter-spacing: .03em; margin: 0; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button::before { display: none; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"] button::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 22%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .34), transparent); transform: translateX(-120%) skewX(-24deg); }
+section[data-testid="stSidebar"] [class*="st-key-nav_"]:is(:hover, :focus-within) button, section[data-testid="stSidebar"] [class*="st-key-nav_"] button[data-testid="stBaseButton-primary"] {
+  color: var(--ql-fondo) !important; transform: translateX(5px);
+  background: linear-gradient(95deg, var(--acento, var(--ql-cian)), color-mix(in srgb, var(--acento, var(--ql-cian)) 55%, #ffffff)) !important; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"]:is(:hover, :focus-within) button::after { animation: ql-corte .7s cubic-bezier(.3, .7, .2, 1) both; }
+section[data-testid="stSidebar"] [class*="st-key-nav_"]:has(button:focus-visible) button { outline: 2px solid var(--ql-texto); outline-offset: 2px; }
+section[data-testid="stSidebar"] .ql-menu-cab { padding: 1rem 0 .3rem .3rem; }
+@media (max-width: 900px) {
+  .st-key-ql_menu { padding-top: 3.8rem; }
+  .ql-velo { background: linear-gradient(0deg, rgba(11, 16, 32, .5), rgba(11, 16, 32, .12)); }
+  .ql-lectura-inicio { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .ql-trazo { stroke-dasharray: none !important; }
-  .ql-obs-particulas, #ql-fondo-vivo, #ql-tunel { display: none; }
+  .ql-obs-particulas, #ql-fondo-vivo, #ql-emerge { display: none; }
+  .ql-atomo { transform: none; }
   [data-testid="stApp"]::before { animation: none; }
 }
 html { scroll-behavior: smooth; }
@@ -355,6 +486,11 @@ JS = r"""
       d.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
       d.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
     }
+    var f = document.querySelector('.ql-fondo-atomo');     // el fondo de la portada no recibe el puntero: se usa la ventana completa
+    if (f) {
+      f.style.setProperty('--px', ((e.clientX / W.innerWidth) * 2 - 1).toFixed(3));
+      f.style.setProperty('--py', ((e.clientY / W.innerHeight) * 2 - 1).toFixed(3));
+    }
     var o = e.target.closest('.ql-obs');
     if (o) {
       var q = o.getBoundingClientRect();
@@ -369,7 +505,7 @@ JS = r"""
   var lienzo = null, ctx = null, puntos = [], anima = 0, dpr = 1, ancho = 0, alto = 0, obs = null, escenaEl = null, tPrev = 0;
   var COLORES = ['66,217,255', '167,139,250', '244,114,208'];
   function preparar(c) {
-    lienzo = c; ctx = c.getContext('2d'); obs = c.closest('.ql-obs'); escenaEl = obs ? obs.querySelector('.ql-obs-escena') : null;
+    lienzo = c; ctx = c.getContext('2d'); obs = c.closest('.ql-obs, .ql-fondo-atomo'); escenaEl = obs ? obs.querySelector('.ql-obs-escena, .ql-atomo') : null;
     dpr = Math.min(W.devicePixelRatio || 1, 2);
     medir(); tPrev = 0;
     var n = Math.round(Math.min(90, Math.max(36, ancho * alto / 9000)));
@@ -403,13 +539,14 @@ JS = r"""
     var px = estilo ? parseFloat(estilo.getPropertyValue('--px')) || 0 : 0;
     var py = estilo ? parseFloat(estilo.getPropertyValue('--py')) || 0 : 0;
     // Centro y tamaño de la ilustración, en coordenadas del lienzo.
-    var cx = ancho * 0.72, cy = alto * 0.5, ex = ancho * 0.34, ey = alto * 0.42;
+    var cx = ancho * 0.72, cy = alto * 0.5, ex = ancho * 0.34, ey = alto * 0.42, esc = 1;
     if (escenaEl) {
       var q = escenaEl.getBoundingClientRect();
-      cx = q.left - r.left + q.width / 2; cy = q.top - r.top + q.height / 2; ex = q.width * 0.55; ey = q.height * 0.55;
+      cx = q.left - r.left + q.width * (escenaEl.classList.contains('ql-atomo') ? 0.7214 : 0.5); cy = q.top - r.top + q.height / 2;
+      ex = Math.min(q.width, q.height * 1.55) * 0.5; ey = Math.min(q.height, q.width / 1.55) * 0.5;
     }
     // Las estelas se obtienen desvaneciendo el cuadro anterior en lugar de borrarlo.
-    ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.fillRect(0, 0, ancho, alto);
+    ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(0, 0, ancho, alto);
     ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
     for (var i = 0; i < puntos.length; i++) {
       var p = puntos[i], x, y;
@@ -447,10 +584,12 @@ JS = r"""
       if (m && m.scrollTop > 0) { m.scrollTo({ top: 0, behavior: modo }); }
       if (W.scrollY > 0) { W.scrollTo({ top: 0, behavior: modo }); }
     }
-    if (nombre && escenaActual !== null && nombre !== escenaActual) {
-      document.body.classList.remove('ql-viajando');   // la página nueva no hereda la salida de la anterior
-      W.clearTimeout(viajeTimer);                      // pero el túnel termina su recorrido (≈0,9 s) antes de retirarse
-      viajeTimer = W.setTimeout(function () { document.body.classList.remove('ql-tunel'); }, Math.max(0, 950 - (Date.now() - viajeInicio)));
+    if (nombre && escenaActual !== null && nombre !== escenaActual && emergeVisible) {
+      W.clearTimeout(emergeTimer);
+      (function esperar() {
+        if (!emergeVisible) { return; }
+        if (!emergeListo || Date.now() - emergeInicio < MIN_EMERGE) { emergeTimer = W.setTimeout(esperar, 80); } else { retirarEmergencia(); }
+      })();
     }
     if (nombre) { escenaActual = nombre; }
     W.setTimeout(seguirEscena, 150);
@@ -514,25 +653,51 @@ JS = r"""
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden && fondo && !fanim) { fanim = W.requestAnimationFrame(fondoCuadro); } });
 
-  // Viaje hacia el tema elegido (barra lateral, «Observatorio» y tarjetas): mientras Streamlit carga, la escena actual se acerca y se
-  // difumina con un túnel de luz; la página nueva emerge desde el fondo (ver ql-entrada). Si no llega la navegación, se retira solo.
-  var tunel = null, viajeTimer = 0, viajeInicio = 0;
-  function viajar() {
+  // Emergencia desde abajo (inspirada en los menús de «explorador» en CSS): al elegir un tema, un cuerpo de luz sube sobre un horizonte
+  // curvo desde el borde inferior y aparece el nombre del tema; cuando la página nueva está montada, el cuerpo baja y el contenido emerge
+  // también desde abajo. Dura al menos ~1,1 s para que se vea aunque el servidor responda rápido y se retira solo si la navegación falla.
+  var emergeEl = null, emergeTimer = 0, emergeInicio = 0, emergeVisible = false, emergeListo = false;
+  var MIN_EMERGE = 1100, MAX_EMERGE = 4000;
+  function crearEmergencia() {
+    emergeEl = document.createElement('div'); emergeEl.id = 'ql-emerge'; emergeEl.setAttribute('aria-hidden', 'true');
+    function pieza(padre, tag, clase) { var n = document.createElement(tag); n.className = clase; padre.appendChild(n); return n; }
+    pieza(emergeEl, 'div', 'ql-em-cuerpo');
+    var texto = pieza(emergeEl, 'div', 'ql-em-texto');
+    pieza(texto, 'span', 'ql-em-tipo'); pieza(texto, 'div', 'ql-em-titulo'); pieza(texto, 'span', 'ql-em-linea');
+    document.body.appendChild(emergeEl);
+  }
+  function emergerDesde(boton) {
     if (reducir.matches) { return; }
-    if (!tunel) {
-      tunel = document.createElement('div'); tunel.id = 'ql-tunel'; tunel.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(tunel);
-    }
-    document.body.classList.remove('ql-viajando', 'ql-tunel'); void document.body.offsetWidth; document.body.classList.add('ql-viajando', 'ql-tunel');
-    W.clearTimeout(viajeTimer); viajeInicio = Date.now();
-    viajeTimer = W.setTimeout(function () { document.body.classList.remove('ql-viajando', 'ql-tunel'); }, 2600);
+    if (!emergeEl) { crearEmergencia(); }
+    var texto = (boton.innerText || boton.textContent || '').replace(/\s+/g, ' ').trim();
+    var m = texto.match(/^(\d{2})\s+(.*)$/);
+    var titulo = m ? m[2] : texto;
+    var cont = boton.closest('[class*="st-key-ql_dest_"]');
+    if (cont) { var h = cont.querySelector('h3'); if (h) { titulo = h.textContent.trim(); } }
+    if (boton.closest('.st-key-ql_volver')) { titulo = 'Observatorio'; }
+    var host = boton.closest('[class*="st-key-ql_item_"], [class*="st-key-nav_"], [class*="st-key-ql_dest_"]');
+    var acento = host ? getComputedStyle(host).getPropertyValue('--acento').trim() : '';
+    emergeEl.style.setProperty('--acento', acento && acento.indexOf('var(') < 0 ? acento : '');
+    if (!acento || acento.indexOf('var(') === 0) { emergeEl.style.removeProperty('--acento'); }
+    emergeEl.querySelector('.ql-em-tipo').textContent = m ? 'Destino ' + m[1] + ' · 15' : 'Quantum Lab';
+    emergeEl.querySelector('.ql-em-titulo').textContent = titulo;
+    emergeEl.classList.remove('ql-em-baja'); void emergeEl.offsetWidth; emergeEl.classList.add('ql-em-sube');
+    emergeVisible = true; emergeListo = false; emergeInicio = Date.now();
+    // El tiempo mínimo se cuenta desde el primer cuadro realmente pintado: si el navegador está ocupado dibujando la página, no se acorta.
+    W.requestAnimationFrame(function () { W.requestAnimationFrame(function () { emergeInicio = Date.now(); emergeListo = true; }); });
+    W.clearTimeout(emergeTimer); emergeTimer = W.setTimeout(retirarEmergencia, MAX_EMERGE);
+  }
+  function retirarEmergencia() {
+    if (!emergeEl || !emergeVisible) { return; }
+    emergeVisible = false; W.clearTimeout(emergeTimer);
+    emergeEl.classList.add('ql-em-baja');
+    emergeTimer = W.setTimeout(function () { emergeEl.classList.remove('ql-em-sube', 'ql-em-baja'); }, 800);
   }
   document.addEventListener('click', function (e) {
     var t = e.target && e.target.closest ? e.target.closest('button') : null;
-    if (!t) { return; }
-    var navegacion = t.closest('section[data-testid="stSidebar"]') && t.closest('[data-testid="stExpanderDetails"], [data-testid="stSidebarUserContent"]')
-      || t.closest('.st-key-ql_volver') || t.closest('[class*="st-key-ql_dest_"]');
-    if (navegacion && !t.disabled) { viajar(); }
+    if (!t || t.disabled) { return; }
+    var navegacion = t.closest('[class*="st-key-nav_"], [class*="st-key-ql_item_"], .st-key-ql_volver, [class*="st-key-ql_dest_"]');
+    if (navegacion) { emergerDesde(t); }
   }, true);
 
   // Elección de una tarjeta: se expande la elegida y se apartan las demás mientras Streamlit carga la página destino.
@@ -599,6 +764,17 @@ def observatorio_html(escena_svg: str, lecturas: list[tuple[str, str]], ancla: s
         f'<div class="ql-obs-escena">{escena_svg}</div></div>'
         f'<div class="ql-obs-lectura"><span class="ql-obs-pulso">Inventario del laboratorio</span>{lectura}</div>'
         '</div>')
+
+
+def fondo_atomo_html(atomo_svg: str, lecturas: list[tuple[str, str]]) -> str:
+    """Capa de fondo de la portada a pantalla completa: átomo ilustrado, lienzo de partículas y cifras reales del laboratorio."""
+    e = html.escape
+    lectura = "".join(f"<span><b>{e(v)}</b>{e(k)}</span>" for v, k in lecturas)
+    return ('<div class="ql-fondo-atomo" aria-hidden="false">'
+            f'<div class="ql-atomo">{atomo_svg}</div>'
+            '<canvas id="ql-particulas" class="ql-obs-particulas" aria-hidden="true"></canvas>'
+            '<div class="ql-velo" aria-hidden="true"></div>'
+            f'<div class="ql-lectura-inicio"><span class="ql-obs-pulso">Inventario del laboratorio</span>{lectura}</div></div>')
 
 
 def capitulo_html(numero: str, etiqueta: str, titulo: str, descripcion: str, ancla: str = "") -> str:

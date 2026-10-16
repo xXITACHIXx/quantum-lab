@@ -93,8 +93,10 @@ def test_la_portada_no_inventa_indicadores():
         assert prohibido not in texto
 
 
-def _abrir(pagina=None):
+def _abrir(pagina=None, vista="Tarjetas"):
     at = AppTest.from_file(APP, default_timeout=180)
+    if vista:
+        at.session_state["ql_vista"] = (vista == "Tarjetas")
     if pagina:
         at.session_state["ql_pagina"] = pagina
     at.run()
@@ -107,7 +109,7 @@ def test_inicio_tiene_boton_y_un_boton_por_modulo():
     claves = {b.key for b in at.button if b.key and b.key.startswith("ql_abrir_")}
     assert claves == {f"ql_abrir_{m[0]}" for m in portada.MODULOS}
     html = " ".join(m.value for m in at.markdown)
-    assert "Explorar simuladores" in html and f'href="#{portada.ID_SIMULADORES}"' in html
+    assert 'class="ql-fondo-atomo"' in html and f'id="{portada.ID_SIMULADORES}"' in html
 
 
 @pytest.mark.parametrize("clave", SIMULADORES)

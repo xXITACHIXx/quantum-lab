@@ -474,3 +474,74 @@ def observatorio() -> str:
                f'<line x1="{cx + 140}" y1="{cy - 120}" x2="{cx + 210}" y2="{cy - 170}" stroke="{P["tenue"]}" stroke-width="1"/>',
                rot(cx + 214, cy - 174, "|ψ|² máx.", P["texto"])]
     return _envolver("".join(partes), "Ilustración conceptual: nube de probabilidad de un orbital 2p con órbitas de referencia y retícula de medida", ancho, alto)
+
+
+def _nube_1s(n: int, semilla: int):
+    """Puntos (x, z) proyectados de la densidad 1s, ρ ∝ e^(−2r) (r en radios de Bohr): r² e^(−2r) → Γ(3, ½), dirección isótropa."""
+    rng = np.random.default_rng(semilla)
+    r = rng.gamma(3.0, 0.5, n)
+    c = rng.uniform(-1, 1, n)
+    fi = rng.uniform(0, 2 * math.pi, n)
+    s_ = np.sqrt(1 - c * c)
+    return np.column_stack([r * s_ * np.cos(fi), r * c])
+
+
+def _nube_3dz2(n: int, semilla: int):
+    """Puntos (x, z) proyectados de la densidad 3d_z², ρ ∝ r⁴ e^(−2r/3) (3d, a₀) por (3cos²θ − 1)²; el radial es Γ(5, 3/2)."""
+    rng = np.random.default_rng(semilla)
+    puntos = []
+    while len(puntos) < n:
+        r = rng.gamma(5.0, 1.5)
+        c = rng.uniform(-1, 1)
+        if rng.uniform() < ((3 * c * c - 1) / 2) ** 2:
+            fi = rng.uniform(0, 2 * math.pi)
+            s_ = math.sqrt(1 - c * c)
+            puntos.append((r * s_ * math.cos(fi), r * c))
+    return np.array(puntos)
+
+
+def atomo() -> str:
+    """
+    Fondo de la portada: un átomo a pantalla completa. Tres nubes de probabilidad muestreadas de densidades hidrogenoides (1s, 2p_z y
+    3d_z²) con sus escalas relativas, núcleo, cuatro órbitas de referencia con un electrón que las recorre y anillos de medida.
+    Las clases ql-obs-* reciben el movimiento del CSS; sin él la escena queda estática y completa. Es una ilustración conceptual: las
+    escalas de cada nube están ajustadas para componer la imagen, no son un resultado calculado.
+    """
+    ancho, alto = 1400, 900
+    cx, cy = 1010, 450
+    def nube(pts, esc, color, op, grosor, partes_color=None):
+        xs, ys = cx + esc * pts[:, 0], cy - esc * pts[:, 1]
+        ok = (xs > 4) & (xs < ancho - 4) & (ys > 4) & (ys < alto - 4)
+        xs, ys = xs[ok], ys[ok]
+        d = "".join(f"M{_n(a)} {_n(b)}h0" for a, b in zip(xs, ys))
+        return f'<path d="{d}" stroke="{color}" stroke-width="{grosor}" stroke-linecap="round" stroke-opacity="{op}"/>'
+    partes = [
+        '<defs><radialGradient id="ql-at-halo" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="0" stop-color="{P["violeta"]}" stop-opacity=".42"/><stop offset=".5" stop-color="{P["cian"]}" stop-opacity=".07"/>'
+        f'<stop offset="1" stop-color="{P["cian"]}" stop-opacity="0"/></radialGradient>'
+        '<radialGradient id="ql-at-nucleo" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="0" stop-color="#FFFFFF"/><stop offset=".3" stop-color="{P["amarillo"]}"/><stop offset="1" stop-color="{P["amarillo"]}" stop-opacity="0"/></radialGradient></defs>',
+        f'<circle cx="{cx}" cy="{cy}" r="470" fill="url(#ql-at-halo)" class="ql-obs-halo"/>',
+    ]
+    anillos = [f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{P["borde"]}" stroke-width="1" stroke-dasharray="2 8" stroke-opacity=".9"/>' for r in (120, 240, 360, 480)]
+    anillos.append(f'<line x1="{cx - 520}" y1="{cy}" x2="{cx + 520}" y2="{cy}" stroke="{P["borde"]}" stroke-width="1" stroke-opacity=".8"/>')
+    anillos.append(f'<line x1="{cx}" y1="{cy - 440}" x2="{cx}" y2="{cy + 440}" stroke="{P["borde"]}" stroke-width="1" stroke-opacity=".8"/>')
+    partes.append('<g class="ql-obs-reticula">' + "".join(anillos) + "</g>")
+    for i, (inclinacion, aplastado, radio, color, dur) in enumerate(((-22, .30, 430, P["cian"], 1), (34, .22, 350, MAGENTA, 2),
+                                                                      (82, .17, 290, P["cian"], 3), (-58, .26, 390, P["violeta"], 2))):
+        partes.append(f'<g transform="translate({cx} {cy}) rotate({inclinacion}) scale(1 {aplastado})"><g class="ql-obs-giro ql-obs-giro-{dur}">'
+                      f'<circle r="{radio}" fill="none" stroke="{color}" stroke-width="{1.3 / aplastado ** .5:.2f}" stroke-opacity=".34"/>'
+                      f'<circle cx="{radio}" r="{6 / aplastado ** .5:.1f}" fill="{color}" class="ql-obs-electron"/></g></g>')
+    p3 = _nube_3dz2(950, 21)
+    p2 = _nube_2p(1000, 5)
+    p1 = _nube_1s(520, 9)
+    partes.append(f'<g class="ql-obs-nube">{nube(p3, 17.0, MAGENTA, .55, 2.8)}</g>')
+    arriba = p2[:, 1] > 0
+    partes.append(f'<g class="ql-obs-nube ql-at-2p">{nube(p2[arriba], 25.0, P["violeta"], .8, 3.2)}{nube(p2[~arriba], 25.0, P["cian"], .75, 3.2)}</g>')
+    partes.append(f'<g class="ql-obs-halo">{nube(p1, 62.0, P["amarillo"], .6, 2.6)}</g>')
+    partes.append(f'<circle cx="{cx}" cy="{cy}" r="26" fill="url(#ql-at-nucleo)" class="ql-obs-nucleo"/>')
+    mono = "'Source Code Pro', Consolas, monospace"
+    partes.append(f'<text x="{ancho - 28}" y="{alto - 26}" fill="{P["tenue"]}" font-size="12" font-family="{mono}" letter-spacing="2" text-anchor="end">ILUSTRACIÓN CONCEPTUAL · DENSIDADES 1s, 2p Y 3d</text>')
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" role="img" preserveAspectRatio="xMaxYMid slice" '
+            'aria-label="Ilustración conceptual: átomo con nubes de probabilidad de los orbitales 1s, 2p y 3d, núcleo y órbitas de referencia">'
+            f'<title>Ilustración conceptual: átomo con orbitales 1s, 2p y 3d</title>{"".join(partes)}</svg>')

@@ -98,8 +98,10 @@ def test_tarjeta_mayor_y_compacta():
     assert "ql-dest-compacta" in portada.tarjeta_html(*portada.modulo("ruta"), compacta=True)
 
 
-def _abrir(pagina=None):
+def _abrir(pagina=None, vista="Tarjetas"):
     at = AppTest.from_file(APP, default_timeout=180)
+    if vista:
+        at.session_state["ql_vista"] = (vista == "Tarjetas")
     if pagina:
         at.session_state["ql_pagina"] = pagina
     at.run()
@@ -110,7 +112,7 @@ def test_portada_destinos_y_observatorio():
     at = _abrir()
     assert not at.exception, [e.value for e in at.exception]
     html = " ".join(m.value for m in at.markdown)
-    assert 'id="ql-particulas"' in html and 'class="ql-obs"' in html
+    assert 'id="ql-particulas"' in html and 'class="ql-fondo-atomo"' in html and 'class="ql-atomo"' in html
     assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
     etiquetas = {b.key: b.label for b in at.button if b.key and b.key.startswith("ql_abrir_")}
     assert len(etiquetas) == 15 and etiquetas["ql_abrir_caja"] == "Abrir el simulador: Partícula en una caja"
@@ -181,15 +183,74 @@ def test_trazos_numerados_para_la_secuencia():
     assert indices == list(range(1, len(indices) + 1)) and len(indices) >= 2
 
 
-def test_viaje_entre_paginas_y_nube_orbital():
+def test_emergencia_desde_abajo_y_nube_orbital():
     import quantum_lab_escena as e
     css, js = e.css(), e.JS
-    for k in ("ql-tunel-in", "ql-acerca", "ql-emerge"):
+    for k in ("ql-em-fondo", "ql-em-sube", "ql-em-baja", "ql-em-texto", "ql-pagina-sube"):
         assert f"@keyframes {k}" in css
     movimiento = css[css.index("prefers-reduced-motion: reduce"):]
-    assert "#ql-tunel" in movimiento                              # el túnel se oculta con movimiento reducido
-    assert "if (reducir.matches) { return; }" in js[js.index("function viajar"):][:120]
-    assert "pointer-events: none" in css[css.index("#ql-tunel {"):][:160]
-    assert "Math.min(90" in js                                    # límite de partículas del observatorio
-    assert "p.orb" in js and "destination-out" in js              # órbitas con estela
-    assert "navegacion" in js and "ql_volver" in js
+    assert "#ql-emerge" in movimiento                              # la emergencia se oculta con movimiento reducido
+    assert "if (reducir.matches) { return; }" in js[js.index("function emergerDesde"):][:120]
+    assert "pointer-events: none" in css[css.index("#ql-emerge {"):][:260]   # nunca bloquea clics ni desplazamiento
+    assert "MAX_EMERGE" in js and "MIN_EMERGE" in js               # se retira sola si la navegación no ocurre
+    assert "innerHTML" not in js                                   # el JS no lleva etiquetas HTML (st.html lo descartaba)
+    assert "Math.min(90" in js                                     # límite de partículas
+    assert "p.orb" in js and "destination-out" in js               # órbitas con estela
+    assert "st-key-nav_" in js and "st-key-ql_item_" in js and "ql_volver" in js
+
+
+
+def test_menu_cinetico_es_la_vista_predeterminada():
+    import quantum_lab_portada as portada
+    at = _abrir(vista=None)
+    assert not at.exception, [e.value for e in at.exception]
+    claves = {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")}
+    assert claves == {f"ql_menu_{m[0]}" for m in portada.MODULOS}
+    assert not any(b.key and b.key.startswith("ql_abrir_") for b in at.button)       # las tarjetas quedan en la otra vista
+    html = " ".join(m.value for m in at.markdown)
+    assert html.count('class="ql-esc-item ql-esc-') == len(portada.MODULOS)           # una escena por destino
+    assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html   # los botones del hero siguen funcionando
+
+
+def test_menu_cinetico_navega_con_su_boton():
+    at = _abrir(vista=None)
+    at.button(key="ql_menu_oscilador").click().run()
+    assert at.session_state["ql_pagina"] == "oscilador" and not at.exception
+
+
+def test_menu_cinetico_css_por_destino_y_accesibilidad():
+    import quantum_lab_portada as portada
+    import quantum_lab_escena as e
+    css = portada._css_menu()
+    for m in portada.MODULOS:
+        assert f".ql-esc-{m[0]}" in css and f"st-key-ql_item_{m[0]}" in css
+    assert ":focus-within" in css                         # el teclado enciende el mismo escenario que el cursor
+    base = e.css()
+    assert "@keyframes ql-menu-entra" in base and "@keyframes ql-esc-entra" in base
+    assert ".ql-esc { display: none; }" in base           # en pantallas pequeñas queda solo la lista
+
+
+def test_atomo_de_fondo_es_conceptual_y_accesible():
+    import quantum_lab_arte as a
+    s = a.atomo()
+    assert 'role="img"' in s and "aria-label=" in s and "<title>" in s
+    assert "ILUSTRACIÓN CONCEPTUAL" in s                          # se declara como ilustración, no como resultado
+    assert s.count('class="ql-obs-giro ') == 4                    # órbitas de referencia que giran con CSS
+    assert "http" not in s.replace("http://www.w3.org/2000/svg", "")   # sin recursos externos
+    assert len(s) < 120_000                                       # ligero: nubes como un solo trazo por grupo
+
+
+def test_inicio_a_pantalla_completa_y_barra_lateral_angular():
+    import quantum_lab_escena as e
+    css = e.css()
+    assert 'stMainBlockContainer"]:has(.st-key-ql_menu)' in css   # solo la portada anula el ancho máximo
+    assert "min-height: 100vh" in css
+    assert 'section[data-testid="stSidebar"] [class*="st-key-nav_"]' in css and "skewX(-14deg)" in css
+    assert ".ql-velo" in css                                      # velo que garantiza el contraste del texto sobre el átomo
+    at = _abrir("caja", vista=None)
+    html = " ".join(m.value for m in at.markdown)
+    assert "st-key-nav_caja" in html                              # acento por página en la barra lateral
+    assert "stMainBlockContainer" in html and not any(b.key == "ql_menu_caja" for b in at.button)   # el menú solo existe en la portada
+    ini = _abrir(vista=None)
+    claves = [b.key for b in ini.sidebar.button]
+    assert "nav_inicio" in claves and "nav_caja" in claves        # la navegación de respaldo sigue en la barra lateral
