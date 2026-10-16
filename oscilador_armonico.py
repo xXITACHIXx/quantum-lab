@@ -1209,7 +1209,8 @@ def interfaz() -> None:
         "Relacionar el número cuántico n con la energía, la forma de ψ y el reparto entre energía cinética y "
         "potencial, y seguir la dinámica de una superposición.",
         r"\begin{gathered}E_n=\hbar\omega\left(n+\tfrac{1}{2}\right)\\[4pt]"
-        r"\psi_n(\xi)=N_n\,H_n(\xi)\,e^{-\xi^2/2},\quad \xi=x\sqrt{m\omega/\hbar}\end{gathered}",
+        r"\psi_n(\xi)=N_n\,H_n(\xi)\,e^{-\xi^2/2}\\[4pt]"
+        r"\xi=x\sqrt{m\omega/\hbar}\end{gathered}",
         [("n", "número cuántico, entero ≥ 0"), ("ω", "frecuencia angular"), ("m", "masa"),
          ("Hₙ", "polinomio de Hermite")],
         "Potencial armónico ideal V = ½mω²x² en una dimensión; estados exactos de la ecuación de Schrödinger.")
