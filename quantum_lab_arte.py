@@ -21,7 +21,7 @@ import math
 import numpy as np
 from numpy.polynomial import hermite as _herm
 
-from quantum_lab_tema import PALETA as P, SERIES as S
+from quantum_lab_tema import MAGENTA, PALETA as P, SERIES as S
 
 ANCHO, ALTO = 360, 200
 _FUENTE = "system-ui, 'Segoe UI', Roboto, sans-serif"
@@ -40,7 +40,10 @@ def _camino(xs, ys, cerrar: bool = False) -> str:
 
 
 def _linea(xs, ys, color, ancho=2.0, op=1.0, extra="") -> str:
-    return f'<path d="{_camino(xs, ys)}" fill="none" stroke="{color}" stroke-width="{ancho}" stroke-opacity="{op}" stroke-linejoin="round" {extra}/>'
+    # Los trazos continuos llevan class="ql-trazo" y pathLength="1": el CSS puede «dibujarlos» (stroke-dashoffset 1 → 0) al entrar
+    # en una página o al pasar el cursor por una tarjeta. Los discontinuos no, porque pathLength reescalaría su patrón de guiones.
+    trazo = '' if "stroke-dasharray" in extra else ' class="ql-trazo" pathLength="1"'
+    return f'<path d="{_camino(xs, ys)}" fill="none" stroke="{color}" stroke-width="{ancho}" stroke-opacity="{op}" stroke-linejoin="round"{trazo} {extra}/>'
 
 
 def _area(xs, ys, base, color, op=0.25) -> str:
@@ -126,7 +129,7 @@ def esfera() -> str:
     r = 0.95 * R * ((3 * np.cos(th) ** 2 - 1) / 2) ** 2 / 1.0
     r = np.clip(r, 0, None)
     xs, ys = cx + r * np.sin(th), cy - r * np.cos(th)
-    partes.append(f'<path d="{_camino(xs, ys, True)}" fill="{S["onda"]}" fill-opacity=".38" stroke="{S["onda"]}" stroke-width="2"/>')
+    partes.append(f'<path d="{_camino(xs, ys, True)}" fill="{S["onda"]}" fill-opacity=".38" stroke="{S["onda"]}" stroke-width="2" class="ql-trazo" pathLength="1"/>')
     partes.append(f'<line x1="{cx}" y1="{cy - R - 10}" x2="{cx}" y2="{cy + R + 10}" stroke="{P["tenue"]}" stroke-width="1" stroke-dasharray="3 4"/>')
     partes.append(_texto(cx + 8, cy - R - 12, "z", P["tenue"], 11, "start"))
     partes.append(_texto(cx, 197, "Yₗᵐ(θ, φ) sobre la esfera  ·  ejemplo: |Y₂⁰|²", P["tenue"], 10))
@@ -408,3 +411,58 @@ def icono(clave: str, color: str | None = None) -> str:
         return ""
     return (f'<svg class="ql-icono" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="{color or P["cian"]}" '
             f'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{_ICONOS[clave]}</svg>')
+
+
+# ---------------------------------------------------------------------
+# Observatorio: escena principal de la portada (animada con CSS)
+# ---------------------------------------------------------------------
+def observatorio() -> str:
+    """
+    Escena de la portada: nube de probabilidad del orbital 2p_z (muestreada de ρ ∝ r² e^(−r) cos²θ), tres órbitas de referencia con un
+    punto luminoso que las recorre y una retícula de medida. Las clases ql-obs-* reciben su movimiento del CSS de `quantum_lab_escena`;
+    sin CSS (o con «reducir movimiento») la escena queda estática y completa. Es una ilustración conceptual, no un resultado calculado.
+    """
+    ancho, alto = 640, 460
+    cx, cy, esc = 330, 228, 25.0
+    pts = _nube_2p(1100, semilla=11)
+    xs, ys = cx + esc * pts[:, 0], cy - esc * pts[:, 1]
+    ok = (xs > 16) & (xs < ancho - 16) & (ys > 16) & (ys < alto - 16)
+    xs, ys = xs[ok], ys[ok]
+    superior = ys < cy
+    def nube(mask, color, op):
+        d = "".join(f"M{_n(a)} {_n(b)}h0" for a, b in zip(xs[mask], ys[mask]))
+        return f'<path d="{d}" stroke="{color}" stroke-width="3.2" stroke-linecap="round" stroke-opacity="{op}"/>'
+    partes = [
+        '<defs><radialGradient id="ql-obs-halo" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="0" stop-color="{P["violeta"]}" stop-opacity=".45"/><stop offset=".55" stop-color="{P["violeta"]}" stop-opacity=".08"/>'
+        f'<stop offset="1" stop-color="{P["violeta"]}" stop-opacity="0"/></radialGradient>'
+        '<radialGradient id="ql-obs-nucleo" cx="50%" cy="50%" r="50%">'
+        f'<stop offset="0" stop-color="#FFFFFF"/><stop offset=".35" stop-color="{P["amarillo"]}"/><stop offset="1" stop-color="{P["amarillo"]}" stop-opacity="0"/></radialGradient></defs>',
+        f'<circle cx="{cx}" cy="{cy}" r="210" fill="url(#ql-obs-halo)" class="ql-obs-halo"/>',
+    ]
+    # retícula de medida (anillos y ejes con marcas)
+    ret = [f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{P["borde"]}" stroke-width="1" stroke-dasharray="2 6"/>' for r in (70, 140, 210)]
+    ret.append(f'<line x1="{cx - 230}" y1="{cy}" x2="{cx + 230}" y2="{cy}" stroke="{P["borde"]}" stroke-width="1"/>')
+    ret.append(f'<line x1="{cx}" y1="{cy - 215}" x2="{cx}" y2="{cy + 215}" stroke="{P["borde"]}" stroke-width="1"/>')
+    for k in range(-4, 5):
+        if k:
+            ret.append(f'<line x1="{cx + 50 * k}" y1="{cy - 4}" x2="{cx + 50 * k}" y2="{cy + 4}" stroke="{P["tenue"]}" stroke-width="1" stroke-opacity=".6"/>')
+            ret.append(f'<line x1="{cx - 4}" y1="{cy + 50 * k}" x2="{cx + 4}" y2="{cy + 50 * k}" stroke="{P["tenue"]}" stroke-width="1" stroke-opacity=".6"/>')
+    partes.append('<g class="ql-obs-reticula">' + "".join(ret) + "</g>")
+    # órbitas de referencia: cada una es un círculo aplastado e inclinado; el grupo interior gira con CSS
+    for i, (inclinacion, aplastado, radio, color, dur) in enumerate(((-24, .30, 190, P["cian"], 1), (38, .24, 150, MAGENTA, 2), (90, .18, 120, P["cian"], 3))):
+        partes.append(f'<g transform="translate({cx} {cy}) rotate({inclinacion}) scale(1 {aplastado})"><g class="ql-obs-giro ql-obs-giro-{dur}">'
+                      f'<circle r="{radio}" fill="none" stroke="{color}" stroke-width="{1.2 / aplastado ** .5:.2f}" stroke-opacity=".38"/>'
+                      f'<circle cx="{radio}" r="{5 / aplastado ** .5:.1f}" fill="{color}" class="ql-obs-electron"/></g></g>')
+    partes.append(f'<g class="ql-obs-nube">{nube(superior, P["violeta"], .8)}{nube(~superior, P["cian"], .7)}</g>')
+    partes.append(f'<circle cx="{cx}" cy="{cy}" r="16" fill="url(#ql-obs-nucleo)" class="ql-obs-nucleo"/>')
+    # rótulos técnicos
+    mono = "'Source Code Pro', Consolas, monospace"
+    def rot(x, y, t, c, ancla="start"):
+        return f'<text x="{x}" y="{y}" fill="{c}" font-size="11" font-family="{mono}" letter-spacing="1.5" text-anchor="{ancla}">{t}</text>'
+    partes += [rot(24, 34, "ORBITAL 2p  ·  n = 2  ·  l = 1  ·  m = 0", P["tenue"]),
+               rot(24, 52, "ρ(r, θ) ∝ r² e^(−r) cos²θ", P["violeta"]),
+               rot(ancho - 24, alto - 22, "ILUSTRACIÓN CONCEPTUAL", P["tenue"], "end"),
+               f'<line x1="{cx + 140}" y1="{cy - 120}" x2="{cx + 210}" y2="{cy - 170}" stroke="{P["tenue"]}" stroke-width="1"/>',
+               rot(cx + 214, cy - 174, "|ψ|² máx.", P["texto"])]
+    return _envolver("".join(partes), "Ilustración conceptual: nube de probabilidad de un orbital 2p con órbitas de referencia y retícula de medida", ancho, alto)

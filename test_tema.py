@@ -50,3 +50,8 @@ def test_css_sin_marcadores_sin_resolver():
 def test_colores_de_graficas_salen_de_la_paleta():
     assert qc.COLORES["onda"] == t.PALETA["violeta"] and qc.COLORES["densidad"] == t.PALETA["cian"]
     assert qc.COLORES["energia"] == t.PALETA["amarillo"] and qc.COLORES["fondo"] == t.PALETA["fondo"]
+
+
+def test_acentos_de_escena_legibles():
+    assert t.contraste(t.MAGENTA, t.PALETA["fondo"]) >= 4.5
+    assert t.contraste(t.PALETA["texto"], t.PROFUNDO) >= 4.5 and t.contraste(t.PALETA["tenue"], t.PROFUNDO) >= 4.5

@@ -32,6 +32,7 @@ import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import quantum_lab_escena as escena
 import quantum_lab_portada as portada
 import repaso
 import ruta
@@ -98,6 +99,7 @@ def _barra_lateral() -> None:
                     _boton_nav(clave)
         st.markdown("")
         qc.interruptor_movil()
+        escena.instalar_efectos(st)
         st.markdown('<div class="ql-pie">Cálculo con NumPy y SciPy.<br>La dirección de la página guarda la '
                     f'configuración: cópiala para compartirla.<br><br>Versión {qc.VERSION} · 6 simuladores</div>',
                     unsafe_allow_html=True)
@@ -106,6 +108,14 @@ def _barra_lateral() -> None:
 # ---------------------------------------------------------------------
 # Páginas
 # ---------------------------------------------------------------------
+def _ubicacion(pagina: str) -> None:
+    """Barra de ubicación (categoría / página / número) y regreso al observatorio."""
+    m = portada.modulo(pagina)
+    c1, c2 = st.columns([5, 1.25], vertical_alignment="center")
+    c1.markdown(escena.ubicacion_html(m[2], m[4], m[1], len(portada.MODULOS)), unsafe_allow_html=True)
+    c2.button("Observatorio", key="ql_volver", icon=":material/arrow_back:", type="tertiary", on_click=_ir_a, args=("inicio",), width="stretch")
+
+
 def _pagina_inicio() -> None:
     portada.pagina_inicio(_ir_a, lambda: ruta.tarjeta_sugerencia(ruta.estados(), "ru_inicio"))
 
@@ -138,14 +148,18 @@ def main() -> None:
     pagina = st.session_state["ql_pagina"]
     if pagina in ("inicio", "pruebas", "verificacion"):
         qc.escribir_en_url(None)
-    if pagina == "inicio":
-        _pagina_inicio()
-    elif pagina == "pruebas":
-        _pagina_pruebas()
-    elif pagina == "verificacion":
-        verificacion.interfaz()
-    else:
-        PAGINAS[pagina][2].interfaz()
+    # La clave del contenedor cambia solo al cambiar de página: la animación de entrada se reproduce al navegar y no al mover un control.
+    with st.container(key=f"ql_escena_{pagina}"):
+        if pagina != "inicio":
+            _ubicacion(pagina)
+        if pagina == "inicio":
+            _pagina_inicio()
+        elif pagina == "pruebas":
+            _pagina_pruebas()
+        elif pagina == "verificacion":
+            verificacion.interfaz()
+        else:
+            PAGINAS[pagina][2].interfaz()
 
 
 def _bajo_streamlit() -> bool:

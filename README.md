@@ -158,6 +158,15 @@ la barra lateral que aparece el número de versión esperado.
   `test_tema.py` comprueba que coincidan y que el contraste sea de al menos 4.5:1. Las ilustraciones de la portada y de cada simulador son SVG
   **conceptuales** generados en `quantum_lab_arte.py` (sin imágenes externas ni conexión); no son resultados del simulador. La portada y sus tarjetas
   están en `quantum_lab_portada.py` (lista `MODULOS`: número, categoría, título y descripción de cada módulo).
+* **Escena y movimiento** (`quantum_lab_escena.py`): (1) *navegación animada*: cada página se dibuja en `st.container(key="ql_escena_<página>")`;
+  como la clave solo cambia al navegar, la entrada escalonada, el barrido de la barra de ubicación y el trazado de la ilustración se reproducen
+  al cambiar de página y no al mover un control; la barra de ubicación indica categoría, página y número, con regreso al «Observatorio».
+  (2) *Destinos interactivos*: cada tarjeta de la portada es un contenedor `ql_dest_<página>` con un `st.button` real extendido sobre toda
+  la tarjeta (clic, toque y teclado); al pasar el cursor se eleva, se enciende la línea de energía, la luz sigue al puntero y la ilustración se
+  vuelve a trazar. (3) *Observatorio*: portada por capas (luz ambiental, plano en perspectiva, partículas en Canvas con paralaje y nube 2p con
+  órbitas). Los indicadores de los simuladores destellan cuando su valor cambia. El JavaScript es una mejora progresiva (`st.html` con
+  `unsafe_allow_javascript`, detectado en tiempo de ejecución); sin él quedan todas las animaciones CSS. Con `prefers-reduced-motion` todo se
+  detiene, y en móviles se suprimen el plano y las partículas.
 * **Ruta de estudio** (barra lateral → «Teoría y repaso»): recorrido por dominio de cada tema, sin depender de fechas. Los 13 temas siguen un orden de
   dependencias físicas (`ORDEN` y `PREREQ` en `ejercicios/_ruta.py`). Cada tema tiene tres pasos: *teoría leída* (se marca a mano; no aplica si la
   teoría aún no existe), *ejercicios resueltos* (al menos el 75 %) y *mini-examen aprobado* (3 ejercicios del tema, nota de 3.0 o más sobre 5.0).

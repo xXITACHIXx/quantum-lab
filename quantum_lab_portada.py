@@ -1,10 +1,14 @@
 """
-quantum_lab_portada.py — Página de inicio de QUANTUM LAB
-========================================================
+quantum_lab_portada.py — Página de inicio de QUANTUM LAB: el observatorio
+=========================================================================
 
-Cabecera con ilustración y tarjetas (cada módulo con su ilustración conceptual) de navegación por categoría. `MODULOS` es la única lista de módulos de la portada (número, categoría,
-título, descripción); las claves son las de `quantum_lab.PAGINAS`. Las tarjetas solo usan datos reales: no muestran estadísticas de uso
-ni indicadores de progreso (el progreso del estudiante vive en la Ruta de estudio).
+La portada es una escena (ver `quantum_lab_escena`): el observatorio animado y, debajo, los módulos como **destinos** en cuatro
+capítulos. Los simuladores se presentan en una composición asimétrica (un destino mayor y dos menores por capítulo, alternando el lado);
+las estaciones de estudio y de verificación, como tarjetas compactas. Cada destino es un contenedor `ql_dest_<clave>` con un `st.button`
+real que cubre la tarjeta, de modo que la navegación es la de Streamlit.
+
+`MODULOS` es la única lista de módulos (número, categoría, tipo, título, descripción, ecuación). Las cifras de la franja inferior del
+observatorio se calculan con los datos de la aplicación; no hay estadísticas de uso ni indicadores inventados.
 """
 
 from __future__ import annotations
@@ -15,6 +19,7 @@ import streamlit as st
 
 import quantum_lab_arte as arte
 import quantum_lab_comun as qc
+import quantum_lab_escena as escena
 
 SIMULADOR, ESTUDIO, VERIFICACION = "simulador", "estudio", "verificacion"
 
@@ -53,53 +58,89 @@ MODULOS = [
      "Ejecución de todas las comprobaciones numéricas de la aplicación.", ""),
 ]
 CATEGORIAS = ("Mecánica cuántica", "Fundamentos", "Teoría y repaso", "Verificación")
-ACCION = {SIMULADOR: "Abrir simulador", ESTUDIO: "Abrir", VERIFICACION: "Abrir"}
+CAPITULOS = {
+    "Mecánica cuántica": ("01", "Sistemas modelo", "Soluciones exactas de la ecuación de Schrödinger: confinamiento, oscilación y rotación."),
+    "Fundamentos": ("02", "Origen de la teoría", "Los experimentos y modelos que obligaron a abandonar la física clásica."),
+    "Teoría y repaso": ("03", "Estaciones de estudio", "Teoría, fórmulas, práctica y evaluación conectadas con cada simulador."),
+    "Verificación": ("04", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
+}
 ID_SIMULADORES = "ql-simuladores"
+ID_ESTUDIO = "ql-estudio"
+_CLASE = {SIMULADOR: "ql-dest-sim", ESTUDIO: "ql-dest-est", VERIFICACION: "ql-dest-ver"}
+# Composición asimétrica: proporciones de columna y posición del destino mayor en cada capítulo de simuladores.
+COMPOSICION = {"Mecánica cuántica": ([1.55, 1, 1], 0), "Fundamentos": ([1, 1, 1.55], 2)}
 
 
-def tarjeta_html(clave: str, numero: str, categoria: str, tipo: str, titulo: str, descripcion: str, lema: str) -> str:
-    """HTML de una tarjeta (los textos se escapan; los SVG son los generados por `quantum_lab_arte`)."""
+def modulo(clave: str):
+    return next(m for m in MODULOS if m[0] == clave)
+
+
+def tarjeta_html(clave: str, numero: str, categoria: str, tipo: str, titulo: str, descripcion: str, lema: str,
+                 mayor: bool = False, compacta: bool = False) -> str:
+    """HTML de un destino (los textos se escapan; los SVG son los generados por `quantum_lab_arte`)."""
     e = html.escape
-    cabecera = f'<div class="ql-miniatura">{arte.svg(clave)}</div>'
-    ecuacion = f'<div class="ql-ecuacion">{e(lema)}</div>' if lema else ""
-    return (f'<div class="ql-card ql-card-{tipo}">{cabecera}'
-            f'<div class="ql-card-cab"><span class="ql-num">{e(numero)}</span><span class="ql-chip">{e(categoria)}</span></div>'
-            f'<h3>{e(titulo)}</h3><p>{e(descripcion)}</p>{ecuacion}</div>')
+    clases = " ".join(c for c in ("ql-dest", _CLASE[tipo], "ql-dest-mayor" if mayor else "", "ql-dest-compacta" if compacta else "") if c)
+    prefijo = {SIMULADOR: "SIM", ESTUDIO: "EST", VERIFICACION: "VER"}[tipo]
+    ecuacion = f'<span class="ql-ecuacion">{e(lema)}</span>' if lema else "<span></span>"
+    entrar = "Entrar al simulador" if tipo == SIMULADOR else "Abrir"
+    return (f'<div class="{clases}"><span class="ql-dest-luz"></span>'
+            f'<div class="ql-dest-arte ql-miniatura">{arte.svg(clave)}</div>'
+            f'<div class="ql-dest-cuerpo"><div class="ql-dest-meta"><span class="ql-num">{prefijo}·{e(numero)}</span><span class="ql-chip">{e(categoria)}</span></div>'
+            f'<h3>{e(titulo)}</h3><p>{e(descripcion)}</p>'
+            f'<div class="ql-dest-pie">{ecuacion}<span class="ql-dest-entrar">{entrar}<i>→</i></span></div></div>'
+            f'<span class="ql-dest-linea"></span></div>')
+
+
+def destino(m, ir_a, mayor: bool = False, compacta: bool = False) -> None:
+    """Un destino: contenedor con clave + tarjeta + botón real (el CSS lo extiende sobre la tarjeta)."""
+    clave, _, _, tipo, titulo, *_ = m
+    with st.container(key=f"ql_dest_{clave}"):
+        st.markdown(tarjeta_html(*m, mayor=mayor, compacta=compacta), unsafe_allow_html=True)
+        etiqueta = f"Abrir el simulador: {titulo}" if tipo == SIMULADOR else f"Abrir {titulo}"
+        st.button(etiqueta, key=f"ql_abrir_{clave}", on_click=ir_a, args=(clave,), width="stretch")
+
+
+def lecturas() -> list[tuple[str, str]]:
+    """Cifras reales de la aplicación para la franja del observatorio."""
+    import ejercicios
+    import formulario
+    import talleres
+    import teoria
+    temas = [t for _, t in teoria.todos_los_temas() if t.estado == teoria.DISPONIBLE]
+    formulas = sum(len(s.todas()) for s in formulario.SECCIONES)
+    return [(str(sum(m[3] == SIMULADOR for m in MODULOS)), "simuladores"), (str(len(temas)), "temas de teoría"),
+            (str(len(ejercicios.EJERCICIOS)), "ejercicios"), (str(formulas), "fórmulas"), (str(len(talleres.TALLERES)), "talleres")]
 
 
 def _hero() -> None:
-    st.markdown(
-        '<div class="ql-hero"><div class="ql-hero-texto">'
-        f'<div class="ql-hero-marca">{arte.icono("ruta", "var(--ql-violeta)").replace("ql-icono", "ql-icono-marca")}'
-        '<span class="ql-etiqueta">Laboratorio interactivo de mecánica cuántica</span></div>'
-        '<div class="ql-titulo">Quantum Lab</div>'
-        '<p class="ql-subtitulo">Funciones de onda, energías, densidades de probabilidad y armónicos esféricos calculados a partir de parámetros físicos '
-        'reales, cada uno con su comprobación numérica.</p>'
-        f'<a class="ql-boton" href="#{ID_SIMULADORES}">Explorar simuladores</a></div>'
-        f'<div class="ql-hero-arte">{arte.portada()}</div></div>', unsafe_allow_html=True)
+    st.markdown(escena.observatorio_html(arte.observatorio(), lecturas(), ID_SIMULADORES, ID_ESTUDIO), unsafe_allow_html=True)
 
 
 def pagina_inicio(ir_a, sugerencia=None) -> None:
     """Portada. `ir_a(clave)` es el callback de navegación; `sugerencia()` dibuja la tarjeta «Siguiente paso sugerido» (opcional)."""
     _hero()
-    st.markdown(f'<div id="{ID_SIMULADORES}"></div>', unsafe_allow_html=True)
     for categoria in CATEGORIAS:
         modulos = [m for m in MODULOS if m[2] == categoria]
-        qc.seccion(categoria)
+        num, etiqueta, descripcion = CAPITULOS[categoria]
+        ancla = {"Mecánica cuántica": ID_SIMULADORES, "Teoría y repaso": ID_ESTUDIO}.get(categoria, "")
+        st.markdown(escena.capitulo_html(num, etiqueta, categoria, descripcion, ancla), unsafe_allow_html=True)
+        if categoria in COMPOSICION:
+            proporciones, mayor = COMPOSICION[categoria]
+            for i, (col, m) in enumerate(zip(st.columns(proporciones, gap="medium"), modulos)):
+                with col:
+                    destino(m, ir_a, mayor=(i == mayor))
+            continue
         if categoria == "Teoría y repaso" and sugerencia:
             sugerencia()
-        ancho = 3 if modulos[0][3] == SIMULADOR else 4
-        for i in range(0, len(modulos), ancho):
-            columnas = st.columns(ancho)
-            for col, m in zip(columnas, modulos[i:i + ancho]):
+        for i in range(0, len(modulos), 2):
+            for col, m in zip(st.columns(2, gap="medium"), modulos[i:i + 2]):
                 with col:
-                    st.markdown(tarjeta_html(*m), unsafe_allow_html=True)
-                    st.button(ACCION[m[3]], key=f"ql_abrir_{m[0]}", on_click=ir_a, args=(m[0],), icon=":material/arrow_forward:", width="stretch")
+                    destino(m, ir_a, compacta=True)
     st.markdown("")
     c1, c2 = st.columns(2, gap="large")
     with c1:
         with st.expander("Cómo usar la aplicación", icon=":material/help:"):
-            st.markdown("1. Seleccionar un simulador o el **Centro de teoría** en la barra lateral o en las tarjetas.\n"
+            st.markdown("1. Seleccionar un destino en esta página o una sección en la barra lateral.\n"
                         "2. Ajustar los **parámetros del sistema** en el panel superior; los resultados se recalculan al instante.\n"
                         "3. Recorrer las **pestañas**: resultados, visualización, valores detallados e interpretación.\n"
                         "4. «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al comienzo.\n"
@@ -110,4 +151,4 @@ def pagina_inicio(ir_a, sugerencia=None) -> None:
             st.markdown("- Las **fórmulas** (ψₙ, Eₙ, Hermite, Yₗᵐ…) son exactas; las **integrales y derivadas** se calculan en mallas numéricas con el error documentado en cada simulador.\n"
                         "- Las deformaciones y «lóbulos» de la esfera son recursos geométricos, no objetos físicos.\n"
                         "- Herramienta **educativa**: una partícula, sin espín ni interacciones; no describe átomos reales.\n"
-                        "- Las ilustraciones de la portada y de las tarjetas son **conceptuales**; no son resultados del simulador.")
+                        "- El observatorio, las ilustraciones y sus animaciones son **conceptuales**; no son resultados del simulador.")

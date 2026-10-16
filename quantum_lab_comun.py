@@ -575,7 +575,8 @@ def css_fuente_simbolos() -> str:
 
 def inyectar_css() -> None:
     import streamlit as st
-    st.markdown(css_fuente_simbolos() + CSS, unsafe_allow_html=True)
+    import quantum_lab_escena as escena
+    st.markdown(css_fuente_simbolos() + CSS + escena.css(), unsafe_allow_html=True)
 
 
 # =====================================================================
