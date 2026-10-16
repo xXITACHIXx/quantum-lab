@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import os
 from functools import lru_cache
 
 import numpy as np
@@ -349,9 +350,9 @@ def agregar_animacion(figura, nombres_cuadros: list[str], etiquetas: list[str],
 # el texto y «Source Code Pro» para cifras y etiquetas técnicas.
 VERSION = "5.0"           # se muestra en la barra lateral: sirve para comprobar qué versión está publicada
 
-FUENTE_TITULOS = '"Source Serif", "Source Serif Pro", Georgia, "Times New Roman", serif'
-FUENTE_TEXTO = '"Source Sans", "Source Sans Pro", "Segoe UI", system-ui, sans-serif'
-FUENTE_CIFRAS = '"Source Code Pro", Consolas, "Courier New", monospace'
+FUENTE_TITULOS = '"Source Serif", "Source Serif Pro", "QL Simbolos", Georgia, "Times New Roman", serif'
+FUENTE_TEXTO = '"Source Sans", "Source Sans Pro", "QL Simbolos", "Segoe UI", system-ui, sans-serif'
+FUENTE_CIFRAS = '"Source Code Pro", "QL Simbolos Mono", Consolas, "Courier New", monospace'
 
 CSS = """
 <style>
@@ -530,8 +531,24 @@ def _rango_css() -> str:
     return ", ".join(f"U+{a:04X}" if a == b else f"U+{a:04X}-{b:04X}" for a, b in _RANGOS_SIMBOLOS)
 
 
+_ARCHIVO_FUENTE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fuente_simbolos.css")
+
+
 @lru_cache(maxsize=1)
 def css_fuente_simbolos() -> str:
+    """CSS con la fuente de símbolos. Se lee del archivo pregenerado `fuente_simbolos.css` (no depende de fontTools en el servidor);
+    si no existe, se genera al vuelo."""
+    try:
+        with open(_ARCHIVO_FUENTE, encoding="utf-8") as f:
+            texto = f.read()
+        if "QL Simbolos" in texto:
+            return texto
+    except OSError:
+        pass
+    return _generar_css_fuente()
+
+
+def _generar_css_fuente() -> str:
     """Reglas @font-face con la fuente de símbolos incrustada (base64). Cadena vacía si algo falla."""
     try:
         import base64
@@ -564,7 +581,7 @@ def css_fuente_simbolos() -> str:
         sans, mono = woff_b64("DejaVuSans.ttf"), woff_b64("DejaVuSansMono.ttf")
         rango = _rango_css()
         reglas = []
-        for familia, datos in (("Source Sans", sans), ("Source Code Pro", mono)):
+        for familia, datos in (("Source Sans", sans), ("Source Code Pro", mono), ("QL Simbolos", sans), ("QL Simbolos Mono", mono)):
             reglas.append(f'@font-face {{ font-family: "{familia}"; src: url(data:font/woff;base64,{datos}) '
                           f'format("woff"); font-weight: 100 900; font-style: normal; font-display: swap; '
                           f'unicode-range: {rango}; }}')

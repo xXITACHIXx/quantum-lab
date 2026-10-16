@@ -96,8 +96,8 @@ def _ubicacion(pagina: str) -> None:
     m = portada.modulo(pagina)
     c1, c2, c3 = st.columns([4, 1.5, 1.25], vertical_alignment="center")
     c1.markdown(escena.ubicacion_html(m[2], m[4], m[1], len(portada.MODULOS)), unsafe_allow_html=True)
-    c2.button(m[2], key="ql_categoria", icon=":material/arrow_back:", type="tertiary", on_click=_ir_a, args=(portada.CAT_CLAVE[m[2]],), width="stretch")
-    c3.button("Inicio", key="ql_volver", icon=":material/home:", type="tertiary", on_click=_ir_a, args=("inicio",), width="stretch")
+    c2.button(f"\u2190 {m[2]}", key="ql_categoria", type="tertiary", on_click=_ir_a, args=(portada.CAT_CLAVE[m[2]],), width="stretch")
+    c3.button("\u2190 Inicio", key="ql_volver", type="tertiary", on_click=_ir_a, args=("inicio",), width="stretch")
 
 
 def _pagina_inicio() -> None:

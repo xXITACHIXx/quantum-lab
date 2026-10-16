@@ -451,7 +451,15 @@ section[data-testid="stSidebar"] .ql-menu-cab { padding: 1rem 0 .3rem .3rem; }
   .st-key-ql_cats [class*="st-key-ql_item_"] { margin-left: calc(var(--k, 0) * .9rem); }
   .st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button { min-height: 3.4rem; }
 }
+/* Fondo estable en el celular: sin giro de órbitas ni desplazamiento por puntero; la capa se rasteriza una vez y no se repinta al
+   mostrarse u ocultarse la barra del navegador (altura de ventana pequeña estable: svh). */
+.ql-fondo-atomo, .ql-atomo { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.ql-atomo { will-change: transform; }
+.st-key-ql_menu { min-height: 100vh; min-height: 100svh; }
 @media (max-width: 900px) {
+  .ql-atomo { transform: none !important; transition: none !important; }
+  .ql-fondo-atomo .ql-obs-giro, .ql-fondo-atomo .ql-obs-nucleo { animation: none !important; }
+  .ql-fondo-atomo { contain: strict; }
   .st-key-ql_menu { padding-top: 3.8rem; }
   .ql-velo { background: linear-gradient(0deg, rgba(11, 16, 32, .5), rgba(11, 16, 32, .12)); }
   .ql-lectura-inicio { display: none; }

@@ -25,7 +25,7 @@ from numpy.polynomial import hermite as _herm
 from quantum_lab_tema import MAGENTA, PALETA as P, SERIES as S
 
 ANCHO, ALTO = 360, 200
-_FUENTE = "system-ui, 'Segoe UI', Roboto, sans-serif"
+_FUENTE = "'Source Sans', 'QL Simbolos', system-ui, 'Segoe UI', Roboto, sans-serif"
 
 
 # ---------------------------------------------------------------------
@@ -465,7 +465,7 @@ def observatorio() -> str:
     partes.append(f'<g class="ql-obs-nube">{nube(superior, P["violeta"], .8)}{nube(~superior, P["cian"], .7)}</g>')
     partes.append(f'<circle cx="{cx}" cy="{cy}" r="16" fill="url(#ql-obs-nucleo)" class="ql-obs-nucleo"/>')
     # rótulos técnicos
-    mono = "'Source Code Pro', Consolas, monospace"
+    mono = "'Source Code Pro', 'QL Simbolos Mono', Consolas, monospace"
     def rot(x, y, t, c, ancla="start"):
         return f'<text x="{x}" y="{y}" fill="{c}" font-size="11" font-family="{mono}" letter-spacing="1.5" text-anchor="{ancla}">{t}</text>'
     partes += [rot(24, 34, "ORBITAL 2p  ·  n = 2  ·  l = 1  ·  m = 0", P["tenue"]),
@@ -540,7 +540,7 @@ def atomo() -> str:
     partes.append(f'<g class="ql-obs-nube ql-at-2p">{nube(p2[arriba], 25.0, P["violeta"], .8, 3.2)}{nube(p2[~arriba], 25.0, P["cian"], .75, 3.2)}</g>')
     partes.append(f'<g class="ql-obs-halo">{nube(p1, 62.0, P["amarillo"], .6, 2.6)}</g>')
     partes.append(f'<circle cx="{cx}" cy="{cy}" r="26" fill="url(#ql-at-nucleo)" class="ql-obs-nucleo"/>')
-    mono = "'Source Code Pro', Consolas, monospace"
+    mono = "'Source Code Pro', 'QL Simbolos Mono', Consolas, monospace"
     partes.append(f'<text x="{ancho - 28}" y="{alto - 26}" fill="{P["tenue"]}" font-size="12" font-family="{mono}" letter-spacing="2" text-anchor="end">ILUSTRACIÓN CONCEPTUAL · DENSIDADES 1s, 2p Y 3d</text>')
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" role="img" preserveAspectRatio="xMaxYMid slice" '
             'aria-label="Ilustración conceptual: átomo con nubes de probabilidad de los orbitales 1s, 2p y 3d, núcleo y órbitas de referencia">'

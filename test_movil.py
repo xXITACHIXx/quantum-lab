@@ -1,0 +1,37 @@
+"""Ajustes para celular: símbolos, botones de regreso y fondo estable."""
+import os
+
+import quantum_lab_arte as arte
+import quantum_lab_comun as qc
+import quantum_lab_escena as escena
+from streamlit.testing.v1 import AppTest
+
+
+def test_fuente_de_simbolos_pregenerada_y_con_familias_de_respaldo():
+    assert os.path.exists(qc._ARCHIVO_FUENTE)                     # no depende de fontTools en el servidor
+    css = qc.css_fuente_simbolos()
+    for familia in ("Source Sans", "Source Code Pro", "QL Simbolos", "QL Simbolos Mono"):
+        assert f'font-family: "{familia}"' in css
+    assert "U+2070-209C" in css                                    # subíndices y superíndices
+    assert '"QL Simbolos"' in qc.FUENTE_TEXTO and '"QL Simbolos Mono"' in qc.FUENTE_CIFRAS and '"QL Simbolos"' in qc.FUENTE_TITULOS
+
+
+def test_ilustraciones_usan_la_fuente_de_simbolos():
+    s = arte.svg("formulario")
+    assert "QL Simbolos" in s
+
+
+def test_botones_de_regreso_sin_icono_material():
+    for pagina in ("caja", "cat1"):
+        at = AppTest.from_file("quantum_lab.py", default_timeout=120)
+        at.session_state["ql_pagina"] = pagina
+        at.run()
+        assert not at.exception
+        volver = next(b for b in at.button if b.key == "ql_volver")
+        assert volver.label.startswith("←") and "material" not in str(volver.proto.icon)
+
+
+def test_fondo_del_atomo_estable_en_celular():
+    css = escena.css()
+    movil = css[css.index("Fondo estable en el celular"):]
+    assert "animation: none" in movil and "100svh" in movil and "will-change: transform" in movil

@@ -196,7 +196,7 @@ def menu_cinetico(ir_a, categoria: str | None = None) -> None:
             else:
                 num, etiqueta, desc = CAPITULOS[categoria]
                 with st.container(key="ql_sub_volver"):
-                    st.button("Inicio", key="ql_volver", icon=":material/arrow_back:", type="tertiary", on_click=ir_a, args=("inicio",))
+                    st.button("\u2190 Inicio", key="ql_volver", type="tertiary", on_click=ir_a, args=("inicio",))
                 st.markdown(f'<div class="ql-inicio-marca"><span class="ql-inicio-eyebrow">Capítulo {html.escape(num)} · {html.escape(etiqueta)}</span>'
                             f'<div class="ql-inicio-titulo ql-sub-titulo" role="heading" aria-level="1">{html.escape(categoria)}</div>'
                             f'<p class="ql-inicio-sub">{html.escape(desc)}</p></div>', unsafe_allow_html=True)
