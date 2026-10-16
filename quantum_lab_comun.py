@@ -25,6 +25,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import constants as const
 
+import quantum_lab_tema as _tema
+
 # Fuera de Streamlit (p. ej. al ejecutar las pruebas con `python`), Streamlit
 # emite avisos de "modo sin servidor" que no aportan nada; se silencian.
 for _nombre in ("streamlit.runtime.caching.cache_data_api",
@@ -45,17 +47,12 @@ T_ATOMICO = HBAR / E_HARTREE                                  # s  (unidad atóm
 
 # Paleta coherente en los tres simuladores
 COLORES = {
-    "onda": "#00D4FF",          # función de onda ψ
-    "densidad": "#FFB000",      # densidad de probabilidad |ψ|²
-    "cinetica": "#22C55E",      # energía cinética
-    "potencial": "#8B5CF6",     # energía potencial
-    "energia": "#FF4D6D",       # nivel / energía total
-    "interferencia": "#00FF9D",  # términos de interferencia, imaginaria
-    "gris": "#B8C1D1",
-    "fondo": "#0B1020",
-    "panel": "#121A33",
-    "rejilla": "#2A3558",
-    "texto": "#E6EAF5",
+    **_tema.SERIES,
+    "gris": _tema.PALETA["tenue"],
+    "fondo": _tema.PALETA["fondo"],
+    "panel": _tema.PALETA["panel"],
+    "rejilla": _tema.PALETA["borde"],
+    "texto": _tema.PALETA["texto"],
 }
 
 SISTEMAS = ("SI", "Atómicas")
@@ -179,7 +176,7 @@ def region_espectral(longitud_nm: float) -> str:
     return "Microondas / radio"
 
 
-def color_longitud_onda(longitud_nm: float, fuera="#9AA4BC") -> str:
+def color_longitud_onda(longitud_nm: float, fuera=_tema.PALETA["tenue"]) -> str:
     """
     Color RGB aproximado de una luz monocromática visible (algoritmo de Bruton, 380–750 nm).
     Fuera del visible devuelve `fuera`. Es solo una ayuda visual: no es una conversión colorimétrica exacta.
@@ -319,7 +316,7 @@ def agregar_animacion(figura, nombres_cuadros: list[str], etiquetas: list[str],
         margin=dict(b=margen_inf),
         updatemenus=[dict(
             type="buttons", direction="left", x=0.0, y=y_ctrl, xanchor="left", yanchor="top", showactive=False,
-            pad=dict(r=8, t=0), bgcolor="#1A2342", bordercolor=COLORES["rejilla"], borderwidth=1,
+            pad=dict(r=8, t=0), bgcolor=_tema.PANEL_2, bordercolor=COLORES["rejilla"], borderwidth=1,
             font=dict(color=COLORES["texto"], size=12),
             buttons=[
                 dict(label="▶  Reproducir", method="animate",
@@ -334,7 +331,7 @@ def agregar_animacion(figura, nombres_cuadros: list[str], etiquetas: list[str],
             active=0, x=0.025, y=y_ctrl - 40 / alto_dibujo, len=0.95, xanchor="left", yanchor="top",
             currentvalue=dict(prefix="", font=dict(size=12, color=COLORES["texto"], family=FUENTE_CIFRAS),
                               xanchor="right", offset=8),
-            pad=dict(t=0, b=0), bgcolor="#1A2342", bordercolor=COLORES["rejilla"], activebgcolor=COLORES["onda"],
+            pad=dict(t=0, b=0), bgcolor=_tema.PANEL_2, bordercolor=COLORES["rejilla"], activebgcolor=COLORES["onda"],
             tickcolor=COLORES["gris"], font=dict(size=10, color=COLORES["gris"]),
             steps=[dict(label=etq, method="animate",
                         args=[[nom], dict(frame=dict(duration=0, redraw=True),
@@ -359,8 +356,9 @@ FUENTE_CIFRAS = '"Source Code Pro", Consolas, "Courier New", monospace'
 CSS = """
 <style>
 :root {
-  --ql-fondo: #0B1020; --ql-panel: #10172C; --ql-panel-2: #131B33;
-  --ql-borde: #232C47; --ql-texto: #E6EAF5; --ql-tenue: #9AA4BC; --ql-acento: #38BDF8;
+  --ql-fondo: FONDO; --ql-panel: PANEL; --ql-panel-2: PANEL2;
+  --ql-borde: BORDE; --ql-texto: TEXTO; --ql-tenue: TENUE; --ql-acento: CIAN;
+  --ql-cian: CIAN; --ql-violeta: VIOLETA; --ql-verde: VERDE; --ql-amarillo: AMARILLO; --ql-rojo: ROJO;
   --ql-serif: FUENTE_TITULOS; --ql-mono: FUENTE_CIFRAS;
 }
 .block-container { padding-top: 2.2rem; padding-bottom: 4rem; max-width: 1380px; }
@@ -371,7 +369,7 @@ header[data-testid="stHeader"] { background: transparent; }
 .ql-etiqueta { font: 600 .72rem/1.2 var(--ql-mono); letter-spacing: .18em; text-transform: uppercase;
   color: var(--ql-acento); margin: 0; }
 .ql-titulo { font-family: var(--ql-serif); font-weight: 600; font-size: 2.05rem; line-height: 1.15;
-  color: #F3F5FA; margin: .35rem 0 .3rem 0; }
+  color: var(--ql-texto); margin: .35rem 0 .3rem 0; }
 .ql-subtitulo { color: var(--ql-tenue); font-size: 1.02rem; line-height: 1.5; margin: 0; max-width: 60rem; }
 .ql-regla { border: 0; border-top: 1px solid var(--ql-borde); margin: 1.1rem 0 1.3rem 0; }
 
@@ -410,14 +408,14 @@ div[data-baseweb="tab-list"] { gap: 1.2rem; border-bottom: 1px solid var(--ql-bo
 section[data-testid="stSidebar"] { border-right: 1px solid var(--ql-borde); }
 section[data-testid="stSidebar"] .block-container, section[data-testid="stSidebarContent"] { padding-top: 1rem; }
 .ql-marca { padding: .2rem 0 1rem 0; border-bottom: 1px solid var(--ql-borde); margin-bottom: .9rem; }
-.ql-marca .ql-marca-nombre { font-family: var(--ql-serif); font-size: 1.35rem; font-weight: 600; color: #F3F5FA;
+.ql-marca .ql-marca-nombre { font-family: var(--ql-serif); font-size: 1.35rem; font-weight: 600; color: var(--ql-texto);
   letter-spacing: .02em; }
 .ql-marca .ql-marca-sub { font: 500 .68rem/1.4 var(--ql-mono); letter-spacing: .14em; text-transform: uppercase;
   color: var(--ql-tenue); margin-top: .2rem; }
 section[data-testid="stSidebar"] .stButton button { justify-content: flex-start; text-align: left; border: 0;
   border-radius: 6px; padding: .38rem .7rem; min-height: 2.2rem; font-weight: 400; }
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] { background: transparent; color: var(--ql-texto); }
-section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"]:hover { background: var(--ql-panel-2); color: #FFFFFF; }
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"]:hover { background: var(--ql-panel-2); color: var(--ql-texto); }
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] { background: rgba(56,189,248,.12);
   color: var(--ql-acento); box-shadow: inset 2px 0 0 var(--ql-acento); }
 section[data-testid="stSidebar"] .stButton button p { font-size: .93rem; white-space: nowrap; }
@@ -428,18 +426,49 @@ section[data-testid="stSidebar"] [data-testid="stExpanderDetails"] { padding: .3
 section[data-testid="stSidebar"] details { border-color: var(--ql-borde) !important; }
 section[data-testid="stSidebar"] details summary p { font: 600 .72rem/1 var(--ql-mono); letter-spacing: .14em;
   text-transform: uppercase; color: var(--ql-tenue); }
-.ql-pie { font: 400 .72rem/1.5 var(--ql-mono); color: #6F7A95; margin-top: 1.2rem; }
+.ql-pie { font: 400 .72rem/1.5 var(--ql-mono); color: PIE; margin-top: 1.2rem; }
 
 /* ---------- Portada ---------- */
-.ql-portada { padding: 2.6rem 2.4rem 2.3rem 2.4rem; border: 1px solid var(--ql-borde); border-radius: 10px;
-  background: linear-gradient(180deg, #10172C 0%, #0D1427 100%); margin-bottom: 1.6rem; }
-.ql-portada .ql-titulo { font-size: 2.7rem; }
-.ql-card { padding: 1.3rem 1.35rem 1.1rem 1.35rem; border: 1px solid var(--ql-borde); border-radius: 8px;
-  background: var(--ql-panel); min-height: 17rem; display: flex; flex-direction: column; }
-.ql-card h3 { font-family: var(--ql-serif); font-size: 1.22rem; font-weight: 600; margin: .45rem 0 .55rem 0; color: #F3F5FA; }
-.ql-card p { color: var(--ql-tenue); font-size: .94rem; line-height: 1.5; margin: 0; }
-.ql-card .ql-ecuacion { margin-top: auto; padding-top: .9rem; font: 400 .86rem/1.4 var(--ql-mono); color: var(--ql-texto); }
+.ql-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 1.6rem; align-items: center; padding: 2rem 2.2rem;
+  border: 1px solid var(--ql-borde); border-radius: 12px; background: var(--ql-panel); margin-bottom: 1.8rem; }
+.ql-hero .ql-titulo { font-size: 3rem; margin: .5rem 0 .5rem 0; }
+.ql-hero .ql-subtitulo { margin-bottom: 1.3rem; }
+.ql-hero-marca { display: flex; align-items: center; gap: .55rem; }
+.ql-icono-marca { width: 1.5rem; height: 1.5rem; flex: none; }
+.ql-hero-arte svg { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--ql-fondo); border: 1px solid var(--ql-borde); }
+a.ql-boton, a.ql-boton:visited { display: inline-block; padding: .7rem 1.35rem; border-radius: 8px; background: var(--ql-cian); color: var(--ql-fondo) !important;
+  font-weight: 700; text-decoration: none; letter-spacing: .01em; border: 1px solid var(--ql-cian); }
+a.ql-boton:hover { background: var(--ql-fondo); color: var(--ql-cian) !important; }
+a.ql-boton:focus-visible { outline: 2px solid var(--ql-texto); outline-offset: 3px; }
 
+/* ---------- Tarjetas de navegación ---------- */
+.ql-card { padding: 1.1rem 1.2rem 1rem 1.2rem; border: 1px solid var(--ql-borde); border-radius: 10px; background: var(--ql-panel);
+  min-height: 15rem; display: flex; flex-direction: column; margin-bottom: .5rem; }
+.ql-card-simulador { border-top: 3px solid var(--ql-violeta); min-height: 25rem; }
+.ql-card-estudio, .ql-card-verificacion { min-height: 21rem; }
+.ql-card-verificacion { border-top: 3px solid var(--ql-verde); }
+.ql-card-estudio { border-top: 3px solid var(--ql-borde); }
+.ql-card h3 { font-family: var(--ql-serif); font-size: 1.2rem; font-weight: 600; margin: .5rem 0 .4rem 0; color: var(--ql-texto); }
+.ql-card p { color: var(--ql-tenue); font-size: .92rem; line-height: 1.5; margin: 0; }
+.ql-card .ql-ecuacion { margin-top: auto; padding-top: .8rem; font: 400 .85rem/1.4 var(--ql-mono); color: var(--ql-texto); }
+.ql-card-cab { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.ql-num { font: 600 .78rem/1 var(--ql-mono); letter-spacing: .12em; color: var(--ql-tenue); }
+.ql-chip { white-space: nowrap; font: 600 .66rem/1 var(--ql-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ql-tenue);
+  border: 1px solid var(--ql-borde); border-radius: 999px; padding: .25rem .6rem; }
+.ql-card-simulador .ql-chip { color: var(--ql-violeta); border-color: var(--ql-violeta); }
+.ql-card-verificacion .ql-chip { color: var(--ql-verde); border-color: var(--ql-verde); }
+.ql-miniatura svg { width: 100%; height: auto; display: block; border-radius: 6px; background: var(--ql-fondo); margin-bottom: .8rem; }
+.ql-icono-caja { width: 2.6rem; height: 2.6rem; border-radius: 8px; background: var(--ql-fondo); border: 1px solid var(--ql-borde);
+  display: flex; align-items: center; justify-content: center; margin-bottom: .7rem; }
+.ql-icono { width: 1.5rem; height: 1.5rem; }
+
+/* ---------- Encabezado con ilustración ---------- */
+.ql-cab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 300px); gap: 1.4rem; align-items: center; }
+.ql-cab-arte svg { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--ql-panel); border: 1px solid var(--ql-borde); }
+
+/* Tablas y ecuaciones anchas: desplazamiento horizontal en su propio contenedor, nunca en toda la página */
+div[data-testid="stMarkdownContainer"] table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.katex-display { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding-bottom: .2rem; }
 footer { visibility: hidden; }
 .ql-desliza { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 @media (max-width: 640px) {
@@ -453,12 +482,25 @@ footer { visibility: hidden; }
   .ql-titulo { font-size: 1.55rem; }
   .block-container { padding-top: 1.2rem; }
 }
+@media (max-width: 1150px) {
+  div[data-testid="stHorizontalBlock"]:has(.ql-card) { flex-wrap: wrap !important; gap: .8rem !important; }
+  div[data-testid="stHorizontalBlock"]:has(.ql-card) > div[data-testid="stColumn"] { min-width: calc(50% - .4rem) !important; flex: 1 1 calc(50% - .4rem) !important; }
+}
+@media (max-width: 640px) {
+  div[data-testid="stHorizontalBlock"]:has(.ql-card) > div[data-testid="stColumn"] { min-width: 100% !important; }
+}
 @media (max-width: 900px) {
-  .ql-portada { padding: 1.6rem 1.2rem; } .ql-portada .ql-titulo { font-size: 2rem; }
-  .ql-card { min-height: 0; } .block-container { padding-left: 1rem; padding-right: 1rem; }
+  .ql-hero { grid-template-columns: 1fr; padding: 1.4rem 1.2rem; } .ql-hero .ql-titulo { font-size: 2.2rem; }
+  .ql-cab { grid-template-columns: 1fr; } .ql-cab-arte { max-width: 340px; }
+  .ql-card, .ql-card-simulador { min-height: 0; } .block-container { padding-left: 1rem; padding-right: 1rem; }
 }
 </style>
-""".replace("FUENTE_TITULOS", FUENTE_TITULOS).replace("FUENTE_CIFRAS", FUENTE_CIFRAS)
+"""
+for _k, _v in {"FUENTE_TITULOS": FUENTE_TITULOS, "FUENTE_CIFRAS": FUENTE_CIFRAS, "PANEL2": _tema.PANEL_2, "FONDO": _tema.PALETA["fondo"],
+               "PANEL": _tema.PALETA["panel"], "BORDE": _tema.PALETA["borde"], "TEXTO": _tema.PALETA["texto"], "TENUE": _tema.PALETA["tenue"],
+               "CIAN": _tema.PALETA["cian"], "VIOLETA": _tema.PALETA["violeta"], "VERDE": _tema.PALETA["verde"],
+               "AMARILLO": _tema.PALETA["amarillo"], "PIE": _tema.PIE, "ROJO": _tema.PALETA["rojo"]}.items():
+    CSS = CSS.replace(_k, _v)
 
 
 # ---------------------------------------------------------------------
@@ -545,10 +587,18 @@ def _esc(texto) -> str:
 
 
 def encabezado_pagina(etiqueta: str, titulo: str, subtitulo: str) -> None:
-    """Encabezado sobrio: etiqueta en versalitas, título con serifa, descripción y filete."""
+    """
+    Encabezado sobrio: etiqueta en versalitas, título con serifa, descripción y filete. En las páginas de simulador añade, a la derecha,
+    su ilustración conceptual (SVG local de `quantum_lab_arte`).
+    """
     import streamlit as st
-    st.markdown(f'<p class="ql-etiqueta">{_esc(etiqueta)}</p><div class="ql-titulo">{_esc(titulo)}</div>'
-                f'<p class="ql-subtitulo">{_esc(subtitulo)}</p><hr class="ql-regla">', unsafe_allow_html=True)
+    texto = (f'<p class="ql-etiqueta">{_esc(etiqueta)}</p><div class="ql-titulo">{_esc(titulo)}</div>'
+             f'<p class="ql-subtitulo">{_esc(subtitulo)}</p>')
+    import quantum_lab_arte as arte
+    ilustracion = arte.svg(st.session_state.get("ql_pagina", ""))
+    if ilustracion:
+        texto = f'<div class="ql-cab"><div>{texto}</div><div class="ql-cab-arte">{ilustracion}</div></div>'
+    st.markdown(texto + '<hr class="ql-regla">', unsafe_allow_html=True)
 
 
 def seccion(titulo: str) -> None:

@@ -152,6 +152,12 @@ la barra lateral que aparece el número de versión esperado.
   `<<plantillas>>` sin rellenar. Para añadir una gráfica, registrar una `Figura` en `FIGURAS` de `_figuras.py`.
 * **Revisión antes de publicar:** `python -m ejercicios` imprime el informe de mantenimiento (cuántos ejercicios hay por
   fuente, semana y tema, reglas de calidad y contrastes numéricos) y termina con error si algo falla.
+* **Identidad visual:** la paleta vive en un solo archivo, `quantum_lab_tema.py` (fondo #0B1020, paneles #151F35, cian #42D9FF para controles y densidad
+  |ψ|², violeta #A78BFA para funciones de onda y orbitales, verde para validaciones y energía cinética, amarillo para energía y advertencias, rojo para
+  errores). De ahí salen el CSS, los gráficos de Matplotlib y Plotly y las ilustraciones; `.streamlit/config.toml` repite los valores base y
+  `test_tema.py` comprueba que coincidan y que el contraste sea de al menos 4.5:1. Las ilustraciones de la portada y de cada simulador son SVG
+  **conceptuales** generados en `quantum_lab_arte.py` (sin imágenes externas ni conexión); no son resultados del simulador. La portada y sus tarjetas
+  están en `quantum_lab_portada.py` (lista `MODULOS`: número, categoría, título y descripción de cada módulo).
 * **Ruta de estudio** (barra lateral → «Teoría y repaso»): recorrido por dominio de cada tema, sin depender de fechas. Los 13 temas siguen un orden de
   dependencias físicas (`ORDEN` y `PREREQ` en `ejercicios/_ruta.py`). Cada tema tiene tres pasos: *teoría leída* (se marca a mano; no aplica si la
   teoría aún no existe), *ejercicios resueltos* (al menos el 75 %) y *mini-examen aprobado* (3 ejercicios del tema, nota de 3.0 o más sobre 5.0).

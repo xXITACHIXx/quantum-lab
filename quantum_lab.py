@@ -32,6 +32,7 @@ import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import quantum_lab_portada as portada
 import repaso
 import ruta
 import talleres
@@ -105,89 +106,8 @@ def _barra_lateral() -> None:
 # ---------------------------------------------------------------------
 # Páginas
 # ---------------------------------------------------------------------
-TARJETAS = [
-    ("caja", "Simulador 01", "Partícula en una caja",
-     "Estados estacionarios, energías, longitud de onda de De Broglie y nodos. Superposición e "
-     "interferencia dependientes del tiempo.", "Eₙ = n²π²ħ² / 2ma²"),
-    ("oscilador", "Simulador 02", "Oscilador armónico",
-     "Polinomios de Hermite, densidades de energía cinética y potencial, teorema del virial, "
-     "efecto túnel y dinámica de superposiciones.", "Eₙ = ħω (n + ½)"),
-    ("esfera", "Simulador 03", "Partícula en una esfera",
-     "Armónicos esféricos en 3D, nodos y simetrías, orbitales complejos frente a reales y un modelo "
-     "confinado con funciones de Bessel.", "L² Yₗᵐ = ħ² l(l+1) Yₗᵐ"),
-    ("fotoelectrico", "Simulador 04", "Efecto fotoeléctrico",
-     "Frecuencia umbral, energía de los electrones emitidos, corriente fotoeléctrica y determinación "
-     "de la constante de Planck al estilo de Millikan.", "Kₘₐₓ = hν − Φ"),
-    ("bohr", "Simulador 05", "Átomo de hidrógeno",
-     "Modelo de Bohr: niveles, transiciones y series espectrales. Átomo cuántico en 3D: nubes de "
-     "probabilidad que se construyen medida a medida.", "Eₙ = −13.6 eV / n²"),
-    ("incertidumbre", "Simulador 06", "Principio de incertidumbre",
-     "Paquetes de ondas en posición y momento, el límite de Heisenberg, el ensanchamiento de una "
-     "partícula libre y la difracción por una rendija.", "Δx · Δp ≥ ħ / 2"),
-]
-
-
 def _pagina_inicio() -> None:
-    st.markdown(
-        '<div class="ql-portada"><p class="ql-etiqueta">Laboratorio interactivo de mecánica cuántica</p>'
-        '<div class="ql-titulo">Quantum Lab</div>'
-        '<p class="ql-subtitulo">Funciones de onda, energías, densidades de probabilidad, interferencia y armónicos '
-        'esféricos a partir de parámetros físicos reales. Cada resultado se acompaña de su comprobación numérica.</p></div>',
-        unsafe_allow_html=True)
-    for titulo_grupo, desde, hasta in (("Mecánica cuántica", 0, 3), ("Orígenes y fundamentos", 3, 6)):
-        qc.seccion(titulo_grupo)
-        columnas = st.columns(3)
-        for col, (clave, etiqueta, titulo, texto, ecuacion) in zip(columnas, TARJETAS[desde:hasta]):
-            with col:
-                st.markdown(f'<div class="ql-card"><p class="ql-etiqueta">{etiqueta}</p><h3>{titulo}</h3>'
-                            f'<p>{texto}</p><div class="ql-ecuacion">{ecuacion}</div></div>', unsafe_allow_html=True)
-                st.button("Abrir simulador", key=f"ql_abrir_{clave}", on_click=_ir_a, args=(clave,),
-                          icon=":material/arrow_forward:", width="stretch")
-    qc.seccion("Ruta de estudio")
-    st.markdown("La **Ruta de estudio** ordena los temas por dependencias físicas, sin depender de fechas, y propone el siguiente paso según el desempeño registrado.")
-    ruta.tarjeta_sugerencia(ruta.estados(), "ru_inicio")
-    st.button("Abrir la ruta de estudio", key="ql_abrir_ruta", on_click=_ir_a, args=("ruta",), icon=":material/route:")
-    qc.seccion("Teoría del curso")
-    st.markdown("El **Centro de teoría** reúne la teoría de cada tema con enlaces a su simulador, experimentos guiados y autoevaluación. "
-                "Los temas que el curso aún no desarrolla figuran con su lugar reservado.")
-    st.button("Abrir el Centro de teoría", key="ql_abrir_teoria", on_click=_ir_a, args=("teoria",),
-              icon=":material/menu_book:")
-    qc.seccion("Formulario")
-    st.markdown("El **Formulario** contiene las constantes fundamentales (CODATA) con su incertidumbre, un conversor de unidades de energía, "
-                "longitud, masa y ángulo, las expresiones de cada tema con la definición de sus símbolos y condiciones de validez, y las masas isotópicas.")
-    st.button("Abrir el formulario", key="ql_abrir_formulario", on_click=_ir_a, args=("formulario",), icon=":material/functions:")
-    qc.seccion("Talleres de repaso")
-    st.markdown("Los **Talleres de repaso** reproducen el formato de los talleres evaluativos: el estudiante ingresa sus resultados, la página los califica por partes, "
-                "indica el error más probable y presenta la solución justificada. Cada taller puede repetirse con datos nuevos.")
-    st.button("Abrir los talleres", key="ql_abrir_talleres", on_click=_ir_a, args=("talleres",), icon=":material/edit_note:")
-    qc.seccion("Ejercicios de práctica")
-    st.markdown("Los **Ejercicios de práctica** reúnen los problemas de las diapositivas de clase y del libro. Cada uno incluye pistas, una "
-                "**solución explicada paso a paso** y, opcionalmente, la comprobación del resultado numérico.")
-    st.button("Abrir los ejercicios", key="ql_abrir_ejercicios", on_click=_ir_a, args=("ejercicios",), icon=":material/calculate:")
-    qc.seccion("Modo examen y repaso personalizado")
-    st.markdown("El **Modo examen** genera una evaluación cronometrada con ejercicios del banco, calificada sobre 5.0. "
-                "El **Repaso personalizado** identifica los temas con menor desempeño y los errores más frecuentes a partir de los intentos registrados.")
-    c_ex, c_rp = st.columns(2)
-    c_ex.button("Abrir el modo examen", key="ql_abrir_examen", on_click=_ir_a, args=("examen",), icon=":material/timer:", width="stretch")
-    c_rp.button("Abrir el repaso personalizado", key="ql_abrir_repaso", on_click=_ir_a, args=("repaso",), icon=":material/history_edu:", width="stretch")
-    st.markdown("")
-    c1, c2 = st.columns(2, gap="large")
-    with c1:
-        qc.seccion("Uso")
-        st.markdown("1. Seleccionar un simulador o el **Centro de teoría** en la barra lateral o en las tarjetas.\n"
-                    "2. Ajustar los **parámetros del sistema** en el panel superior; los resultados se recalculan al instante.\n"
-                    "3. Recorre las **pestañas**: resultados, visualización, valores detallados e interpretación.\n"
-                    "4. «Configuración de ejemplo» carga casos típicos; «Restaurar valores iniciales» vuelve al comienzo.\n"
-                    "5. **Ver la teoría de este tema** abre su explicación; **Guía de práctica** propone experimentos con predicción y resultado; **Autoevaluación** "
-                    "corrige preguntas de opción múltiple; **Pruebas numéricas** verifica los cálculos.\n"
-                    "6. Las gráficas y tablas se pueden **descargar** (PNG, HTML o CSV) y «Compartir configuración» "
-                    "da un enlace con los parámetros exactos.")
-    with c2:
-        qc.seccion("Alcance del modelo")
-        st.markdown("- Las **fórmulas** (ψₙ, Eₙ, Hermite, Yₗᵐ…) son exactas; las **integrales y derivadas** se calculan "
-                    "en mallas numéricas con el error documentado en cada simulador.\n"
-                    "- Las deformaciones y «lóbulos» de la esfera son recursos geométricos, no objetos físicos.\n"
-                    "- Herramienta **educativa**: una partícula, sin espín ni interacciones; no describe átomos reales.")
+    portada.pagina_inicio(_ir_a, lambda: ruta.tarjeta_sugerencia(ruta.estados(), "ru_inicio"))
 
 
 def _pagina_pruebas() -> None:
