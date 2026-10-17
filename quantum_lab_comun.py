@@ -815,21 +815,66 @@ def _acepta(funcion, parametro: str) -> bool:
 # ---------------------------------------------------------------------
 # Figuras (con descarga)
 # ---------------------------------------------------------------------
+def descripcion_figura(figura) -> str:
+    """
+    Texto alternativo de una figura de Matplotlib, construido solo con lo que la figura ya contiene (título general, título y nombre de los
+    ejes de cada panel). No interpreta ni inventa resultados: describe qué se representa, para lectores de pantalla.
+    """
+    import re
+
+    griego = {"psi": "ψ", "Psi": "Ψ", "propto": "∝", "langle": "⟨", "rangle": "⟩", "hbar": "ħ", "omega": "ω", "Omega": "Ω", "lambda": "λ",
+              "to": "→", "infty": "∞", "mu": "μ", "nu": "ν", "tau": "τ", "phi": "φ", "varphi": "φ", "theta": "θ", "sigma": "σ",
+              "Delta": "Δ", "alpha": "α", "epsilon": "ε", "pi": "π", "rho": "ρ", "xi": "ξ", "cdot": "·", "times": "×", "approx": "≈"}
+
+    def sin_tex(m) -> str:
+        t = m.group(1)
+        t = re.sub(r"\\(?:mathrm|text|mathbf|mathit)\{([^{}]*)\}", r"\1", t)
+        t = re.sub(r"\\([A-Za-z]+)", lambda k: griego.get(k.group(1), k.group(1)), t)
+        t = re.sub(r"\\[ ,;:!]", " ", t)
+        t = re.sub(r"([_^])\{([^{}]*)\}", r"\1\2", t)
+        return t.replace("{", "").replace("}", "")
+
+    def limpio(t) -> str:
+        t = re.sub(r"\$([^$]*)\$", sin_tex, t or "")
+        return re.sub(r"\s+", " ", t).strip()
+
+    general = limpio(figura._suptitle.get_text()) if getattr(figura, "_suptitle", None) is not None else ""
+    paneles = []
+    for ax in figura.axes:
+        partes = [limpio(ax.get_title())]
+        ejes = [f"{n} {limpio(l)}" for n, l in (("eje x:", ax.get_xlabel()), ("eje y:", ax.get_ylabel())) if limpio(l)]
+        if ejes:
+            partes.append("(" + "; ".join(ejes) + ")")
+        texto = " ".join(p for p in partes if p)
+        if texto:
+            paneles.append(texto)
+    cabecera = general or "Gráfica del simulador"
+    n = len(paneles)
+    if not n:
+        return cabecera
+    return f"{cabecera}. {n} panel{'es' if n != 1 else ''}: " + "; ".join(paneles) + "."
+
+
 def mostrar_pyplot(figura, archivo: str | None = None) -> None:
     """
     Muestra una figura de Matplotlib ocupando el ancho. Se dibuja UNA sola vez como PNG: esa misma
-    imagen se muestra y, si se da `archivo`, se ofrece para descargar.
+    imagen se muestra y, si se da `archivo`, se ofrece para descargar. La imagen lleva texto alternativo
+    (`descripcion_figura`) para lectores de pantalla.
     """
     import io
     import streamlit as st
+    descripcion = descripcion_figura(figura)
     buf = io.BytesIO()
     figura.savefig(buf, format="png", dpi=150, bbox_inches="tight", facecolor=figura.get_facecolor())
     plt.close(figura)
     datos = buf.getvalue()
     try:
-        st.image(datos, width="stretch")
-    except Exception:                      # Streamlit sin width="stretch" en imágenes
-        st.image(datos, use_container_width=True)
+        st.image(datos, width="stretch", alt=descripcion)
+    except TypeError:                      # Streamlit sin `alt` o sin width="stretch" en imágenes
+        try:
+            st.image(datos, width="stretch")
+        except Exception:
+            st.image(datos, use_container_width=True)
     if archivo:
         boton_descarga("Descargar gráfica (PNG)", datos, archivo, "image/png")
 
