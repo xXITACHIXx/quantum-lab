@@ -18,7 +18,6 @@ import html
 import streamlit as st
 
 import quantum_lab_arte as arte
-import quantum_lab_comun as qc
 import quantum_lab_escena as escena
 
 SIMULADOR, ESTUDIO, VERIFICACION = "simulador", "estudio", "verificacion"
@@ -161,7 +160,7 @@ def _css_menu(entradas: list[dict], por_defecto: bool = False) -> str:
 
 def css_navegacion() -> str:
     """Color de acento y orden de entrada de las barras de navegación de una página."""
-    reglas = [f'.st-key-nav_inicio{{--n:0;--acento:var(--ql-cian);}}']
+    reglas = ['.st-key-nav_inicio{--n:0;--acento:var(--ql-cian);}']
     for i, m in enumerate(MODULOS, start=1):
         reglas.append(f'.st-key-nav_{m[0]}{{--n:{i};--acento:{_ACENTO[m[3]]};}}')
     return "<style>" + "".join(reglas) + "</style>"

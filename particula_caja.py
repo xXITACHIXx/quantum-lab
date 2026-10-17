@@ -405,7 +405,6 @@ def _etiquetas_unidades(sistema: str) -> dict:
 
 def figura_estado_individual(d: dict, p: ParametrosCaja):
     """Cuatro paneles coordinados del estado estacionario."""
-    import matplotlib.pyplot as plt
     et = _etiquetas_unidades(p.sistema)
     fx, fe, L, Ltex, U = et["fx"], et["fe"], et["L"], et["Ltex"], et["E"]
     n = p.n
@@ -496,7 +495,6 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
 def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region: tuple[float, float],
                          comparar_individuales: bool, mostrar_extremos: bool):
     """Re Ψ, Im Ψ y |Ψ|² en un instante τ concreto."""
-    import matplotlib.pyplot as plt
     et = _etiquetas_unidades(p.sistema)
     fx, L, Ltex = et["fx"], et["L"], et["Ltex"]
     x_vis = d["x"] / fx

@@ -4,11 +4,10 @@ talleres/t1_espectros.py — Taller 1: vibración y rotación de moléculas diat
 
 from __future__ import annotations
 
-import math
 
 from talleres import _fisica as f
 from talleres import _soluciones as _s
-from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
+from talleres._modelo import NUM, Datos, Parte, Pregunta, Taller
 
 NOMBRES = {"HF": r"HF ($^{1}$H y $^{19}$F)", "HCl": r"HCl ($^{1}$H y $^{35}$Cl)", "HBr": r"HBr ($^{1}$H y $^{79}$Br)"}
 IONES = {2: "He²⁺", 3: "Li³⁺", 4: "Be⁴⁺"}

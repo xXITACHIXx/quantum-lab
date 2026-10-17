@@ -11,7 +11,7 @@ from streamlit.testing.v1 import AppTest
 import talleres
 from talleres import _fisica as f
 from talleres._calificar import CASI, INVALIDA, MAL, OK, VACIA, evaluar, evaluar_opcion, leer_numero
-from talleres._modelo import NUM, OPC, Datos, calificar
+from talleres._modelo import OPC, Datos, calificar
 
 APP = str(Path(__file__).parent / "quantum_lab.py")
 

@@ -1,7 +1,6 @@
 """Pruebas de la Ruta de estudio: lógica pura, persistencia en la dirección y recorrido de la página."""
 from pathlib import Path
 
-import pytest
 from streamlit.testing.v1 import AppTest
 
 import ejercicios

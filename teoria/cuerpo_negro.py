@@ -10,7 +10,7 @@ import streamlit as st
 from scipy.integrate import trapezoid
 
 import quantum_lab_comun as qc
-from teoria._util import C, COL, H, KB, SIGMA, cifras, figura, dibujar
+from teoria._util import C, COL, H, KB, SIGMA, figura, dibujar
 
 B_WIEN = H * C / (4.965114231744276 * KB)          # constante de desplazamiento de Wien [m·K] (≈ 2.8978e-3)
 

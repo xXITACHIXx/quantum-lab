@@ -6,7 +6,6 @@ import math
 
 import numpy as np
 from scipy import constants as sc
-from scipy.integrate import quad
 from scipy.optimize import brentq
 
 from formulario._modelo import Bloque, F, Seccion

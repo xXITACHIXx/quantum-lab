@@ -752,7 +752,6 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     r.comprobar("Nodos radiales = n − l − 1 (2s: un nodo en r = 2a₀)",
                 all(len(calcular_orbital(n, l, 0)["nodos_r"]) == n - l - 1 for n, l in estados)
                 and abs(calcular_orbital(2, 0, 0)["nodos_r"][0] - 2.0) < 0.01)
-    from scipy.special import eval_genlaguerre                   # ecuación radial: comprobación independiente
     r1 = np.linspace(0.05, 20, 4000) * A0
     psi = r1 * radial_hidrogeno(r1, 3, 1)                           # u(r) = r R(r)
     d2 = np.gradient(np.gradient(psi, r1), r1)

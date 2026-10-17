@@ -10,7 +10,7 @@ import numpy as np
 
 from talleres import _fisica as f
 from talleres import _soluciones as _s
-from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
+from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller
 
 # molécula: (masa reducida [u], longitud de enlace [pm], nombre con formato)
 ROTORES = {"H2": (f.MASA["H"] / 2, 74.14, "hidrógeno (H₂)"),
