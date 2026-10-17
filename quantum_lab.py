@@ -2,7 +2,7 @@
 quantum_lab.py — QUANTUM LAB · menú principal
 =============================================
 
-Laboratorio interactivo de mecánica cuántica con seis simuladores independientes:
+Laboratorio interactivo de mecánica cuántica con seis simuladores independientes y herramientas de estudio (biblioteca, solucionador, tutor):
 
     particula_caja.py       Partícula en una caja 1D (estados, superposición e interferencia)
     oscilador_armonico.py   Oscilador armónico cuántico 1D (energías, virial, límite clásico, dinámica)
@@ -24,6 +24,7 @@ import streamlit as st
 
 import quantum_lab_comun as qc
 import efecto_fotoelectrico
+import biblioteca
 import ejercicios
 import examen
 import formulario
@@ -36,8 +37,10 @@ import quantum_lab_escena as escena
 import quantum_lab_portada as portada
 import repaso
 import ruta
+import solucionador
 import talleres
 import teoria
+import tutor
 import verificacion
 
 # Páginas: clave → (título en la barra lateral, icono monocromo, módulo o None)
@@ -56,6 +59,9 @@ PAGINAS = {
     "examen": ("Modo examen", ":material/timer:", examen),
     "repaso": ("Repaso personalizado", ":material/history_edu:", repaso),
     "formulario": ("Formulario", ":material/functions:", formulario),
+    "biblioteca": ("Biblioteca científica", ":material/local_library:", biblioteca),
+    "solucionador": ("Solucionador paso a paso", ":material/function:", solucionador),
+    "tutor": ("Tutor de errores conceptuales", ":material/psychology_alt:", tutor),
     "verificacion": ("Verificación", ":material/verified:", verificacion),
     "pruebas": ("Pruebas numéricas", ":material/fact_check:", None),
 }
@@ -63,6 +69,7 @@ GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
     ("Teoría y repaso", ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
+    ("Herramientas de estudio", ["biblioteca", "solucionador", "tutor"], True),
     ("Verificación", ["verificacion", "pruebas"], True),
 ]
 
@@ -74,7 +81,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, tutor, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -83,7 +90,7 @@ def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
 def _pie() -> None:
     with st.container(key="ql_pie"):
         qc.interruptor_movil()
-        escena.instalar_efectos(st)
+        escena.instalar_efectos(st, len(portada.CATEGORIAS), len(portada.MODULOS))
         st.markdown(portada.css_navegacion() + '<div class="ql-pie">Cálculo con NumPy y SciPy. La dirección de la página guarda la '
                     f'configuración: cópiala para compartirla. Versión {qc.VERSION} · 6 simuladores</div>', unsafe_allow_html=True)
 

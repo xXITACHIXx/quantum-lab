@@ -115,7 +115,7 @@ def test_portada_destinos_y_observatorio():
     assert 'id="ql-particulas"' in html and 'class="ql-fondo-atomo"' in html and 'class="ql-atomo"' in html
     assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
     etiquetas = {b.key: b.label for b in at.button if b.key and b.key.startswith("ql_abrir_")}
-    assert len(etiquetas) == 15 and etiquetas["ql_abrir_caja"] == "Abrir el simulador: Partícula en una caja"
+    assert len(etiquetas) == 18 and etiquetas["ql_abrir_caja"] == "Abrir el simulador: Partícula en una caja"
     assert not any("ql-ubicacion" in m.value and "role=" in m.value for m in at.markdown)
 
 
@@ -204,10 +204,10 @@ def test_portada_muestra_solo_los_cuatro_capitulos():
     at = _abrir(vista=None)
     assert not at.exception, [e.value for e in at.exception]
     claves = {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")}
-    assert claves == {f"ql_menu_{c}" for c in portada.CAT_CLAVE.values()} and len(claves) == 4
+    assert claves == {f"ql_menu_{c}" for c in portada.CAT_CLAVE.values()} and len(claves) == 5
     assert not any(b.key and b.key.startswith("ql_abrir_") for b in at.button)       # las tarjetas quedan en la otra vista
     html = " ".join(m.value for m in at.markdown)
-    assert html.count('class="ql-esc-item ql-esc-') == 4                              # una escena por capítulo
+    assert html.count('class="ql-esc-item ql-esc-') == 5                              # una escena por capítulo
     assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
 
 
