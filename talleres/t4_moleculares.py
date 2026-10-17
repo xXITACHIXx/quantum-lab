@@ -8,7 +8,7 @@ import math
 
 from talleres import _fisica as f
 from talleres import _soluciones as _s
-from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller, tex
+from talleres._modelo import NUM, OPC, Datos, Parte, Pregunta, Taller
 
 ESPECIES = {"CN⁻": "el ion cianuro (CN⁻)", "CO": "la molécula de monóxido de carbono (CO)", "NO⁺": "el catión nitrosonio (NO⁺)"}
 ALILO = {2: ("catión alilo", "CH₂CHCH₂⁺"), 3: ("radical alilo", "CH₂CHCH₂·"), 4: ("anión alilo", "CH₂CHCH₂⁻")}
@@ -85,7 +85,7 @@ def _q3(d: Datos) -> Pregunta:
     partes = (
         Parte("e1", "Energía del orbital más bajo: coeficiente de $\\beta$ en $E_1=\\alpha+x\\beta$ ($x$ =)", NUM, float(x[0]), "", tol_rel=0.01, peso=0.2,
               explicacion="La ecuación secular $\\begin{vmatrix}-x&1&0\\\\1&-x&1\\\\0&1&-x\\end{vmatrix}=0$ da $x=\\sqrt2,0,-\\sqrt2$."),
-        Parte("na", f"$E_\\pi$: número $n_\\alpha$ (cantidad de $\\alpha$)", NUM, float(ne), "", tol_rel=0.0, tol_abs=0.01, peso=0.2,
+        Parte("na", "$E_\\pi$: número $n_\\alpha$ (cantidad de $\\alpha$)", NUM, float(ne), "", tol_rel=0.0, tol_abs=0.01, peso=0.2,
               explicacion=f"Cada electrón aporta un $\\alpha$: $n_\\alpha={ne}$."),
         Parte("nb", "$E_\\pi$: coeficiente $n_\\beta$ de $\\beta$", NUM, 2 * float(x[0]), "", tol_rel=0.01, peso=0.25,
               confusiones=((0.5, "los dos electrones del orbital más bajo aportan $2\\sqrt2$; el electrón del no enlazante aporta $0\\cdot\\beta$"),),

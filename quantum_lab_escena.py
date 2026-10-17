@@ -457,6 +457,13 @@ section[data-testid="stSidebar"] .ql-menu-cab { padding: 1rem 0 .3rem .3rem; }
   .st-key-ql_cats [class*="st-key-ql_item_"] { margin-left: calc(var(--k, 0) * .9rem); }
   .st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button { min-height: 3.4rem; }
 }
+/* Celular: «04   Herramientas de estudio» no cabe en una línea con 1.25rem y la escalera; se reduce la letra y se permite partir la línea. */
+@media (max-width: 640px) {
+  .st-key-ql_cats [class*="st-key-ql_item_"] { margin-left: calc(var(--k, 0) * .45rem); max-width: calc(100% - var(--k, 0) * .45rem); }
+  .st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button { min-height: 3.2rem; padding-left: 1.1rem !important; padding-right: .9rem !important; }
+  .st-key-ql_menu .st-key-ql_cats [class*="st-key-ql_item_"] button p { font-size: .98rem !important; letter-spacing: .02em; white-space: normal; line-height: 1.15; }
+  .st-key-ql_menu .st-key-ql_temas [class*="st-key-ql_item_"] button p { white-space: normal; line-height: 1.15; }
+}
 /* Fondo estable en el celular: sin giro de órbitas ni desplazamiento por puntero; la capa se rasteriza una vez y no se repinta al
    mostrarse u ocultarse la barra del navegador (altura de ventana pequeña estable: svh). */
 .ql-fondo-atomo, .ql-atomo { backface-visibility: hidden; -webkit-backface-visibility: hidden; }

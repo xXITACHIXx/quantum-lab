@@ -9,7 +9,7 @@ import streamlit as st
 from scipy import constants as const
 
 import quantum_lab_comun as qc
-from teoria._util import C, COL, H, HBAR, dibujar, figura
+from teoria._util import C, COL, HBAR, dibujar, figura
 
 U_MASA = const.atomic_mass
 

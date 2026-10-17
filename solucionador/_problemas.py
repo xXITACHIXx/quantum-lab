@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import math
 
-import numpy as np
 from scipy import constants as const
 
 from biblioteca._modelo import Paso as P
@@ -53,6 +52,7 @@ def fotoelectrico(lambda_nm: float, phi_ev: float) -> Solucion:
     hay = e_ev > phi
     k = max(e_ev - phi, 0.0)
     v = math.sqrt(2 * k * E / M_E)
+    signo = ">" if hay else r"\le"
     pasos = [
         P("Frecuencia de la luz a partir de su longitud de onda.", rf"\nu=\frac{{c}}{{\lambda}}=\frac{{{num(C)}\ \mathrm{{m/s}}}}{{{num(lam * 1e-9)}\ \mathrm{{m}}}}={cu(nu, 'Hz')}"),
         P("Energía de cada fotón, primero en julios y luego en electronvoltios (1 eV = 1.602×10⁻¹⁹ J).",
@@ -60,7 +60,7 @@ def fotoelectrico(lambda_nm: float, phi_ev: float) -> Solucion:
         P("Umbral del metal: frecuencia y longitud de onda mínimas para que haya emisión.",
           rf"\nu_0=\frac{{\Phi}}{{h}}=\frac{{{num(phi)}\ \mathrm{{eV}}\cdot{num(E)}\ \mathrm{{J/eV}}}}{{{num(H)}\ \mathrm{{J\,s}}}}={cu(nu0, 'Hz')},\qquad "
           rf"\lambda_0=\frac{{hc}}{{\Phi}}={cu(lam0, 'nm')}"),
-        P("Comparación: hay emisión si E_γ > Φ (equivale a ν > ν₀ y λ < λ₀).", rf"{num(e_ev)}\ \mathrm{{eV}}\ {'>' if hay else r'\le'}\ {num(phi)}\ \mathrm{{eV}}"),
+        P("Comparación: hay emisión si E_γ > Φ (equivale a ν > ν₀ y λ < λ₀).", rf"{num(e_ev)}\ \mathrm{{eV}}\ {signo}\ {num(phi)}\ \mathrm{{eV}}"),
     ]
     if hay:
         pasos += [
@@ -115,7 +115,7 @@ def caja(n, a_nm: float, masa_kg: float) -> Solucion:
                     (rf"n={n}", rf"a={cu(a * 1e9, 'nm')}", rf"m={cu(m, 'kg')}", rf"\hbar={num(HBAR)}\ \mathrm{{J\,s}}"),
                     tuple(pasos),
                     (("Energía del nivel", cu(en / E, "eV")), ("Longitud de onda de De Broglie", cu(lam * 1e9, "nm")),
-                     ("Nodos interiores", str(n - 1)), (f"Fotón n → n+1", cu(lam_f * 1e9, "nm"))),
+                     ("Nodos interiores", str(n - 1)), ("Fotón n → n+1", cu(lam_f * 1e9, "nm"))),
                     "La energía crece como n² y como 1/a²: la mitad de caja cuadruplica cada nivel. La caja contiene n semilongitudes de onda, es decir "
                     "una onda estacionaria; ψ es una amplitud y la partícula no recorre una trayectoria definida.",
                     () if a * 1e9 <= 1000 else ("Una caja de más de 1 µm hace que los niveles queden casi juntos: el efecto cuántico es ya muy pequeño.",),

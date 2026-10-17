@@ -11,7 +11,7 @@ import math
 
 from scipy import constants as const
 
-from ejercicios._modelo import BASICO, CUADERNO, MEDIO, NUM, OPC, Ejercicio, Parte, llenar
+from ejercicios._modelo import BASICO, CUADERNO, NUM, OPC, Ejercicio, Parte, llenar
 from talleres._modelo import tex
 
 

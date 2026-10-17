@@ -11,7 +11,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Callable
 
-from talleres._calificar import CASI, MAL, OK, VACIA, Resultado, evaluar, evaluar_opcion
+from talleres._calificar import OK, evaluar, evaluar_opcion
 
 NUM = "numerica"
 OPC = "opcion"

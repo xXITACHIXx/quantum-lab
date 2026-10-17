@@ -12,8 +12,8 @@ from streamlit.testing.v1 import AppTest
 
 import ejercicios
 from ejercicios._modelo import CLASE, CUADERNO, LIBRO, TEMAS, calificar, llenar
-from talleres._calificar import CASI, MAL, OK
-from talleres._modelo import NUM, OPC
+from talleres._calificar import CASI
+from talleres._modelo import OPC
 
 APP = str(Path(__file__).parent / "quantum_lab.py")
 EJ = {e.id: e for e in ejercicios.EJERCICIOS}

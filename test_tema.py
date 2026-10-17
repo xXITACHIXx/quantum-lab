@@ -1,5 +1,8 @@
 """Pruebas del sistema visual: paleta única, contraste suficiente y coherencia con .streamlit/config.toml."""
-import tomllib
+try:
+    import tomllib                  # Python 3.11 o superior
+except ModuleNotFoundError:         # Python 3.10: tomli (la instala pytest)
+    import tomli as tomllib
 from pathlib import Path
 
 import pytest

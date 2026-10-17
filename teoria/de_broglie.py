@@ -8,7 +8,7 @@ import numpy as np
 import streamlit as st
 
 import quantum_lab_comun as qc
-from teoria._util import COL, EV, H, HBAR, ME, figura, dibujar
+from teoria._util import COL, EV, H, ME, figura, dibujar
 
 U_MASA = 1.66053906660e-27          # kg
 PARTICULAS = {

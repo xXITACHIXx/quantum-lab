@@ -44,7 +44,7 @@ import streamlit as st
 from scipy.special import eval_hermite, gammaln, erfc
 
 import quantum_lab_comun as qc
-from quantum_lab_comun import HBAR, M_E, E_CARGA, E_HARTREE, A0, COLORES
+from quantum_lab_comun import HBAR, M_E, E_HARTREE, A0, COLORES
 
 # =====================================================================
 # 1. FÍSICA
@@ -427,7 +427,6 @@ def _semiancho_visual(p: ParametrosOscilador, n_max: int, x0: float, zoom: bool)
 
 def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True):
     """Seis paneles sincronizados (mismo eje x): ψ, ρ, V+E, u_V, u_T y energía acumulada."""
-    import matplotlib.pyplot as plt
     from scipy.integrate import cumulative_trapezoid
     et = _et(p.sistema)
     fx, fe, L, Ltex, U = et["fx"], et["fe"], et["L"], et["Ltex"], et["E"]
@@ -518,7 +517,6 @@ def figura_niveles_y_escalas(d: dict, p: ParametrosOscilador, zoom: bool = True)
     Izquierda: parábola, niveles energéticos (el seleccionado resaltado) y ψ_n sobre su nivel.
     Derecha: ψ_n y |ψ_n|² en el mismo gráfico pero con EJES DISTINTOS y etiquetados.
     """
-    import matplotlib.pyplot as plt
     et = _et(p.sistema)
     fx, fe, L, Ltex, U = et["fx"], et["fe"], et["L"], et["Ltex"], et["E"]
     n, x0 = p.n, d["x0"]

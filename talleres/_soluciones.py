@@ -197,20 +197,20 @@ $$r_e=\frac{{{tex(R_pm * 1e-12)}\ \text{{m}}}}{{10^{{-12}}\ \text{{m/pm}}}}=\mat
 def orbital_d(n: int, l: int, nombre: str, maximos: list, nodos: list, r_max: float, theta_nodal: float, P_en_maximos: list) -> str:
     maxtxt = ", ".join(f"{r:.2f}" for r in maximos)
     if (n, l) == (3, 2):
-        radial = rf"""
-**Función radial.** Para 3d la parte radial es $R_{{32}}(r)\propto r^2e^{{-r/3a_0}}$ (no tiene nodos: $n-l-1=0$). La distribución radial es la probabilidad de encontrar el electrón en una **capa esférica** de radio $r$ y grosor $dr$:
+        radial = r"""
+**Función radial.** Para 3d la parte radial es $R_{32}(r)\propto r^2e^{-r/3a_0}$ (no tiene nodos: $n-l-1=0$). La distribución radial es la probabilidad de encontrar el electrón en una **capa esférica** de radio $r$ y grosor $dr$:
 
-$$P(r)=r^2\,R_{{32}}(r)^2\ \propto\ r^2\cdot r^4e^{{-2r/3a_0}}=r^6e^{{-2r/3a_0}}$$
+$$P(r)=r^2\,R_{32}(r)^2\ \propto\ r^2\cdot r^4e^{-2r/3a_0}=r^6e^{-2r/3a_0}$$
 
-(el factor $r^2$ es el área de la capa esférica, por eso $P(0)=0$ aunque $R_{{32}}$ sea grande cerca del núcleo).
+(el factor $r^2$ es el área de la capa esférica, por eso $P(0)=0$ aunque $R_{32}$ sea grande cerca del núcleo).
 
 **Máximo: se deriva e iguala a cero.** Con $r$ en unidades de $a_0$, conviene derivar el logaritmo:
 
-$$\frac{{d}}{{dr}}\ln P=\frac6r-\frac23=0\ \Rightarrow\ r=\mathbf{{9\,a_0}}$$
+$$\frac{d}{dr}\ln P=\frac6r-\frac23=0\ \Rightarrow\ r=\mathbf{9\,a_0}$$
 
 (es el máximo que da la regla general $r=n^2a_0$ para orbitales con $l=n-1$).
 
-**Menor densidad radial.** $P=0$ en $r=0$ y, para $r\to\infty$, la exponencial $e^{{-2r/3}}$ domina y $P\to0$. Como no hay nodos radiales, no hay más ceros."""
+**Menor densidad radial.** $P=0$ en $r=0$ y, para $r\to\infty$, la exponencial $e^{-2r/3}$ domina y $P\to0$. Como no hay nodos radiales, no hay más ceros."""
     else:
         radial = rf"""
 **Función radial.** Para {nombre}, $R_{{{n}{l}}}(r)$ tiene $n-l-1={n - l - 1}$ **nodo radial** (una esfera donde $R=0$) en $r={', '.join(f'{x:.2f}' for x in nodos)}\,a_0$. La distribución radial es la probabilidad por capa esférica:
