@@ -324,6 +324,8 @@ div[data-baseweb="slider"] div[role]:hover, div[data-baseweb="slider"] div[role]
 /* =============== 9. Menú cinético =============== */
 /* Barras angulares que se desplazan y se encienden al apuntarlas; a la derecha, el escenario con la ilustración del tema. */
 @keyframes ql-menu-entra { from { opacity: 0; transform: translateX(-46px) skewX(-14deg); } to { opacity: 1; transform: skewX(-14deg); } }
+@keyframes ql-refresca { from { opacity: .4; filter: blur(2px); } to { opacity: 1; filter: none; } }
+.ql-refresca { animation: ql-refresca .4s cubic-bezier(.2, .7, .2, 1) both; }
 @keyframes ql-esc-entra { from { opacity: 0; transform: translateY(70px); clip-path: ellipse(70% 45% at 50% 100%); }
                           to { opacity: 1; transform: none; clip-path: ellipse(150% 160% at 50% 100%); } }
 @keyframes ql-corte { 0% { transform: translateX(-120%) skewX(-24deg); } 100% { transform: translateX(260%) skewX(-24deg); } }
@@ -741,6 +743,20 @@ JS = r"""
       for (var j = 0; j < todas.length; j++) { todas[j].classList.remove('ql-abriendo', 'ql-aparta'); }
     }, 2500);
   }, true);
+
+  // Refresco de gráficas: cuando una imagen que ya estaba en la página recibe una gráfica nueva (el usuario movió un control), se
+  // reproduce un fundido breve. Solo se anima el cambio real; la imagen no se modifica ni se inventa nada.
+  if (W.MutationObserver) {
+    new MutationObserver(function (lista) {
+      if (reducir.matches) { return; }
+      for (var i = 0; i < lista.length; i++) {
+        var im = lista[i].target;
+        if (im && im.tagName === 'IMG' && lista[i].oldValue && lista[i].oldValue !== im.getAttribute('src') && im.closest('[data-testid="stImage"]')) {
+          im.classList.remove('ql-refresca'); void im.offsetWidth; im.classList.add('ql-refresca');
+        }
+      }
+    }).observe(document.body, { attributes: true, attributeFilter: ['src'], attributeOldValue: true, subtree: true });
+  }
 
   function vigilar() {
     if (!fondo && !reducir.matches && W.innerWidth >= 640) { fondoPreparar(); }
