@@ -2,7 +2,7 @@
 
 [![Pruebas](https://github.com/xXITACHIXx/quantum-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/xXITACHIXx/quantum-lab/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.10%20a%203.13-blue)
-![Versión](https://img.shields.io/badge/versi%C3%B3n-5.0-informational)
+![Versión](https://img.shields.io/badge/versi%C3%B3n-6.0-informational)
 
 Seis simuladores (más una página de verificación) con una identidad visual común (tema oscuro, tipografía científica sin emojis), todo en español.
 Cada simulador incluye resultados numéricos, visualización, interpretación, ecuaciones o **teoría**, **guía de
@@ -10,9 +10,15 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 
 | Archivo | Contenido |
 |---|---|
-| `quantum_lab.py` | Menú principal (portada, acceso a los seis simuladores y al Centro de teoría, pruebas globales) |
+| `quantum_lab.py` | Aplicación principal: enruta las páginas (portada, sub-portadas por capítulo, simuladores, estudio, verificación), pie de página y pruebas globales. **No hay barra lateral** |
+| `quantum_lab_portada.py` | Portada y sub-portadas: lista `MODULOS` (número, categoría, título, descripción y lema de cada destino), `CAPITULOS`, menú de barras angulares y escenario con la ilustración de cada elemento |
+| `quantum_lab_escena.py` | Movimiento y escena: CSS de animaciones, JavaScript opcional (partículas, emergencia desde abajo, refresco de gráficas), fondo del átomo |
+| `quantum_lab_arte.py` | Ilustraciones **conceptuales** en SVG (una por destino, el átomo de la portada y el observatorio); sin imágenes externas |
+| `quantum_lab_tema.py` | Paleta única (colores, series, contraste) de la que salen el CSS, Matplotlib, Plotly y las ilustraciones |
+| `fuente_simbolos.css` | Fuente de símbolos (subíndices, superíndices, operadores) incrustada y **pregenerada**: evita cuadros vacíos en celulares |
 | `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `talleres/` | **Talleres de repaso**: `__init__.py` (índice, página y pruebas), `_calificar.py` (lectura de números y tolerancias), `_modelo.py` (preguntas y calificación por partes), `_fisica.py` (cálculos verificados) y un archivo por taller (`t1_espectros.py`…) |
+| `ruta/`, `formulario/`, `examen/`, `repaso/` | Ruta de estudio, formulario de constantes y fórmulas, modo examen y repaso personalizado (cada uno con su `__init__.py` y módulos de apoyo) |
 | `ejercicios/` | **Ejercicios de práctica**: `__init__.py` (página, filtros y pruebas), `_modelo.py` (ejercicio, fuentes y temas), `_progreso.py`, `_figuras.py`, `_calidad.py` y los ejercicios por fuente: `clase_s1_s5.py`, `clase_s6_s13.py` (diapositivas), `libro.py` y `cuaderno.py` |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
@@ -24,9 +30,11 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `verificacion.py` | Página «Verificación»: compara cada simulador con una referencia independiente (diagonalización del hamiltoniano, diferencias finitas, integrales, valores tabulados) |
 | `test_quantum_lab.py` | Pruebas numéricas y de verificación con `pytest` |
 | `test_interfaz.py` | Pruebas de interfaz (cada página se ejecuta con `AppTest` sin excepciones) |
+| `test_escena.py`, `test_arte.py`, `test_tema.py`, `test_movil.py`, `test_caja_diseno.py` | Pruebas de la portada y la navegación, las ilustraciones, la paleta y el contraste, el celular y la accesibilidad (texto alternativo, fuente de símbolos, fondo estable) y la figura y la superposición de la caja |
+| `test_ruta.py`, `test_formulario.py`, `test_talleres.py`, `test_ejercicios*.py`, `test_examen.py`, `test_repaso.py`, `test_teoria.py` | Pruebas de las secciones de estudio |
 | `requirements.txt` | Dependencias con límites de versión |
 | `requirements-lock.txt` | Versiones exactas con las que se probó el proyecto |
-| `colab/` | Los tres cuadernos de Google Colab (caja, oscilador, esfera): implementación independiente de la misma física |
+| `colab/` | Los tres cuadernos de Google Colab (caja, oscilador, esfera): implementación independiente de la misma física, y `celda_superposicion_oscilador.py`, una celda suelta con la animación de la superposición de estados del oscilador |
 | `docs/img/` | Capturas usadas en este README |
 | `.github/workflows/tests.yml` | Integración continua: ejecuta `pytest` en cada subida y una vez por semana |
 | `.github/dependabot.yml` | Avisos semanales de actualización de dependencias |
@@ -36,6 +44,8 @@ Los simuladores 04 y 05 proceden de los cuadernos «Efecto_Fotoelectrico_Simulac
 «Modelo_Bohr_Simulacion.ipynb», adaptados a la interfaz interactiva y ampliados.
 
 ## Vista previa
+
+Capturas de la interfaz actual (escritorio, 1440 px).
 
 | | |
 |---|---|
@@ -99,7 +109,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # pruebas numéricas, verificación y de interfaz (unos 50 s)
+python -m pytest -q          # 630 pruebas: numéricas, verificación, interfaz y accesibilidad (unos 3 minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador
@@ -117,11 +127,11 @@ actualizaciones de dependencias.
 futura no rompa la aplicación sin aviso; las versiones exactas probadas están en `requirements-lock.txt`
 (`python -m pip install -r requirements-lock.txt` reproduce ese entorno). Al actualizar la versión publicada en
 Streamlit Cloud hay que pulsar **«Reboot app»** (la nube conserva en memoria los módulos ya importados) y comprobar en
-la barra lateral que aparece el número de versión esperado.
+el pie de la página que aparece el número de versión esperado (ahora 6.0).
 
 ## 5. Uso
 
-* **Centro de teoría** (inicio → capítulo «Teoría y verificación»): toda la teoría del curso en un solo lugar, organizada
+* **Centro de teoría** (inicio → capítulo «Teoría y repaso»): toda la teoría del curso en un solo lugar, organizada
   por unidades según las diapositivas. Los temas sin material aún aparecen como «en preparación». Cada tema
   tiene pestañas de *Teoría* (con calculadoras y gráficas interactivas), *Simulación y práctica* (cuando hay simulador)
   y *Autoevaluación*. Desde cada simulador, «Ver la teoría de este tema» abre su explicación. Un tema se enlaza con
@@ -160,11 +170,11 @@ la barra lateral que aparece el número de versión esperado.
   están en `quantum_lab_portada.py` (lista `MODULOS`: número, categoría, título y descripción de cada módulo).
 * **Escena y movimiento** (`quantum_lab_escena.py`): (1) *navegación animada*: cada página se dibuja en `st.container(key="ql_escena_<página>")`;
   como la clave solo cambia al navegar, la entrada escalonada, el barrido de la barra de ubicación y el trazado de la ilustración se reproducen
-  al cambiar de página y no al mover un control; la barra de ubicación indica categoría, página y número, con regreso al «Observatorio».
+  al cambiar de página y no al mover un control; la barra de ubicación indica categoría, página y número, con regreso al capítulo y al inicio.
   (2) *Destinos interactivos*: cada tarjeta de la portada es un contenedor `ql_dest_<página>` con un `st.button` real extendido sobre toda
   la tarjeta (clic, toque y teclado); al pasar el cursor se eleva, se enciende la línea de energía, la luz sigue al puntero y la ilustración se
-  vuelve a trazar. (3) *Observatorio*: portada por capas (luz ambiental, plano en perspectiva, partículas en Canvas con paralaje y nube 2p con
-  órbitas). Los indicadores de los simuladores destellan cuando su valor cambia. El JavaScript es una mejora progresiva (`st.html` con
+  vuelve a trazar. (3) *Portada*: átomo a pantalla completa (ver el apartado 10); el «observatorio» por capas de la versión anterior se conserva en el código
+  (`observatorio_html`) pero ya no se muestra. Los indicadores de los simuladores destellan cuando su valor cambia. El JavaScript es una mejora progresiva (`st.html` con
   `unsafe_allow_javascript`, detectado en tiempo de ejecución); sin él quedan todas las animaciones CSS. Con `prefers-reduced-motion` todo se
   detiene, y en móviles se suprimen el plano y las partículas.
 * **Ruta de estudio** (inicio → capítulo «Teoría y repaso»): recorrido por dominio de cada tema, sin depender de fechas. Los 13 temas siguen un orden de
@@ -198,10 +208,11 @@ la barra lateral que aparece el número de versión esperado.
   (estado), 03 (|Y|² con x, y, z sobre la esfera), 04 (curva I–V) y 06 (|ψ(x)|² y |φ(p)|²) ofrecen un CSV con los
   números que dibujan la curva, en unidades SI y con el nombre y la unidad en la cabecera de cada columna. Los
   números complejos se separan en parte real e imaginaria.
-* **Superposición en la caja:** la tabla admite hasta 10 estados; la **«Lista rápida»** admite hasta 200 estados
-  con el formato `n:A` o `n:A:φ` separados por «;» (por ejemplo `1:1; 2:0.5; 7:-0.3; 12:0.2:1.57`).
-* **Vista para celular:** se activa sola al abrir la página desde un teléfono (también hay un interruptor en la
-  barra lateral). Muestra 2 indicadores por fila y apila los paneles de las gráficas en una columna.
+* **Superposición en la caja:** el usuario indica cuántos estados superponer (hasta 20), cuáles (número cuántico n de cada uno) y sus coeficientes,
+  escritos con el valor exacto: amplitud y fase, o parte real e imaginaria (la amplitud puede ser mayor que 1 si no se normaliza). La
+  **«Lista rápida»** admite hasta 200 estados con el formato `n:A` o `n:A:φ` separados por «;» (por ejemplo `1:1; 2:0.5; 7:-0.3; 12:0.2:1.57`).
+* **Vista para celular:** se activa sola al abrir la página desde un teléfono (también hay un interruptor en el
+  pie de la página). Muestra 2 indicadores por fila y apila los paneles de las gráficas en una columna.
 * **Guía de práctica:** experimentos con objetivo, procedimiento, una pregunta para predecir, un botón que carga la
   configuración y el resultado esperado oculto. El cuadro de texto sirve para anotar predicciones y medidas.
 * **Autoevaluación:** preguntas de opción múltiple con corrección, puntuación y explicación de cada respuesta.
@@ -212,7 +223,7 @@ la barra lateral que aparece el número de versión esperado.
 
 ## 6. Verificación y contraste con Google Colab
 
-La página **Verificación** (menú «Teoría y verificación») compara cada resultado con **otra forma de obtenerlo**, no
+La página **Verificación** (inicio → capítulo «Verificación») compara cada resultado con **otra forma de obtenerlo**, no
 con la misma fórmula:
 
 | Sistema | Se compara con |
@@ -293,12 +304,29 @@ el orbital **complejo** sí (L_z = mħ).
 | Gráficos lentos | Reduce la resolución angular (esfera), los puntos (caja/oscilador) o el número de medidas (nube 3D) |
 | En Streamlit Cloud la app no arranca y el registro termina en «Welcome to Streamlit!» | Comprueba que `.streamlit/config.toml` tenga `headless = true` (con `false` se queda esperando un correo por teclado) |
 | Se ve el diseño antiguo o un aviso sobre `theme` | `python -m pip install -U -r requirements.txt` (Streamlit 1.65 o superior) y reinicia |
-| Símbolos como ₙ o ⟨⟩ salen como recuadros | La app incrusta una fuente de símbolos; si persiste, recarga la página sin caché (`Ctrl + F5`) |
+| Símbolos como ₙ o ⟨⟩ salen como recuadros | La app incrusta una fuente de símbolos (`fuente_simbolos.css`); si persiste, recarga la página sin caché (`Ctrl + F5`). Para regenerar la fuente: `python -c "import quantum_lab_comun as q; open('fuente_simbolos.css','w',encoding='utf-8').write(q._generar_css_fuente())"` |
 
-## Menú cinético de la portada
+## 10. Portada, navegación y accesibilidad
 
-La portada muestra por defecto un menú de barras angulares (una por destino) y, a la derecha, el escenario con la ilustración conceptual del tema apuntado con el cursor o con el teclado. Cada barra es un `st.button` real (clic, toque y Enter). La vista «Tarjetas» conserva la rejilla anterior. En pantallas menores de 900 px solo queda la lista; con movimiento reducido no hay animaciones. Es una interpretación propia del lenguaje de menús cinéticos: no reproduce el diseño de ningún juego.
+**Navegación.** No hay barra lateral. La **portada** es un átomo ilustrado a pantalla completa (nubes de probabilidad muestreadas de densidades
+hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, los **cuatro capítulos** como barras
+angulares en escalera: Mecánica cuántica, Fundamentos, Teoría y repaso y Verificación. Al apuntar una barra (cursor o teclado) aparece, abajo a la
+derecha, la ilustración conceptual del capítulo. Cada capítulo abre una **sub-portada** con sus temas en el mismo estilo, y cada tema, su página.
+La transición es una emergencia desde abajo (un horizonte que sube con el título y vuelve a bajar al cargar la página). En todas las páginas, la
+barra de ubicación de arriba tiene «← capítulo» y «← Inicio». Debajo de la primera pantalla de la portada están el siguiente paso sugerido, el
+interruptor «Ver también los destinos como tarjetas» y las ayudas. Cada barra es un `st.button` real (clic, toque y Enter), así que la navegación
+funciona también sin JavaScript. En pantallas menores de 900 px solo queda la lista sobre el fondo, y con movimiento reducido no hay animaciones.
 
-## Portada a pantalla completa
+**Gráficas.** Cada gráfica estática lleva **texto alternativo** construido solo con lo que la figura ya contiene (título y ejes de cada panel;
+`quantum_lab_comun.descripcion_figura`). Cuando el usuario mueve un control y la gráfica se reemplaza, hace un fundido breve; no se animan resultados
+ni se inventan datos.
 
-La primera pantalla es un átomo ilustrado a pantalla completa (nubes de probabilidad muestreadas de densidades hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, el menú de destinos en barras angulares. Al apuntar una barra aparece, abajo a la derecha, la ilustración de ese tema. La portada muestra solo los cuatro capítulos, en escalera; cada uno abre una sub-portada con sus temas (misma animación de emergencia). No hay barra lateral: cada página tiene arriba su ubicación con regreso al capítulo y al inicio. Debajo de la primera pantalla están el siguiente paso sugerido, el interruptor «Ver también los destinos como tarjetas» y las ayudas. El átomo es una ilustración conceptual: las escalas de cada nube se ajustan para componer la imagen y no son un resultado del simulador.
+**Interpretación propia.** El menú cinético, el átomo y las ilustraciones son una interpretación propia del lenguaje de menús cinéticos y del diseño
+científico: no reproducen el diseño de ningún juego ni son resultados del simulador (las escalas de cada nube se ajustan para componer la imagen).
+
+**Accesibilidad verificada.** Con axe-core (WCAG 2 A y AA) la caja, el oscilador y el átomo de hidrógeno no tienen incumplimientos. Quedan avisos
+menores de «regiones» (landmarks) que dependen de la estructura de Streamlit. Probado en Chromium (escritorio y un Pixel 7 emulado); no se ha
+probado en Safari ni en un teléfono real.
+
+**Pendiente.** Teoría de hidrógeno, espín y aproximados; simulador de orbitales; rediseño interior de los simuladores con la plantilla de diez
+secciones (por ahora solo la ficha de entrada); las gráficas de Plotly se redibujan sin transición al mover un control.

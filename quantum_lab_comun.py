@@ -348,7 +348,7 @@ def agregar_animacion(figura, nombres_cuadros: list[str], etiquetas: list[str],
 # Tipografía: se usan las tres familias que Streamlit ya trae incluidas
 # (funcionan sin Internet): «Source Serif» para títulos, «Source Sans» para
 # el texto y «Source Code Pro» para cifras y etiquetas técnicas.
-VERSION = "5.0"           # se muestra en la barra lateral: sirve para comprobar qué versión está publicada
+VERSION = "6.0"           # se muestra en el pie de cada página: sirve para comprobar qué versión está publicada
 
 FUENTE_TITULOS = '"Source Serif", "Source Serif Pro", "QL Simbolos", Georgia, "Times New Roman", serif'
 FUENTE_TEXTO = '"Source Sans", "Source Sans Pro", "QL Simbolos", "Segoe UI", system-ui, sans-serif'
