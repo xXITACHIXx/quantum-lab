@@ -14,7 +14,7 @@ import quantum_lab_tema as tema
 APP = str(Path(__file__).parent / "quantum_lab.py")
 PERMITIDOS = {c.upper() for c in tema.PALETA.values()} | {tema.PANEL_2.upper(), tema.SERIES["potencial"].upper(), tema.SERIES["interferencia"].upper()}
 SIMULADORES = ["caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre"]
-ESTUDIO = ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso", "verificacion", "pruebas"]
+ESTUDIO = ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso", "biblioteca", "solucionador", "tutor", "verificacion", "pruebas"]
 
 
 def _todas():
@@ -46,7 +46,7 @@ def test_la_portada_es_reproducible():
 
 
 def test_los_iconos_son_validos():
-    for clave in ("ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso", "verificacion", "pruebas"):
+    for clave in ("ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso", "biblioteca", "solucionador", "tutor", "verificacion", "pruebas"):
         minidom.parseString(arte.icono(clave))
     assert arte.icono("no_existe") == ""
 
@@ -60,7 +60,7 @@ def test_modulos_cubren_todas_las_paginas_una_vez():
     claves = [m[0] for m in portada.MODULOS]
     esperado = [k for k in quantum_lab.PAGINAS if k != "inicio"]
     assert sorted(claves) == sorted(esperado) and len(set(claves)) == len(claves)
-    assert [m[1] for m in portada.MODULOS] == [f"{i:02d}" for i in range(1, 16)]
+    assert [m[1] for m in portada.MODULOS] == [f"{i:02d}" for i in range(1, 19)]
     assert {m[2] for m in portada.MODULOS} == set(portada.CATEGORIAS)
 
 

@@ -2,7 +2,7 @@
 quantum_lab_portada.py — Página de inicio de QUANTUM LAB: el observatorio
 =========================================================================
 
-La portada es una escena (ver `quantum_lab_escena`): el observatorio animado y, debajo, los módulos como **destinos** en cuatro
+La portada es una escena (ver `quantum_lab_escena`): el observatorio animado y, debajo, los módulos como **destinos** en cinco
 capítulos. Los simuladores se presentan en una composición asimétrica (un destino mayor y dos menores por capítulo, alternando el lado);
 las estaciones de estudio y de verificación, como tarjetas compactas. Cada destino es un contenedor `ql_dest_<clave>` con un `st.button`
 real que cubre la tarjeta, de modo que la navegación es la de Streamlit.
@@ -52,17 +52,24 @@ MODULOS = [
      "Evaluación cronometrada con ejercicios del banco, calificada sobre 5.0.", ""),
     ("repaso", "13", "Teoría y repaso", ESTUDIO, "Repaso personalizado",
      "Ejercicios por repasar, temas con menor precisión y errores más frecuentes.", ""),
-    ("verificacion", "14", "Verificación", VERIFICACION, "Verificación",
+    ("biblioteca", "14", "Herramientas de estudio", ESTUDIO, "Biblioteca científica",
+     "Glosario, derivaciones con comprobación numérica, mapa de conexiones entre conceptos y referencias.", ""),
+    ("solucionador", "15", "Herramientas de estudio", ESTUDIO, "Solucionador paso a paso",
+     "Ecuación, datos, sustitución numérica con unidades, resultado e interpretación física de un problema.", ""),
+    ("tutor", "16", "Herramientas de estudio", ESTUDIO, "Tutor de errores conceptuales",
+     "Detecta confusiones frecuentes, como amplitud con probabilidad, y ofrece una pista y una explicación.", ""),
+    ("verificacion", "17", "Verificación", VERIFICACION, "Verificación",
      "Contraste de los resultados con cálculos independientes y con los cuadernos de Colab.", ""),
-    ("pruebas", "15", "Verificación", VERIFICACION, "Pruebas numéricas",
+    ("pruebas", "18", "Verificación", VERIFICACION, "Pruebas numéricas",
      "Ejecución de todas las comprobaciones numéricas de la aplicación.", ""),
 ]
-CATEGORIAS = ("Mecánica cuántica", "Fundamentos", "Teoría y repaso", "Verificación")
+CATEGORIAS = ("Mecánica cuántica", "Fundamentos", "Teoría y repaso", "Herramientas de estudio", "Verificación")
 CAPITULOS = {
     "Mecánica cuántica": ("01", "Sistemas modelo", "Soluciones exactas de la ecuación de Schrödinger: confinamiento, oscilación y rotación."),
     "Fundamentos": ("02", "Origen de la teoría", "Los experimentos y modelos que obligaron a abandonar la física clásica."),
     "Teoría y repaso": ("03", "Estaciones de estudio", "Teoría, fórmulas, práctica y evaluación conectadas con cada simulador."),
-    "Verificación": ("04", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
+    "Herramientas de estudio": ("04", "Consulta, cálculo y corrección", "Biblioteca, solucionador paso a paso y tutor que detecta confusiones conceptuales."),
+    "Verificación": ("05", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
 }
 CAT_CLAVE = {c: f"cat{i}" for i, c in enumerate(CATEGORIAS, start=1)}      # página de cada capítulo (sub-portada)
 CLAVE_CAT = {v: k for k, v in CAT_CLAVE.items()}
@@ -122,7 +129,7 @@ _ACENTO = {SIMULADOR: "var(--ql-cian)", ESTUDIO: "var(--ql-violeta)", VERIFICACI
 
 
 def _entradas(categoria: str | None = None) -> list[dict]:
-    """Elementos del menú: los cuatro capítulos en la portada, o los temas de un capítulo en su sub-portada."""
+    """Elementos del menú: los cinco capítulos en la portada, o los temas de un capítulo en su sub-portada."""
     prefijo = {SIMULADOR: "Simulador", ESTUDIO: "Estación de estudio", VERIFICACION: "Verificación"}
     if categoria is None:
         salida = []
@@ -178,7 +185,7 @@ def _escenario_html(entradas: list[dict], por_defecto: bool = False) -> str:
 
 def menu_cinetico(ir_a, categoria: str | None = None) -> None:
     """
-    Portada (`categoria=None`): el átomo ilustrado a pantalla completa y, sobre él, los cuatro capítulos como barras angulares en escalera.
+    Portada (`categoria=None`): el átomo ilustrado a pantalla completa y, sobre él, los cinco capítulos como barras angulares en escalera.
     Sub-portada (`categoria="Fundamentos"`, por ejemplo): los temas de ese capítulo con el mismo estilo. Al apuntar una barra (cursor o
     teclado) aparece, abajo a la derecha, su ilustración. Cada barra es un `st.button` real (clic, toque y Enter); en pantallas pequeñas
     queda solo la lista sobre el fondo.

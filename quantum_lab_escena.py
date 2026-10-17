@@ -326,6 +326,10 @@ div[data-baseweb="slider"] div[role]:hover, div[data-baseweb="slider"] div[role]
 @keyframes ql-menu-entra { from { opacity: 0; transform: translateX(-46px) skewX(-14deg); } to { opacity: 1; transform: skewX(-14deg); } }
 @keyframes ql-refresca { from { opacity: .4; filter: blur(2px); } to { opacity: 1; filter: none; } }
 .ql-refresca { animation: ql-refresca .4s cubic-bezier(.2, .7, .2, 1) both; }
+/* Accesibilidad: el texto blanco por defecto sobre el cian de los botones primarios solo alcanza un contraste de 1.7:1; se usa el color de fondo de la app (≈ 11:1). */
+button[data-testid="stBaseButton-primary"], button[data-testid="stBaseButton-primary"] p, button[data-testid="stBaseButton-primary"] span { color: #0B1020 !important; }
+/* Una ecuación más ancha que la pantalla se desplaza; el JS le da foco para poder recorrerla con el teclado. */
+.katex-display[tabindex]:focus-visible { outline: 2px solid var(--ql-cian, #42D9FF); outline-offset: 2px; border-radius: 4px; }
 @keyframes ql-esc-entra { from { opacity: 0; transform: translateY(70px); clip-path: ellipse(70% 45% at 50% 100%); }
                           to { opacity: 1; transform: none; clip-path: ellipse(150% 160% at 50% 100%); } }
 @keyframes ql-corte { 0% { transform: translateX(-120%) skewX(-24deg); } 100% { transform: translateX(260%) skewX(-24deg); } }
@@ -402,7 +406,7 @@ div[data-baseweb="slider"] div[role]:hover, div[data-baseweb="slider"] div[role]
 .ql-inicio-titulo { font-family: var(--ql-serif); font-weight: 600; font-size: clamp(2.4rem, 4.2vw, 3.8rem); line-height: .95; letter-spacing: -.02em; color: var(--ql-texto);
   animation: ql-titulo 1s .15s cubic-bezier(.2, .7, .2, 1) both; }
 .ql-inicio-sub { margin: .6rem 0 0 0; color: var(--ql-tenue); font-size: 1rem; max-width: 26rem; }
-/* En la portada las barras son más compactas para que los 15 destinos quepan en la primera pantalla. */
+/* En la portada las barras son más compactas para que todos los destinos quepan en la primera pantalla. */
 .st-key-ql_menu [class*="st-key-ql_item_"] { margin-bottom: 0; max-width: 25rem; }
 .st-key-ql_menu [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] { gap: .2rem; }
 .st-key-ql_menu [data-testid="stColumn"]:first-child [data-testid="stElementContainer"] { flex-shrink: 0; }
@@ -709,7 +713,7 @@ JS = r"""
     var acento = host ? getComputedStyle(host).getPropertyValue('--acento').trim() : '';
     emergeEl.style.setProperty('--acento', acento && acento.indexOf('var(') < 0 ? acento : '');
     if (!acento || acento.indexOf('var(') === 0) { emergeEl.style.removeProperty('--acento'); }
-    emergeEl.querySelector('.ql-em-tipo').textContent = m ? (esCat ? 'Capítulo ' + m[1] + ' · 04' : 'Destino ' + m[1] + ' · 15') : 'Quantum Lab';
+    emergeEl.querySelector('.ql-em-tipo').textContent = m ? (esCat ? 'Capítulo ' + m[1] + ' · __NCAP__' : 'Destino ' + m[1] + ' · __NDEST__') : 'Quantum Lab';
     emergeEl.querySelector('.ql-em-titulo').textContent = titulo;
     emergeEl.classList.remove('ql-em-baja'); void emergeEl.offsetWidth; emergeEl.classList.add('ql-em-sube');
     emergeVisible = true; emergeListo = false; emergeInicio = Date.now();
@@ -758,7 +762,23 @@ JS = r"""
     }).observe(document.body, { attributes: true, attributeFilter: ['src'], attributeOldValue: true, subtree: true });
   }
 
+  // Ecuaciones que desbordan el ancho: hacerlas enfocables (y recorribles con las flechas) para quien no usa el ratón.
+  function ecuacionesDesplazables() {
+    var lista = document.querySelectorAll('.katex-display');
+    for (var i = 0; i < lista.length; i++) {
+      var e = lista[i];
+      var desborda = e.scrollWidth > e.clientWidth + 1;
+      if (desborda && !e.hasAttribute('data-ql-foco')) {
+        e.setAttribute('data-ql-foco', '1'); e.setAttribute('tabindex', '0'); e.setAttribute('role', 'group');
+        e.setAttribute('aria-label', 'Ecuación; se desplaza horizontalmente con las flechas del teclado');
+      } else if (!desborda && e.hasAttribute('data-ql-foco')) {
+        e.removeAttribute('data-ql-foco'); e.removeAttribute('tabindex'); e.removeAttribute('role'); e.removeAttribute('aria-label');
+      }
+    }
+  }
+
   function vigilar() {
+    ecuacionesDesplazables();
     if (!fondo && !reducir.matches && W.innerWidth >= 640) { fondoPreparar(); }
     if (fondo && !fanim) { fanim = W.requestAnimationFrame(fondoCuadro); }
     var c = document.getElementById('ql-particulas');
@@ -772,7 +792,10 @@ JS = r"""
 """
 
 
-def instalar_efectos(st) -> bool:
+NUM_CAPITULOS, NUM_DESTINOS = 5, 18        # valores por defecto del rótulo «Capítulo 02 · 05»; quantum_lab pasa los reales
+
+
+def instalar_efectos(st, n_capitulos: int = NUM_CAPITULOS, n_destinos: int = NUM_DESTINOS) -> bool:
     """
     Inserta el JavaScript de efectos (una vez por pestaña). Requiere `st.html(..., unsafe_allow_javascript=True)`; si la versión de
     Streamlit no lo admite, no hace nada y la aplicación conserva todas las animaciones CSS. Devuelve True si se instaló.
@@ -780,7 +803,7 @@ def instalar_efectos(st) -> bool:
     try:
         if "unsafe_allow_javascript" not in inspect.signature(st.html).parameters:
             return False
-        st.html(JS, unsafe_allow_javascript=True)
+        st.html(JS.replace("__NCAP__", f"{n_capitulos:02d}").replace("__NDEST__", f"{n_destinos:02d}"), unsafe_allow_javascript=True)
         return True
     except Exception:            # cualquier problema con el JS no debe impedir que la aplicación funcione
         return False

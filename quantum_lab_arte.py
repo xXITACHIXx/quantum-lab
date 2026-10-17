@@ -341,9 +341,60 @@ def pruebas() -> str:
     return _envolver("".join(partes), "Ilustración conceptual: lista de comprobaciones numéricas superadas")
 
 
+def biblioteca() -> str:
+    """Fragmento del mapa de conexiones (aristas reales de biblioteca._conexiones)."""
+    nodos = {"fo": (62, 52, "función de onda", P["cian"]), "am": (186, 52, "amplitud", P["violeta"]), "de": (296, 52, "densidad", P["violeta"]),
+             "no": (296, 118, "normalización", P["violeta"]), "fa": (62, 118, "fase", P["amarillo"]), "in": (186, 118, "interferencia", P["verde"])}
+    aristas = (("fo", "am"), ("am", "de"), ("de", "no"), ("fa", "in"))
+    ancho = {k: 22 + 6.1 * len(v[2]) for k, v in nodos.items()}
+    partes = []
+    for a, b in aristas:
+        xa, ya, _, _ = nodos[a]
+        xb, yb, _, _ = nodos[b]
+        if ya == yb:
+            partes.append(_flecha(xa + ancho[a] / 2 + 2, ya, xb - ancho[b] / 2 - 3, yb, P["tenue"], 1.4))
+        else:
+            partes.append(_flecha(xa, ya + 16, xb, yb - 17, P["tenue"], 1.4))
+    for k, (x, y, txt, col) in nodos.items():
+        partes.append(_caja_texto(x - ancho[k] / 2, y - 14, ancho[k], 28, col, 14, P["panel"]))
+        partes.append(_texto(x, y + 4, txt, P["texto"], 11, peso=600))
+    partes.append(_texto(180, 176, "glosario, derivaciones y conexiones entre conceptos", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: fragmento de un mapa de conceptos con flechas entre ellos")
+
+
+def solucionador() -> str:
+    """Tres líneas de cálculo con los valores reales del efecto fotoeléctrico (300 nm sobre sodio, Φ = 2.28 eV)."""
+    filas = (("Ecuación", "K = hν − Φ", P["cian"]), ("Sustitución", "= 4.133 eV − 2.28 eV", P["violeta"]), ("Resultado", "K = 1.853 eV", P["verde"]))
+    partes = []
+    for i, (etq, txt, col) in enumerate(filas):
+        y = 22 + i * 50
+        partes.append(_caja_texto(34, y, 292, 38, col, 7, P["panel"]))
+        partes.append(_texto(48, y + 16, etq, P["tenue"], 9.5, "start", 600))
+        partes.append(_texto(48, y + 31, txt, P["texto"], 13, "start", 600))
+        if i < 2:
+            partes.append(_flecha(180, y + 39, 180, y + 49, P["tenue"], 1.4))
+    partes.append(_texto(180, 188, "ecuación, datos, sustitución, unidades y resultado", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: ecuación, sustitución numérica y resultado en tres pasos")
+
+
+def tutor() -> str:
+    """Una afirmación errónea (amplitud = probabilidad), una pista y la corrección con |ψ|²."""
+    partes = [_caja_texto(24, 28, 150, 54, P["rojo"], 8, P["panel"]), _texto(36, 48, "Confusión", P["rojo"], 9.5, "start", 600),
+              _texto(36, 70, "ψ = probabilidad", P["texto"], 13, "start", 600),
+              _caja_texto(186, 28, 150, 54, P["verde"], 8, P["panel"]), _texto(198, 48, "Corrección", P["verde"], 9.5, "start", 600),
+              _texto(198, 70, "P = |ψ|²", P["texto"], 13, "start", 600),
+              _flecha(176, 55, 184, 55, P["tenue"], 1.4),
+              f'<circle cx="64" cy="132" r="20" fill="{P["panel"]}" stroke="{P["amarillo"]}" stroke-width="2"/>'
+              f'<path d="M56 140h16M58 146h12M64 118a10 10 0 0 0-6 18h12a10 10 0 0 0-6-18z" fill="none" stroke="{P["amarillo"]}" stroke-width="1.8" stroke-linecap="round"/>',
+              _caja_texto(100, 112, 236, 40, P["amarillo"], 8), _texto(112, 128, "Pista", P["amarillo"], 9.5, "start", 600),
+              _texto(112, 143, "¿Puede una probabilidad ser negativa?", P["texto"], 11, "start", 500),
+              _texto(180, 188, "pista primero, explicación después", P["tenue"], 10)]
+    return _envolver("".join(partes), "Ilustración conceptual: una confusión frecuente, su corrección y una pista")
+
+
 ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre,
                  "ruta": ruta, "teoria": teoria, "formulario": formulario, "talleres": talleres, "ejercicios": ejercicios, "examen": examen,
-                 "repaso": repaso, "verificacion": verificacion, "pruebas": pruebas}
+                 "repaso": repaso, "biblioteca": biblioteca, "solucionador": solucionador, "tutor": tutor, "verificacion": verificacion, "pruebas": pruebas}
 _CACHE: dict[str, str] = {}
 
 
@@ -408,6 +459,9 @@ _ICONOS = {
     "ejercicios": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>',
     "examen": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/>',
     "repaso": '<path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v4l3 2"/>',
+    "biblioteca": '<path d="M5 4h4v16H5zM10 4h4v16h-4z"/><path d="M15.5 5.5l3.8-1 3 14.5-3.8 1z"/>',
+    "solucionador": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11l3 3M11 11l-3 3M13 15h3M13 18h3"/>',
+    "tutor": '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
     "verificacion": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
     "pruebas": '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 15h8"/>',
 }

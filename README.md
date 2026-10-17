@@ -18,6 +18,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `fuente_simbolos.css` | Fuente de símbolos (subíndices, superíndices, operadores) incrustada y **pregenerada**: evita cuadros vacíos en celulares |
 | `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `talleres/` | **Talleres de repaso**: `__init__.py` (índice, página y pruebas), `_calificar.py` (lectura de números y tolerancias), `_modelo.py` (preguntas y calificación por partes), `_fisica.py` (cálculos verificados) y un archivo por taller (`t1_espectros.py`…) |
+| `biblioteca/`, `solucionador/`, `tutor/` | Herramientas de estudio: biblioteca científica, solucionador paso a paso y tutor de errores conceptuales (ver apartado 11) |
 | `ruta/`, `formulario/`, `examen/`, `repaso/` | Ruta de estudio, formulario de constantes y fórmulas, modo examen y repaso personalizado (cada uno con su `__init__.py` y módulos de apoyo) |
 | `ejercicios/` | **Ejercicios de práctica**: `__init__.py` (página, filtros y pruebas), `_modelo.py` (ejercicio, fuentes y temas), `_progreso.py`, `_figuras.py`, `_calidad.py` y los ejercicios por fuente: `clase_s1_s5.py`, `clase_s6_s13.py` (diapositivas), `libro.py` y `cuaderno.py` |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
@@ -31,6 +32,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `test_quantum_lab.py` | Pruebas numéricas y de verificación con `pytest` |
 | `test_interfaz.py` | Pruebas de interfaz (cada página se ejecuta con `AppTest` sin excepciones) |
 | `test_escena.py`, `test_arte.py`, `test_tema.py`, `test_movil.py`, `test_caja_diseno.py` | Pruebas de la portada y la navegación, las ilustraciones, la paleta y el contraste, el celular y la accesibilidad (texto alternativo, fuente de símbolos, fondo estable) y la figura y la superposición de la caja |
+| `test_herramientas.py` | Pruebas de biblioteca, solucionador y tutor |
 | `test_ruta.py`, `test_formulario.py`, `test_talleres.py`, `test_ejercicios*.py`, `test_examen.py`, `test_repaso.py`, `test_teoria.py` | Pruebas de las secciones de estudio |
 | `requirements.txt` | Dependencias con límites de versión |
 | `requirements-lock.txt` | Versiones exactas con las que se probó el proyecto |
@@ -109,7 +111,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 630 pruebas: numéricas, verificación, interfaz y accesibilidad (unos 3 minutos)
+python -m pytest -q          # 750 pruebas: numéricas, verificación, interfaz y accesibilidad (unos 3 minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador
@@ -309,8 +311,8 @@ el orbital **complejo** sí (L_z = mħ).
 ## 10. Portada, navegación y accesibilidad
 
 **Navegación.** No hay barra lateral. La **portada** es un átomo ilustrado a pantalla completa (nubes de probabilidad muestreadas de densidades
-hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, los **cuatro capítulos** como barras
-angulares en escalera: Mecánica cuántica, Fundamentos, Teoría y repaso y Verificación. Al apuntar una barra (cursor o teclado) aparece, abajo a la
+hidrogenoides 1s, 2p y 3d, núcleo y órbitas de referencia, con partículas que lo orbitan) y, encima, los **cinco capítulos** como barras
+angulares en escalera: Mecánica cuántica, Fundamentos, Teoría y repaso, Herramientas de estudio y Verificación. Al apuntar una barra (cursor o teclado) aparece, abajo a la
 derecha, la ilustración conceptual del capítulo. Cada capítulo abre una **sub-portada** con sus temas en el mismo estilo, y cada tema, su página.
 La transición es una emergencia desde abajo (un horizonte que sube con el título y vuelve a bajar al cargar la página). En todas las páginas, la
 barra de ubicación de arriba tiene «← capítulo» y «← Inicio». Debajo de la primera pantalla de la portada están el siguiente paso sugerido, el
@@ -324,9 +326,29 @@ ni se inventan datos.
 **Interpretación propia.** El menú cinético, el átomo y las ilustraciones son una interpretación propia del lenguaje de menús cinéticos y del diseño
 científico: no reproducen el diseño de ningún juego ni son resultados del simulador (las escalas de cada nube se ajustan para componer la imagen).
 
-**Accesibilidad verificada.** Con axe-core (WCAG 2 A y AA) la caja, el oscilador y el átomo de hidrógeno no tienen incumplimientos. Quedan avisos
+**Accesibilidad verificada.** Con axe-core (WCAG 2 A y AA) la caja, el oscilador, el átomo de hidrógeno y las tres herramientas de estudio (escritorio y Pixel 7 emulado) no tienen incumplimientos. Los botones primarios usan texto oscuro sobre el cian (antes blanco, contraste 1.7:1) y las ecuaciones más anchas que la pantalla reciben foco de teclado. Quedan avisos
 menores de «regiones» (landmarks) que dependen de la estructura de Streamlit. Probado en Chromium (escritorio y un Pixel 7 emulado); no se ha
 probado en Safari ni en un teléfono real.
 
 **Pendiente.** Teoría de hidrógeno, espín y aproximados; simulador de orbitales; rediseño interior de los simuladores con la plantilla de diez
 secciones (por ahora solo la ficha de entrada); las gráficas de Plotly se redibujan sin transición al mover un control.
+
+## 11. Herramientas de estudio
+
+Capítulo 04 de la portada, con tres páginas (pruebas en `test_herramientas.py` y en las pruebas globales de la aplicación).
+
+* **Biblioteca científica** (`biblioteca/`): glosario de 48 conceptos con definición, ecuación, advertencia de error frecuente y enlaces a la
+  teoría y al simulador; 9 derivaciones paso a paso que terminan con una **comprobación numérica** (el código del laboratorio frente a una
+  referencia calculada por otra vía); mapa de conexiones entre conceptos (37 relaciones, con grafo) y 16 referencias. Búsqueda unificada con el formulario.
+  Añadir un término: `T(...)` en `biblioteca/_glosario.py`.
+* **Solucionador paso a paso** (`solucionador/`): fotoeléctrico, caja, oscilador, transición de Bohr/Rydberg, De Broglie e incertidumbre.
+  Muestra ecuaciones, datos, sustitución numérica con unidades, resultado e interpretación física. Los resultados se comparan en las pruebas con
+  las funciones de los simuladores. Admite notación científica y rechaza datos inválidos con un mensaje.
+* **Tutor de errores conceptuales** (`tutor/`): 22 confusiones frecuentes (amplitud con probabilidad, intensidad con energía del fotón,
+  estacionario con reposo…). Dos entradas: un texto libre revisado por un detector **basado en reglas** (solo reconoce formulaciones típicas; que no
+  encuentre nada no prueba que la explicación sea correcta) y 19 preguntas de diagnóstico cuyos distractores corresponden a una confusión; al fallar
+  se da primero una pista y luego la explicación. El progreso vive solo en la sesión.
+
+**Ideas adoptadas de referencias** (el diseño y el código son propios): de PhET (Quantum Bound States, Quantum Tunneling and Wave Packets, Photoelectric
+Effect), varias representaciones de un mismo concepto, objetivos explícitos y confusiones típicas como la de intensidad con energía del fotón; de Quantum
+Composer, el enlace entre conceptos (mapa de conexiones); de la documentación de Streamlit, `st.session_state`, claves únicas de widgets y `AppTest`.
