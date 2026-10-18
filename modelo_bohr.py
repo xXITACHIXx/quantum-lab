@@ -415,7 +415,7 @@ def figura_transicion(t: Transicion, d: dict, n_max: int, escala_real: bool):
     ax.set_ylim(float(y.min()) - margen, y_ion + 0.09 * alto)
     ax.set_xticks([])
     if escala_real:
-        ax.set_ylabel("energía [eV]")
+        ax.set_ylabel("Energía [eV]")
     else:
         ax.set_yticks([])
     for lado in ("top", "right", "bottom") + (() if escala_real else ("left",)):
@@ -529,7 +529,7 @@ def figura_orbital_2d(n: int, l: int, m: int, real: bool, nucleo: str, masa_redu
     ax.set_xlim(0, lim)
     ax.set_ylim(0, P.max() * 1.18)
     ax.set_xlabel("distancia al núcleo r [a₀]")
-    ax.set_ylabel("densidad radial [1/a₀]")
+    ax.set_ylabel("Densidad de probabilidad radial [1/a₀]")
     ax.set_title("Densidad de probabilidad radial")
     ax.legend(loc="upper right", fontsize=9)
     ax.grid(alpha=0.3)

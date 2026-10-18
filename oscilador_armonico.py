@@ -451,7 +451,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax.plot(x_vis, d["psi"] * np.sqrt(fx), color=COLORES["onda"], lw=2.4, label=rf"$\psi_{{{n}}}(x)$")
     ax.axhline(0, color="white", lw=0.8, alpha=0.5)
     ax.set_title("Función de onda")
-    ax.set_ylabel(rf"$\psi_n\ [{Ltex}^{{-1/2}}]$")
+    ax.set_ylabel(rf"Función de onda [${Ltex}^{{-1/2}}$]")
     ax.legend(loc="upper right")
 
     # 2. densidad de probabilidad
@@ -464,7 +464,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax.axvline(-d["xt"] / fx, color=COLORES["gris"], ls=":", lw=1.2)
     ax.axvline(d["xt"] / fx, color=COLORES["gris"], ls=":", lw=1.2, label="Puntos de retorno")
     ax.set_title("Densidad de probabilidad")
-    ax.set_ylabel(rf"$|\psi_n|^2\ [{Ltex}^{{-1}}]$")
+    ax.set_ylabel(rf"Densidad de probabilidad [${Ltex}^{{-1}}$]")
     ax.legend(loc="upper right")
 
     # 3. potencial + nivel (V es energía por unidad de probabilidad)
@@ -485,7 +485,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax.plot(x_vis, d["u_V"] * fx / fe, color=COLORES["potencial"], lw=2.4, label=r"$u_V=V\,|\psi|^2$")
     ax.fill_between(x_vis, d["u_V"] * fx / fe, color=COLORES["potencial"], alpha=0.12)
     ax.set_title("Densidad de energía potencial")
-    ax.set_ylabel(f"$u_V$ [{U}/{L}]")
+    ax.set_ylabel(f"Densidad de energía potencial [{U}/{L}]")
     ax.legend(loc="upper right")
 
     # 5. densidad de energía cinética
@@ -494,7 +494,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
             label=r"$u_T=\frac{\hbar^2}{2m}|\psi'|^2$")
     ax.fill_between(x_vis, d["u_T"] * fx / fe, color=COLORES["cinetica"], alpha=0.12)
     ax.set_title("Densidad de energía cinética")
-    ax.set_ylabel(f"$u_T$ [{U}/{L}]")
+    ax.set_ylabel(f"Densidad de energía cinética [{U}/{L}]")
     ax.legend(loc="upper right")
 
     # 6. energía total: la integral acumulada converge a ⟨T⟩, ⟨V⟩ y E
@@ -550,12 +550,12 @@ def figura_niveles_y_escalas(d: dict, p: ParametrosOscilador, zoom: bool = True)
     lim = _semiancho_visual(p, n, x0, zoom) / fx
     ax2.plot(d["x"] / fx, d["psi"] * np.sqrt(fx), color=COLORES["onda"], lw=2.4)
     ax2.axhline(0, color="white", lw=0.7, alpha=0.5)
-    ax2.set_ylabel(rf"$\psi_n(x)\ [{Ltex}^{{-1/2}}]$", color=COLORES["onda"])
+    ax2.set_ylabel(rf"Función de onda [${Ltex}^{{-1/2}}$]", color=COLORES["onda"])
     ax2.tick_params(axis="y", colors=COLORES["onda"])
     ax3 = ax2.twinx()
     ax3.plot(d["x"] / fx, d["rho"] * fx, color=COLORES["densidad"], lw=2.4, ls="--")
     ax3.fill_between(d["x"] / fx, d["rho"] * fx, color=COLORES["densidad"], alpha=0.10)
-    ax3.set_ylabel(rf"$|\psi_n(x)|^2\ [{Ltex}^{{-1}}]$", color=COLORES["densidad"])
+    ax3.set_ylabel(rf"Densidad de probabilidad [${Ltex}^{{-1}}$]", color=COLORES["densidad"])
     ax3.tick_params(axis="y", colors=COLORES["densidad"])
     ax2.set_xlim(-lim, lim)
     ax2.set_xlabel(f"x [{L}]")
@@ -587,9 +587,9 @@ def figura_comparacion(datos: list[dict], p: ParametrosOscilador, modo_fundament
                 ax.axvline(-dd["xt"] / fx, color=c, ls=":", lw=1.1, alpha=0.8)
     ax1.axhline(0, color="white", lw=0.7, alpha=0.4)
     ax1.set_title("Función de onda")
-    ax1.set_ylabel(rf"$\psi_n\ [{Ltex}^{{-1/2}}]$")
+    ax1.set_ylabel(rf"Función de onda [${Ltex}^{{-1/2}}$]")
     ax2.set_title("Densidad de probabilidad")
-    ax2.set_ylabel(rf"$|\psi_n|^2\ [{Ltex}^{{-1}}]$")
+    ax2.set_ylabel(rf"Densidad de probabilidad [${Ltex}^{{-1}}$]")
     ax2.set_xlabel(f"x [{L}]")
     lim = min(p.rango, np.sqrt(2 * nmax + 1) + 3.0) * datos[0]["x0"] / fx
     for ax in (ax1, ax2):
@@ -618,7 +618,7 @@ def figura_limite_clasico(d: dict, n: int, sistema: str, ns=None, ks=None):
     ax.set_ylim(0, tope)
     ax.set_title("Densidad de probabilidad")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(f"Densidad de probabilidad [1/{L}]")
+    ax.set_ylabel(f"Densidad de probabilidad [{L}⁻¹]")
     ax.legend(loc="upper center")
     ax.grid(alpha=0.3)
     ax = ejes[1]
@@ -640,7 +640,7 @@ def figura_limite_clasico(d: dict, n: int, sistema: str, ns=None, ks=None):
         ax.set_yscale("log")
         ax.set_title("Distancia cuántica–clásica")
         ax.set_xlabel("número cuántico n")
-        ax.set_ylabel("D = max|F_q − F_cl|")
+        ax.set_ylabel("Distancia")
         ax.grid(alpha=0.3, which="both")
     return fig
 
@@ -670,8 +670,8 @@ def figura_dinamica(x_vis, taus, re, im, rho, x_medio, nombre_longitud: str, eti
                            data=[go.Scatter(y=re[i]), go.Scatter(y=im[i]), go.Scatter(y=rho[i]),
                                  go.Scatter(x=[x_medio[i]], y=[0])]) for i in range(len(taus))]
     amp = 1.12 * max(np.max(np.abs(re)), np.max(np.abs(im)))
-    fig.update_yaxes(range=[-amp, amp], title_text="Ψ (unid. de visualización)", row=1, col=1)
-    fig.update_yaxes(range=[-0.03 * np.max(rho), 1.12 * np.max(rho)], title_text="|Ψ|²", row=2, col=1)
+    fig.update_yaxes(range=[-amp, amp], title_text="Función de onda", row=1, col=1)
+    fig.update_yaxes(range=[-0.03 * np.max(rho), 1.12 * np.max(rho)], title_text="Densidad de probabilidad", row=2, col=1)
     fig.update_xaxes(title_text=f"x [{nombre_longitud}]", row=2, col=1)
     qc.aplicar_tema_plotly(fig, altura=640)
     qc.agregar_animacion(fig, nombres, etiquetas, duracion_ms=70)
