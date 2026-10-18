@@ -63,13 +63,14 @@ def letra(l: int) -> str:
 
 MODOS = {
     "densidad": "Densidad angular |Y|²",
+    "prob": "Densidad de probabilidad |Y|²/R² (por área)",
     "re": "Parte real Re Y",
     "im": "Parte imaginaria Im Y",
     "fase": "Fase arg Y",
     "real_cos": "Combinación real ∝ cos(|m|φ)",
     "real_sin": "Combinación real ∝ sin(|m|φ)",
 }
-UNIDAD_MODO = {"densidad": "sr⁻¹", "re": "sr^(−1/2)", "im": "sr^(−1/2)", "fase": "rad",
+UNIDAD_MODO = {"densidad": "sr⁻¹", "prob": "R⁻²", "re": "sr^(−1/2)", "im": "sr^(−1/2)", "fase": "rad",
                "real_cos": "sr^(−1/2)", "real_sin": "sr^(−1/2)"}
 FORMAS = {
     "esfera": "Esfera intacta (color)",
@@ -159,7 +160,7 @@ def armonico_esferico(l: int, m: int, theta, phi):
     return np.asarray(_Y(l, m, np.asarray(theta, dtype=float), np.asarray(phi, dtype=float)), dtype=complex)
 
 
-def evaluar_campo(l: int, m: int, modo: str, theta, phi):
+def evaluar_campo(l: int, m: int, modo: str, theta, phi, radio: float = 1.0):
     """
     Campo escalar real a dibujar para el modo elegido.
 
@@ -183,6 +184,8 @@ def evaluar_campo(l: int, m: int, modo: str, theta, phi):
     y = armonico_esferico(l, m, theta, phi)
     if modo == "densidad":
         return np.abs(y) ** 2
+    if modo == "prob":                                  # probabilidad por unidad de área sobre la esfera de radio R
+        return np.abs(y) ** 2 / radio ** 2
     if modo == "re":
         return y.real
     if modo == "im":
@@ -546,8 +549,15 @@ def _plotly():
     return go
 
 
+def _unidad_modo(modo, unidad_long=None):
+    """Unidad del campo; la densidad por área depende de la unidad de longitud elegida."""
+    if modo == "prob" and unidad_long:
+        return f"{unidad_long}⁻²"
+    return UNIDAD_MODO[modo]
+
+
 def _rango_color(campo, modo):
-    if modo == "densidad":
+    if modo in ("densidad", "prob"):
         return 0.0, float(np.max(campo)) or 1.0
     if modo == "fase":
         return -np.pi, np.pi
@@ -556,10 +566,10 @@ def _rango_color(campo, modo):
 
 
 def _superficie(go, p_l, p_m, modo, forma, radio, alfa, mapa, n_theta, escala_long, colorbar=True,
-                cmin=None, cmax=None, scene=None):
+                cmin=None, cmax=None, scene=None, unidad_long=None):
     """Una traza `go.Surface` y el radio máximo (para fijar los ejes)."""
     T, P = malla_angular(n_theta)
-    campo = evaluar_campo(p_l, p_m, modo, T, P)
+    campo = evaluar_campo(p_l, p_m, modo, T, P, radio / escala_long)
     if modo == "fase":                                     # la fase no está definida donde |Y| = 0
         campo = np.where(np.abs(armonico_esferico(p_l, p_m, T, P)) < 1e-6, np.nan, campo)
         campo_geo = np.zeros_like(campo)
@@ -572,7 +582,7 @@ def _superficie(go, p_l, p_m, modo, forma, radio, alfa, mapa, n_theta, escala_lo
     cmax = hi if cmax is None else cmax
     traza = go.Surface(
         x=X, y=Y, z=Z, surfacecolor=campo, colorscale=mapa, cmin=cmin, cmax=cmax, showscale=colorbar,
-        colorbar=dict(title=dict(text=f"{MODOS[modo]}<br>[{UNIDAD_MODO[modo]}]", side="right"), thickness=14, len=0.8),
+        colorbar=dict(title=dict(text=f"{MODOS[modo]}<br>[{_unidad_modo(modo, unidad_long)}]", side="right"), thickness=14, len=0.8),
         lighting=dict(ambient=0.6, diffuse=0.7, specular=0.25, roughness=0.6),
         hovertemplate="x=%{x:.3f}<br>y=%{y:.3f}<br>z=%{z:.3f}<br>valor=%{surfacecolor:.4g}<extra></extra>",
         **({"scene": scene} if scene else {}))
@@ -593,7 +603,7 @@ def figura_superficie_3d(p: ParametrosEsfera):
     go = _plotly()
     u = qc.obtener_unidades(p.sistema)
     traza, rmax, forma_ef = _superficie(go, p.l, p.m, p.modo, p.forma, p.radio, p.alfa, p.mapa, p.n_theta,
-                                        u["factor_longitud"])
+                                        u["factor_longitud"], unidad_long=u["nombre_longitud"])
     fig = go.Figure(traza)
     qc.aplicar_tema_plotly(fig, f"{MODOS[p.modo]} · l = {p.l}, m = {p.m} · radio R = "
                                 f"{p.radio / u['factor_longitud']:.4g} {u['nombre_longitud']}", altura=640)
@@ -613,7 +623,7 @@ def figura_comparacion_orbitales(estados, modo: str, forma: str, mapa: str, n_th
                         vertical_spacing=0.06, horizontal_spacing=0.02)
     campos = [evaluar_campo(l, m, modo, *malla_angular(n_theta)) for l, m in estados]
     lo, hi = (min(float(np.min(c)) for c in campos), max(float(np.max(c)) for c in campos))
-    if modo != "densidad":
+    if modo not in ("densidad", "prob"):
         lo, hi = -max(abs(lo), abs(hi)), max(abs(lo), abs(hi))
     for i, (l, m) in enumerate(estados):
         nom = "scene" if i == 0 else f"scene{i + 1}"
@@ -652,7 +662,10 @@ def figura_proyeccion_2d(p: ParametrosEsfera, phi_corte: float, theta_corte: flo
     """Mapa (φ, θ) del campo + cortes a φ fijo y a θ fijo, con los nodos marcados."""
     import matplotlib.pyplot as plt
     T, P = malla_angular(max(p.n_theta, 60))
-    campo = evaluar_campo(p.l, p.m, p.modo, T, P)
+    u = qc.obtener_unidades(p.sistema)
+    rr = p.radio / u["factor_longitud"]
+    unid = _unidad_modo(p.modo, u["nombre_longitud"])
+    campo = evaluar_campo(p.l, p.m, p.modo, T, P, rr)
     if p.modo == "fase":
         campo = np.where(np.abs(armonico_esferico(p.l, p.m, T, P)) < 1e-6, np.nan, campo)
     lo, hi = _rango_color(np.nan_to_num(campo), p.modo)
@@ -680,18 +693,18 @@ def figura_proyeccion_2d(p: ParametrosEsfera, phi_corte: float, theta_corte: flo
     ax.set_ylim(180, 0)
     ax.set_xlim(0, 360)
     ax.set_title(f"Proyección equirrectangular · {MODOS[p.modo]}")
-    fig.colorbar(im, ax=ax, label=f"[{UNIDAD_MODO[p.modo]}]")
+    fig.colorbar(im, ax=ax, label=f"[{unid}]")
     th = np.linspace(0, np.pi, 600)
-    f_th = evaluar_campo(p.l, p.m, p.modo, th, np.full_like(th, phi_corte))
+    f_th = evaluar_campo(p.l, p.m, p.modo, th, np.full_like(th, phi_corte), rr)
     ax2.plot(np.degrees(th), f_th, color=COLORES["energia"], lw=2)
     for nodo in nodos_latitud(p.l, p.m):
         ax2.axvline(np.degrees(nodo), color=COLORES["gris"], ls="--", lw=0.8)
     ax2.set_xlabel("θ [°]")
-    ax2.set_ylabel(f"[{UNIDAD_MODO[p.modo]}]")
+    ax2.set_ylabel(f"[{unid}]")
     ax2.set_title(f"Corte a φ = {np.degrees(phi_corte):.0f}°")
     ax2.grid(True)
     ph = np.linspace(0, 2 * np.pi, 600)
-    f_ph = evaluar_campo(p.l, p.m, p.modo, np.full_like(ph, theta_corte), ph)
+    f_ph = evaluar_campo(p.l, p.m, p.modo, np.full_like(ph, theta_corte), ph, rr)
     ax3.plot(np.degrees(ph), f_ph, color=COLORES["densidad"], lw=2)
     ax3.set_xlabel("φ [°]")
     ax3.set_title(f"Corte a θ = {np.degrees(theta_corte):.0f}°")
@@ -1242,6 +1255,10 @@ def _pestana_3d(p: ParametrosEsfera):
     if p.forma == "lobulos" and p.modo != "fase":
         qc.aviso("Modo «lóbulos»: la distancia al origen codifica |valor| (r = R·|f|/max|f|). No es una superficie "
                  "física: la partícula no está «en» el lóbulo; solo indica en qué direcciones es más probable.")
+    if p.modo == "prob":
+        qc.nota("Densidad de probabilidad por unidad de ÁREA sobre la esfera de radio R: |Y|²/R². Multiplicada por el "
+                "elemento de área R² sinθ dθ dφ da la probabilidad de hallar la partícula en esa región. Para el armónico "
+                "complejo solo depende de z/R = cosθ; la pestaña «Densidad de probabilidad» la muestra frente a x, y, z.")
     if p.forma == "suave":
         qc.aviso(f"Deformación artificial r = R(1 + α f/max|f|) con α = {p.alfa:.2f}, para apreciar el patrón. "
                  "La esfera real de radio R no cambia de forma.")
@@ -1360,7 +1377,7 @@ def _pestana_comparacion(p: ParametrosEsfera):
         c1, c2, c3 = st.columns([2, 1, 1])
         sel = c1.multiselect("Orbitales preseleccionados (máx. 6)", opciones, key="esf_comp_sel",
                              format_func=lambda t: f"l = {t[0]}, m = {t[1]}", max_selections=6)
-        modo = c2.selectbox("Magnitud", ["densidad", "re", "real_cos"], key="esf_comp_modo", format_func=MODOS.get)
+        modo = c2.selectbox("Magnitud", ["densidad", "prob", "re", "real_cos"], key="esf_comp_modo", format_func=MODOS.get)
         forma = c3.selectbox("Forma", ["lobulos", "esfera"], key="esf_comp_forma", format_func=FORMAS.get)
         d1, d2, d3, _ = st.columns(4)
         usar = d1.toggle("Añadir un orbital propio", key="esf_comp_extra")

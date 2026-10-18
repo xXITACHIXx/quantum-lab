@@ -100,3 +100,15 @@ def test_pestana_densidad_en_la_web():
     at.number_input(key="esf_pz").set_value(1.0).run()
     at.toggle(key="esf_dens_real").set_value(True).run()
     assert not at.exception, [e.value for e in at.exception]
+
+
+def test_magnitud_prob_en_la_lista_y_escala_con_radio():
+    import numpy as np
+    assert "prob" in pe.MODOS
+    T, P = pe.malla_angular(40)
+    assert np.allclose(pe.evaluar_campo(2, 1, "prob", T, P, 2.0), pe.evaluar_campo(2, 1, "densidad", T, P) / 4)
+    for sis, r in (("SI", 1e-9), ("Atómicas", 5.0)):
+        p = pe.validar_parametros_esfera(2, 1, r, sis, 40, "prob", "lobulos")
+        fig, _ = pe.figura_superficie_3d(p)
+        assert "R" in fig.data[0].colorbar.title.text and "⁻²" in fig.data[0].colorbar.title.text
+        pe.figura_proyeccion_2d(p, 1.0, 1.0)
