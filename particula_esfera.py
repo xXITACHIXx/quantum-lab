@@ -730,7 +730,7 @@ def figura_densidad_3d(l: int, m: int, real: bool, radio: float, sistema: str, n
     fig = make_subplots(rows=1, cols=2, specs=[[{"type": "scene"}, {"type": "scene"}]], horizontal_spacing=0.02,
                         subplot_titles=["Densidad de probabilidad", "Densidad angular"])
     fig.add_trace(go.Surface(x=xs, y=ys, z=zs, surfacecolor=dens / R ** 2, colorscale="Viridis", cmin=0,
-                             colorbar=dict(title=dict(text=f"Densidad de probabilidad<br>[{unidad_area}]", side="right"), x=0.44, len=0.75, thickness=12),
+                             colorbar=dict(title=dict(text=f"Densidad de probabilidad<br>[{unidad_area}]", side="right"), x=0.40, len=0.75, thickness=12),
                              hovertemplate=f"x=%{{x:.3f}} {u['nombre_longitud']}<br>y=%{{y:.3f}}<br>z=%{{z:.3f}}<br>"
                                            f"Densidad de probabilidad=%{{surfacecolor:.4g}} {unidad_area}<extra></extra>"), row=1, col=1)
     fig.add_trace(go.Surface(x=xp, y=yp, z=zp, surfacecolor=dens, colorscale="Viridis", cmin=0,
