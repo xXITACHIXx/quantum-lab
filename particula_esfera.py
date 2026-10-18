@@ -283,6 +283,79 @@ def malla_angular(n_theta: int, n_phi: int | None = None):
     return np.meshgrid(theta, phi, indexing="ij")       # forma (n_theta, n_phi)
 
 
+# ---------------------------------------------------------------------
+# 1.3b Densidad de probabilidad |Y_l^m|² en función de la posición (x, y, z)
+# ---------------------------------------------------------------------
+PLANOS = {"xz": "Plano xz (y = 0)", "yz": "Plano yz (x = 0)", "xy": "Plano xy (z = 0)"}
+
+
+def densidad_probabilidad(l: int, m: int, theta, phi, real: bool = False):
+    """
+    Densidad de probabilidad angular [sr⁻¹]: |Y_l^m(θ, φ)|² (armónico complejo, L_z = mħ definido) o, con
+    `real=True`, el cuadrado de la combinación real (m > 0 → ∝ cos|m|φ, m < 0 → ∝ sin|m|φ; orbitales pₓ, d_xy…).
+    La probabilidad de hallar la partícula en el ángulo sólido dΩ = sinθ dθ dφ es |Y|² dΩ.
+    """
+    if real and m != 0:
+        return evaluar_campo(l, m, "real_cos" if m > 0 else "real_sin", theta, phi) ** 2
+    return np.abs(armonico_esferico(l, m, theta, phi)) ** 2
+
+
+def densidad_en_punto(l: int, m: int, x: float, y: float, z: float, radio: float, real: bool = False) -> dict:
+    """
+    Evalúa la densidad en la dirección del punto (x, y, z). La partícula está sobre la esfera de radio R, así que
+    el punto se proyecta radialmente sobre ella. Devuelve θ, φ, |Y|² [sr⁻¹], |Y|²/R² [1/longitud²] (probabilidad
+    por unidad de ÁREA de la esfera) y el punto proyectado.
+    """
+    valores = [float(v) for v in (x, y, z)]
+    if not all(np.isfinite(valores)):
+        raise ValueError("Las coordenadas x, y, z deben ser números finitos.")
+    r, theta, phi = (float(v) for v in cartesianas_a_esfericas(*valores))
+    if r == 0:
+        raise ValueError("El origen (0, 0, 0) no define ninguna dirección: escriba un punto distinto del origen.")
+    if not (np.isfinite(radio) and radio > 0):
+        raise ValueError("El radio R debe ser positivo.")
+    d = float(densidad_probabilidad(l, m, theta, phi, real))
+    escala = float(np.max(densidad_probabilidad(l, m, *malla_angular(61), real)))
+    if abs(d) < 1e-12 * escala:                    # ruido de redondeo (≈1e−33) sobre una superficie nodal
+        d = 0.0
+    return {"r": r, "theta": theta, "phi": phi, "densidad_sr": d, "densidad_area": d / radio ** 2,
+            "punto_esfera": tuple(radio * v / r for v in valores)}
+
+
+def curva_densidad_plano(l: int, m: int, plano: str, real: bool = False, n: int = 1441):
+    """
+    Corte polar de la densidad en un plano coordenado: puntos (h, v) a distancia |Y|² del origen en cada dirección
+    del plano. «xz»: (x, z) con φ = 0 y π; «yz»: (y, z) con φ = π/2 y 3π/2; «xy»: (x, y) con θ = π/2.
+    Devuelve (h, v, densidad, ángulo en el plano).
+    """
+    if plano not in PLANOS:
+        raise ValueError(f"Plano desconocido: {plano!r}.")
+    t = np.linspace(0.0, 2 * np.pi, n)
+    if plano == "xy":
+        theta, phi = np.full_like(t, np.pi / 2), t
+        dens = densidad_probabilidad(l, m, theta, phi, real)
+        return dens * np.cos(t), dens * np.sin(t), dens, t
+    phi0 = 0.0 if plano == "xz" else np.pi / 2
+    theta = np.where(t <= np.pi, t, 2 * np.pi - t)
+    phi = np.where(t <= np.pi, phi0, phi0 + np.pi)
+    dens = densidad_probabilidad(l, m, theta, phi, real)
+    x, y, z = esfericas_a_cartesianas(dens, theta, phi)
+    return (x if plano == "xz" else y), z, dens, t
+
+
+def meridiano_maximo(m: int, real: bool) -> float:
+    """Azimut φ donde la combinación real alcanza su máximo (|cos|m|φ| o |sin|m|φ| = 1); 0 para el armónico complejo."""
+    if real and m < 0:
+        return float(np.pi / (2 * abs(m)))
+    return 0.0
+
+
+def densidad_frente_a_z(l: int, m: int, real: bool = False, phi: float = 0.0, n: int = 801):
+    """|Y|² sobre la esfera en función de la altura z/R = cosθ, a lo largo del meridiano φ."""
+    z = np.linspace(-1.0, 1.0, n)
+    return z, densidad_probabilidad(l, m, np.arccos(z), np.full_like(z, phi), real)
+
+
 def nodos_latitud(l: int, m: int) -> np.ndarray:
     """
     Ángulos polares θ (rad, crecientes) de los nodos latitudinales de Y_l^m: ceros de P_l^{|m|}(cos θ) en
@@ -626,6 +699,94 @@ def figura_proyeccion_2d(p: ParametrosEsfera, phi_corte: float, theta_corte: flo
     return fig
 
 
+def figura_densidad_3d(l: int, m: int, real: bool, radio: float, sistema: str, n_theta: int = 90):
+    """
+    Dos vistas 3D en coordenadas cartesianas: (1) la esfera real de radio R con cada punto (x, y, z) coloreado por la
+    densidad por unidad de área |Y|²/R²; (2) la superficie polar r = |Y|²(θ, φ), donde la distancia al origen en cada
+    dirección es la densidad angular.
+    """
+    from plotly.subplots import make_subplots
+    go = _plotly()
+    u = qc.obtener_unidades(sistema)
+    R = radio / u["factor_longitud"]
+    T, P = malla_angular(n_theta)
+    dens = densidad_probabilidad(l, m, T, P, real)
+    xs, ys, zs = esfericas_a_cartesianas(R, T, P)
+    xp, yp, zp = esfericas_a_cartesianas(dens, T, P)
+    unidad_area = f"{u['nombre_longitud']}⁻²"
+    fig = make_subplots(rows=1, cols=2, specs=[[{"type": "scene"}, {"type": "scene"}]], horizontal_spacing=0.02,
+                        subplot_titles=[f"Sobre la esfera de radio R: color = |Y|²/R² [{unidad_area}]",
+                                        "Superficie polar r = |Y|²(θ, φ) [sr⁻¹]"])
+    fig.add_trace(go.Surface(x=xs, y=ys, z=zs, surfacecolor=dens / R ** 2, colorscale="Viridis", cmin=0,
+                             colorbar=dict(title=dict(text=f"|Y|²/R²<br>[{unidad_area}]", side="right"), x=0.44, len=0.75, thickness=12),
+                             hovertemplate=f"x=%{{x:.3f}} {u['nombre_longitud']}<br>y=%{{y:.3f}}<br>z=%{{z:.3f}}<br>"
+                                           f"|Y|²/R²=%{{surfacecolor:.4g}} {unidad_area}<extra></extra>"), row=1, col=1)
+    fig.add_trace(go.Surface(x=xp, y=yp, z=zp, surfacecolor=dens, colorscale="Viridis", cmin=0,
+                             colorbar=dict(title=dict(text="|Y|²<br>[sr⁻¹]", side="right"), x=1.0, len=0.75, thickness=12),
+                             hovertemplate="x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{z:.4f}<br>|Y|²=%{surfacecolor:.4g} sr⁻¹<extra></extra>"),
+                  row=1, col=2)
+    lim = 1.15 * float(np.max(dens)) or 1.0
+    qc.aplicar_tema_plotly(fig, None, altura=560)
+    fig.update_layout(scene=_estilo_escena(1.15 * R, u["nombre_longitud"]),
+                      scene2=_estilo_escena(lim, "sr⁻¹"), margin=dict(l=0, r=0, t=40, b=0))
+    return fig
+
+
+def figura_densidad_cartesiana(l: int, m: int, real: bool):
+    """
+    Densidad de probabilidad |Y_l^m|² frente a la posición en coordenadas cartesianas: cortes polares en los planos
+    xz, yz y xy (distancia al origen = |Y|² en esa dirección) y |Y|² sobre la esfera en función de z/R = cosθ.
+    """
+    import matplotlib.pyplot as plt
+    if qc.modo_compacto():
+        fig, ejes = plt.subplots(4, 1, figsize=(7.2, 22), constrained_layout=True)
+    else:
+        fig, ejes = plt.subplots(2, 2, figsize=(13.5, 12), constrained_layout=True)
+    ejes = np.ravel(ejes)
+    ejes_letras = {"xz": ("x", "z"), "yz": ("y", "z"), "xy": ("x", "y")}
+    escala = float(np.max(densidad_probabilidad(l, m, *malla_angular(61), real)))
+    lim = 0.0
+    for ax, plano in zip(ejes[:3], PLANOS):
+        h, v, dens, _ = curva_densidad_plano(l, m, plano, real)
+        lim = max(lim, float(np.max(np.abs(np.concatenate([h, v])))))
+        ax.fill(h, v, color=COLORES["densidad"], alpha=0.30, lw=0)
+        ax.plot(h, v, color=COLORES["densidad"], lw=2.2, label="|Y|² en cada dirección")
+        ax.axhline(0, color=COLORES["gris"], lw=0.8)
+        ax.axvline(0, color=COLORES["gris"], lw=0.8)
+        a, b = ejes_letras[plano]
+        ax.set_xlabel(f"{a}   (distancia al origen = |Y|² [sr⁻¹])")
+        ax.set_ylabel(f"{b}")
+        ax.set_title(f"{PLANOS[plano]}: |Y|² frente a la dirección")
+        ax.set_aspect("equal")
+        ax.grid(True, alpha=0.3)
+        if float(np.max(dens)) < 1e-12 * escala:
+            ax.text(0.5, 0.62, "Densidad nula en todo este plano\n(es un plano nodal del estado)", transform=ax.transAxes,
+                    ha="center", va="center", fontsize=11, color=COLORES["gris"])
+    lim = 1.12 * (lim or 1.0)
+    for ax in ejes[:3]:
+        ax.set_xlim(-lim, lim)
+        ax.set_ylim(-lim, lim)
+    ax = ejes[3]
+    phi_max = meridiano_maximo(m, real)
+    z, d0 = densidad_frente_a_z(l, m, real, phi_max)
+    etiqueta = (f"meridiano de máxima densidad, φ = {np.degrees(phi_max):.4g}°" if (real and m != 0)
+                else "cualquier meridiano (|Y|² no depende de φ)")
+    ax.plot(z, d0, color=COLORES["densidad"], lw=2.4, label=etiqueta)
+    for t in nodos_latitud(l, m):
+        ax.axvline(np.cos(t), color=COLORES["gris"], ls=":", lw=1.2)
+    ax.set_xlabel("posición z / R = cos θ")
+    ax.set_ylabel("|Y|²  [sr⁻¹]")
+    ax.set_title("Densidad sobre la esfera frente a la coordenada z" + ("" if (real and m != 0) else "  (no depende de φ)"))
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(bottom=0)
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper center", fontsize=9)
+    tipo = "combinación real" if (real and m != 0) else "armónico complejo"
+    fig.suptitle(f"Densidad de probabilidad |Y_{l}^{m}|² en coordenadas cartesianas  ({tipo}, l = {l}, m = {m})",
+                 fontsize=14, fontweight="bold")
+    return fig
+
+
 def figura_confinada(p: ParametrosConfinada, d: dict, n_niveles: int = 3):
     """Radial R_nl, P(r), corte de la densidad volumétrica y diagrama de niveles."""
     import matplotlib.pyplot as plt
@@ -871,6 +1032,14 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     p = validar_parametros_esfera(2, 1, 1.0, "SI", 50, "densidad", "lobulos")
     r.comprobar("Figuras: superficie 3D y comparación se construyen sin error",
                 len(figura_superficie_3d(p)[0].data) == 1 and len(figura_comparacion_orbitales([(0, 0), (1, 0), (1, 1)], "densidad", "lobulos", "Viridis", 30).data) == 3)
+    # Densidad de probabilidad en coordenadas cartesianas (criterio del curso)
+    r.comprobar("Densidad |Y_1^0|² en (0, 0, 1) = 3/(4π)", abs(densidad_en_punto(1, 0, 0, 0, 1, 1.0)["densidad_sr"] - 3 / (4 * np.pi)) < 1e-12)
+    r.comprobar("Densidad |Y_1^0|² en el plano nodal z = 0 es cero", densidad_en_punto(1, 0, 1, 1, 0, 1.0)["densidad_sr"] < 1e-25)
+    r.comprobar("Orbital pₓ (real, m = 1): |p|² = 3/(4π) en (1, 0, 0)",
+                abs(densidad_en_punto(1, 1, 1, 0, 0, 1.0, real=True)["densidad_sr"] - 3 / (4 * np.pi)) < 1e-12)
+    hh, vv, dd, _ = curva_densidad_plano(2, 1, "xz")
+    r.comprobar("Corte polar xz: distancia al origen = |Y|²", bool(np.allclose(np.hypot(hh, vv), dd, atol=1e-14)))
+    r.comprobar_error("Densidad: el origen no define una dirección", densidad_en_punto, 1, 0, 0, 0, 0, 1.0)
     return r
 
 
@@ -1122,6 +1291,68 @@ def _pestana_2d(p: ParametrosEsfera):
                "(las bandas cercanas a los polos están exageradas); por eso la normalización incluye el factor sinθ.")
 
 
+@st.cache_data(show_spinner=False, max_entries=16)
+def _cache_densidad_3d(l, m, real, radio, sistema):
+    return figura_densidad_3d(l, m, real, radio, sistema)
+
+
+def _pestana_densidad(p: ParametrosEsfera):
+    """Criterio del curso: densidad de probabilidad (armónicos esféricos) frente a la posición en coordenadas cartesianas."""
+    u = qc.obtener_unidades(p.sistema)
+    L = u["nombre_longitud"]
+    R = p.radio / u["factor_longitud"]
+    st.markdown(
+        f"Estado elegido arriba: **l = {p.l}, mₗ = {p.m}**. Para una partícula sobre una esfera de radio R, la densidad de "
+        "probabilidad depende solo de la dirección del punto (x, y, z):")
+    st.latex(r"P(\theta,\varphi)=|Y_l^{m_l}(\theta,\varphi)|^2,\qquad \cos\theta=\frac{z}{r},\quad "
+             r"\tan\varphi=\frac{y}{x},\quad r=\sqrt{x^2+y^2+z^2}")
+    st.caption("|Y|² se mide por estereorradián [sr⁻¹]; dividida entre R² es la probabilidad por unidad de área de la esfera. "
+               "La probabilidad en un ángulo sólido dΩ = sinθ dθ dφ es |Y|² dΩ, y ∫|Y|² dΩ = 1.")
+    real = False
+    if p.m != 0:
+        real = st.toggle("Usar la combinación real de ±mₗ (orbitales pₓ, p_y, d_xy…)", key="esf_dens_real", value=False,
+                         help="El armónico complejo Y_l^m tiene L_z = mħ definido y |Y|² con simetría axial (no depende de φ). "
+                              "La combinación real mezcla +m y −m: tiene lóbulos orientados pero no L_z definido.")
+    qc.seccion("Densidad en coordenadas cartesianas")
+    try:
+        qc.mostrar_plotly(_cache_densidad_3d(p.l, p.m, real, p.radio, p.sistema), "esf_fig_densidad3d",
+                          archivo=f"esfera_densidad_l{p.l}_m{p.m}.html")
+    except ValueError as error:
+        qc.error(error)
+        return
+    st.caption("Izquierda: la esfera real de radio R; cada punto (x, y, z) tiene el color de su densidad. Derecha: la "
+               "distancia al origen en cada dirección es |Y|² (representación polar habitual de los libros).")
+    qc.mostrar_pyplot(figura_densidad_cartesiana(p.l, p.m, real), archivo=f"esfera_densidad_cortes_l{p.l}_m{p.m}.png")
+    qc.seccion("Evaluar la densidad en un punto (x, y, z)")
+    c1, c2, c3 = st.columns(3)
+    st.caption("Escriba las coordenadas de un punto; por defecto, el punto de la esfera a 45° del eje z en el plano xz.")
+    x = c1.number_input(f"x [{L}]", value=float(R * np.sqrt(0.5)), format="%.4g", key="esf_px")
+    y = c2.number_input(f"y [{L}]", value=0.0, format="%.4g", key="esf_py")
+    z = c3.number_input(f"z [{L}]", value=float(R * np.sqrt(0.5)), format="%.4g", key="esf_pz")
+    try:
+        d = densidad_en_punto(p.l, p.m, x, y, z, R, real)
+    except ValueError as error:
+        qc.error(error)
+        return
+    px, py, pz = d["punto_esfera"]
+    qc.metricas([
+        ("θ (polar)", f"{np.degrees(d['theta']):.4f}°"), ("φ (azimutal)", f"{np.degrees(d['phi']):.4f}°"),
+        ("|Y|²", f"{d['densidad_sr']:.6g} sr⁻¹"), ("|Y|²/R²", f"{d['densidad_area']:.6g} {L}⁻²"),
+    ])
+    if abs(d["r"] - R) > 1e-9 * max(R, 1.0):
+        st.caption(f"El punto no está sobre la esfera (r = {d['r']:.4g} {L}): se usa su dirección, es decir, el punto "
+                   f"({px:.4g}, {py:.4g}, {pz:.4g}) {L} de la esfera de radio R = {R:.4g} {L}.")
+    if d["densidad_sr"] == 0:
+        st.caption("La densidad es cero: el punto está sobre una superficie nodal.")
+    h, v, dens, t = curva_densidad_plano(p.l, p.m, "xz", real, n=361)
+    theta = np.where(t <= np.pi, t, 2 * np.pi - t)
+    phi = np.where(t <= np.pi, 0.0, np.pi)
+    xs, ys, zs = esfericas_a_cartesianas(R, theta, phi)
+    qc.exportar_datos({f"x [{L}]": xs, f"y [{L}]": ys, f"z [{L}]": zs, "theta [rad]": theta, "phi [rad]": phi,
+                       "|Y|^2 [1/sr]": dens, f"|Y|^2/R^2 [1/{L}^2]": dens / R ** 2},
+                      f"esfera_densidad_xz_l{p.l}_m{p.m}.csv", "Descargar la densidad a lo largo del plano xz (CSV)")
+
+
 def _pestana_comparacion(p: ParametrosEsfera):
     opciones = [(l, m) for l in range(0, 4) for m in range(-l, l + 1)]
     with st.container(border=True):
@@ -1250,23 +1481,25 @@ def interfaz() -> None:
     p = _leer_parametros()
     if p is None:
         return
-    tabs = st.tabs(["Armónico 3D", "Proyección 2D y cortes", "Comparación de orbitales", "Complejos y reales",
+    tabs = st.tabs(["Densidad de probabilidad", "Armónico 3D", "Proyección 2D y cortes", "Comparación de orbitales", "Complejos y reales",
                     "Partícula confinada", "Guía de práctica", "Autoevaluación", "Pruebas numéricas"])
     with tabs[0]:
-        _pestana_3d(p)
+        _pestana_densidad(p)
     with tabs[1]:
-        _pestana_2d(p)
+        _pestana_3d(p)
     with tabs[2]:
-        _pestana_comparacion(p)
+        _pestana_2d(p)
     with tabs[3]:
-        _pestana_complejo_real()
+        _pestana_comparacion(p)
     with tabs[4]:
-        _pestana_confinada()
+        _pestana_complejo_real()
     with tabs[5]:
-        qc.guia_practica(GUIA, "esf")
+        _pestana_confinada()
     with tabs[6]:
-        qc.autoevaluacion(PREGUNTAS, "esf")
+        qc.guia_practica(GUIA, "esf")
     with tabs[7]:
+        qc.autoevaluacion(PREGUNTAS, "esf")
+    with tabs[8]:
         qc.boton_pruebas(ejecutar_pruebas, "esf_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 
