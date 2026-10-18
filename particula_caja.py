@@ -428,7 +428,7 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     ax.axhline(0, color="white", lw=0.8, alpha=0.5)
     ax.set_title("Función de onda")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(rf"$\psi_n(x)\ [{Ltex}^{{-1/2}}]$")
+    ax.set_ylabel(rf"Función de onda [${Ltex}^{{-1/2}}$]")
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right")
 
@@ -447,7 +447,7 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
             bbox=dict(boxstyle="round,pad=0.4", fc=COLORES["fondo"], ec=COLORES["rejilla"]))
     ax.set_title("Densidad de probabilidad")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(rf"$|\psi_n(x)|^2\ [{Ltex}^{{-1}}]$")
+    ax.set_ylabel(rf"Densidad de probabilidad [${Ltex}^{{-1}}$]")
     ax.set_ylim(-0.04 * rho_vis.max(), 1.55 * rho_vis.max())      # espacio arriba para la leyenda y el recuadro de n
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right")
@@ -516,7 +516,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
     ax.set_ylim(-amp_max, amp_max)
     ax.set_title("Parte real")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(rf"$\Psi\ [{Ltex}^{{-1/2}}]$")
+    ax.set_ylabel(rf"Función de onda [${Ltex}^{{-1/2}}$]")
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right")
 
@@ -527,7 +527,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
     ax.set_ylim(-amp_max, amp_max)
     ax.set_title("Parte imaginaria")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(rf"$\Psi\ [{Ltex}^{{-1/2}}]$")
+    ax.set_ylabel(rf"Función de onda [${Ltex}^{{-1/2}}$]")
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right")
 
@@ -563,7 +563,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
     ax.set_ylim(bottom=-0.02 * rho_vis.max(), top=1.35 * rho_vis.max())
     ax.set_title("Densidad de probabilidad")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(rf"$|\Psi|^2\ [{Ltex}^{{-1}}]$")
+    ax.set_ylabel(rf"Densidad de probabilidad [${Ltex}^{{-1}}$]")
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right", fontsize=7.5)
     return fig
@@ -591,8 +591,8 @@ def figura_animacion_superposicion(x_vis, taus, re, im, rho, nombre_longitud: st
                            data=[go.Scatter(y=re[i]), go.Scatter(y=im[i]), go.Scatter(y=rho[i])])
                   for i in range(len(taus))]
     amp = 1.1 * max(np.max(np.abs(re)), np.max(np.abs(im)))
-    fig.update_yaxes(range=[-amp, amp], title_text="Ψ (unidades de visualización)", row=1, col=1)
-    fig.update_yaxes(range=[0, 1.12 * np.max(rho)], title_text="|Ψ|²", row=1, col=2)
+    fig.update_yaxes(range=[-amp, amp], title_text="Función de onda", row=1, col=1)
+    fig.update_yaxes(range=[0, 1.12 * np.max(rho)], title_text="Densidad de probabilidad", row=1, col=2)
     fig.update_xaxes(title_text=f"x [{nombre_longitud}]")
     qc.aplicar_tema_plotly(fig, altura=500)
     qc.agregar_animacion(fig, nombres, etiquetas_tiempo, duracion_ms=70)
@@ -621,7 +621,7 @@ def figura_experimento(x_vis, rho1, rho2, rho12_t, rho12_0, taus, nombre_longitu
                   for i in range(len(taus))]
     tope = 1.12 * max(np.max(rho1), np.max(rho2), np.max(rho12_t))
     fig.update_yaxes(range=[0, tope])
-    fig.update_yaxes(title_text="|Ψ|² (unidades de visualización)", row=1, col=1)
+    fig.update_yaxes(title_text="Densidad de probabilidad", row=1, col=1)
     fig.update_xaxes(title_text=f"x [{nombre_longitud}]")
     qc.aplicar_tema_plotly(fig, altura=470)
     qc.agregar_animacion(fig, nombres, etiquetas_tiempo, duracion_ms=70)

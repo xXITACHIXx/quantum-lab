@@ -392,8 +392,8 @@ def figura_compresion(p: Paquete, compacto: bool = False):
                       margin=dict(t=140 if compacto else 112))
     fig.update_xaxes(range=[-x_lim, x_lim], title_text="x [nm]", row=1, col=1)
     fig.update_xaxes(range=list(k_lim), title_text="p [ħ/nm]", row=pos2[0], col=pos2[1])
-    fig.update_yaxes(range=[1.08 * ymn, 1.08 * ymx], title_text="densidad [1/nm]", row=1, col=1)
-    fig.update_yaxes(range=[0, 1.08 * ymk], title_text="densidad [nm/ħ]", row=pos2[0], col=pos2[1])
+    fig.update_yaxes(range=[1.08 * ymn, 1.08 * ymx], title_text="Densidad de probabilidad [1/nm]", row=1, col=1)
+    fig.update_yaxes(range=[0, 1.08 * ymk], title_text="Densidad de probabilidad [nm/ħ]", row=pos2[0], col=pos2[1])
     fig.update_layout(sliders=[dict(
         active=idx_activo, x=0.025, len=0.95, y=-0.2 if not compacto else -0.12, yanchor="top",
         currentvalue=dict(prefix="ancho del paquete: ", suffix=" nm", font=dict(size=12, family=qc.FUENTE_CIFRAS)),
