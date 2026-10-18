@@ -437,7 +437,6 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     hw_vis = HBAR * p.omega / fe
 
     fig, ejes = qc.rejilla(2, 3, (17.5, 9.2), constrained_layout=True, sharex=True)
-    fig.suptitle(f"Oscilador armónico cuántico 1D — estado n = {n}", fontsize=17, fontweight="bold")
     for ax in ejes.flat:
         ax.set_xlim(-lim, lim)
         ax.grid(alpha=0.3)
@@ -450,7 +449,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax.fill_between(x_vis, d["psi"] * np.sqrt(fx), 0, where=d["psi"] < 0, color=COLORES["energia"], alpha=0.16)
     ax.plot(x_vis, d["psi"] * np.sqrt(fx), color=COLORES["onda"], lw=2.4, label=rf"$\psi_{{{n}}}(x)$")
     ax.axhline(0, color="white", lw=0.8, alpha=0.5)
-    ax.set_title("1 · Función de onda")
+    ax.set_title("Función de onda")
     ax.set_ylabel(rf"$\psi_n\ [{Ltex}^{{-1/2}}]$")
     ax.legend(loc="upper right")
 
@@ -463,7 +462,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
                    label=f"Nodos ({len(d['nodos'])})")
     ax.axvline(-d["xt"] / fx, color=COLORES["gris"], ls=":", lw=1.2)
     ax.axvline(d["xt"] / fx, color=COLORES["gris"], ls=":", lw=1.2, label="Puntos de retorno")
-    ax.set_title("2 · Densidad de probabilidad")
+    ax.set_title("Densidad de probabilidad")
     ax.set_ylabel(rf"$|\psi_n|^2\ [{Ltex}^{{-1}}]$")
     ax.legend(loc="upper right")
 
@@ -476,7 +475,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
             label=r"$|\psi_n|^2$ (escala arbitraria)")
     ax.scatter([-d["xt"] / fx, d["xt"] / fx], [e_vis, e_vis], color=COLORES["energia"], s=40, zorder=5)
     ax.set_ylim(0, e_vis + 1.35 * hw_vis)
-    ax.set_title("3 · Potencial V(x) y nivel E_n")
+    ax.set_title("Potencial y energía")
     ax.set_ylabel(f"Energía [{U}]")
     ax.legend(loc="upper center", fontsize=7.5)
 
@@ -484,7 +483,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax = ejes[1, 0]
     ax.plot(x_vis, d["u_V"] * fx / fe, color=COLORES["potencial"], lw=2.4, label=r"$u_V=V\,|\psi|^2$")
     ax.fill_between(x_vis, d["u_V"] * fx / fe, color=COLORES["potencial"], alpha=0.12)
-    ax.set_title("4 · Densidad de energía potencial")
+    ax.set_title("Densidad de energía potencial")
     ax.set_ylabel(f"$u_V$ [{U}/{L}]")
     ax.legend(loc="upper right")
 
@@ -493,7 +492,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax.plot(x_vis, d["u_T"] * fx / fe, color=COLORES["cinetica"], lw=2.4,
             label=r"$u_T=\frac{\hbar^2}{2m}|\psi'|^2$")
     ax.fill_between(x_vis, d["u_T"] * fx / fe, color=COLORES["cinetica"], alpha=0.12)
-    ax.set_title("5 · Densidad de energía cinética")
+    ax.set_title("Densidad de energía cinética")
     ax.set_ylabel(f"$u_T$ [{U}/{L}]")
     ax.legend(loc="upper right")
 
@@ -506,7 +505,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     ax.plot(x_vis, acum_t + acum_v, color=COLORES["energia"], lw=2.6, label=r"$\int (u_T+u_V)\,dx\ \to\ E$")
     ax.axhline(e_vis, color=COLORES["onda"], ls="--", lw=1.6, label=rf"$E_{{{n}}}=\hbar\omega(n+\frac{{1}}{{2}})$")
     ax.axhline(e_vis / 2, color=COLORES["gris"], ls=":", lw=1.4, label=r"$E_n/2$ (virial)")
-    ax.set_title("6 · Energía total (integral acumulada)")
+    ax.set_title("Energía total")
     ax.set_ylabel(f"Energía [{U}]")
     ax.legend(loc="center left", fontsize=7.5)
     return fig
@@ -541,7 +540,7 @@ def figura_niveles_y_escalas(d: dict, p: ParametrosOscilador, zoom: bool = True)
              label=rf"$\psi_{{{n}}}$ sobre su nivel (escala arbitraria)")
     ax1.set_xlim(-semi / fx, semi / fx)
     ax1.set_ylim(0, (k_max + 0.5) * hw * 1.12)
-    ax1.set_title("Potencial parabólico y diagrama de niveles  ($E_n=\\hbar\\omega(n+\\frac{1}{2})$, equiespaciados)")
+    ax1.set_title("Potencial y niveles de energía")
     ax1.set_xlabel(f"x [{L}]")
     ax1.set_ylabel(f"Energía [{U}]")
     ax1.grid(alpha=0.3)
@@ -550,16 +549,16 @@ def figura_niveles_y_escalas(d: dict, p: ParametrosOscilador, zoom: bool = True)
     lim = _semiancho_visual(p, n, x0, zoom) / fx
     ax2.plot(d["x"] / fx, d["psi"] * np.sqrt(fx), color=COLORES["onda"], lw=2.4)
     ax2.axhline(0, color="white", lw=0.7, alpha=0.5)
-    ax2.set_ylabel(rf"$\psi_n(x)\ [{Ltex}^{{-1/2}}]$   (eje izquierdo)", color=COLORES["onda"])
+    ax2.set_ylabel(rf"$\psi_n(x)\ [{Ltex}^{{-1/2}}]$", color=COLORES["onda"])
     ax2.tick_params(axis="y", colors=COLORES["onda"])
     ax3 = ax2.twinx()
     ax3.plot(d["x"] / fx, d["rho"] * fx, color=COLORES["densidad"], lw=2.4, ls="--")
     ax3.fill_between(d["x"] / fx, d["rho"] * fx, color=COLORES["densidad"], alpha=0.10)
-    ax3.set_ylabel(rf"$|\psi_n(x)|^2\ [{Ltex}^{{-1}}]$   (eje derecho)", color=COLORES["densidad"])
+    ax3.set_ylabel(rf"$|\psi_n(x)|^2\ [{Ltex}^{{-1}}]$", color=COLORES["densidad"])
     ax3.tick_params(axis="y", colors=COLORES["densidad"])
     ax2.set_xlim(-lim, lim)
     ax2.set_xlabel(f"x [{L}]")
-    ax2.set_title("ψ y |ψ|² juntas, con escalas DIFERENTES (cada curva usa su propio eje)")
+    ax2.set_title("Función de onda y densidad de probabilidad")
     ax2.grid(alpha=0.3)
     return fig
 
@@ -586,7 +585,7 @@ def figura_comparacion(datos: list[dict], p: ParametrosOscilador, modo_fundament
                 ax.axvline(dd["xt"] / fx, color=c, ls=":", lw=1.1, alpha=0.8)
                 ax.axvline(-dd["xt"] / fx, color=c, ls=":", lw=1.1, alpha=0.8)
     ax1.axhline(0, color="white", lw=0.7, alpha=0.4)
-    ax1.set_title("Función de onda" + (" — líneas punteadas: puntos de retorno clásicos" if modo_fundamental else ""))
+    ax1.set_title("Función de onda")
     ax1.set_ylabel(rf"$\psi_n\ [{Ltex}^{{-1/2}}]$")
     ax2.set_title("Densidad de probabilidad")
     ax2.set_ylabel(rf"$|\psi_n|^2\ [{Ltex}^{{-1}}]$")
@@ -616,9 +615,9 @@ def figura_limite_clasico(d: dict, n: int, sistema: str, ns=None, ks=None):
     for s_ in (-A, A):
         ax.axvline(s_, color=COLORES["energia"], ls=":", lw=1.2)
     ax.set_ylim(0, tope)
-    ax.set_title(f"Densidad de probabilidad · n = {n}")
+    ax.set_title("Densidad de probabilidad")
     ax.set_xlabel(f"x [{L}]")
-    ax.set_ylabel(f"densidad [1/{L}]")
+    ax.set_ylabel(f"Densidad de probabilidad [1/{L}]")
     ax.legend(loc="upper center")
     ax.grid(alpha=0.3)
     ax = ejes[1]
@@ -629,7 +628,7 @@ def figura_limite_clasico(d: dict, n: int, sistema: str, ns=None, ks=None):
                 arrowprops=dict(arrowstyle="<->", color=COLORES["energia"], lw=1.5))
     ax.text(x[i], (d["F_q"][i] + d["F_cl"][i]) / 2, f"  D = {d['distancia_ks']:.3f}", color=COLORES["energia"],
             va="center", fontsize=10)
-    ax.set_title("Probabilidad acumulada F(x)")
+    ax.set_title("Probabilidad acumulada")
     ax.set_xlabel(f"x [{L}]")
     ax.legend(loc="upper left")
     ax.grid(alpha=0.3)
@@ -638,7 +637,7 @@ def figura_limite_clasico(d: dict, n: int, sistema: str, ns=None, ks=None):
         ax.plot(ns, ks, "o-", color=COLORES["onda"], ms=3.5, lw=1.4)
         ax.plot([n], [d["distancia_ks"]], "o", color=COLORES["energia"], ms=9)
         ax.set_yscale("log")
-        ax.set_title("Distancia cuántica–clásica D frente a n")
+        ax.set_title("Distancia cuántica–clásica")
         ax.set_xlabel("número cuántico n")
         ax.set_ylabel("D = max|F_q − F_cl|")
         ax.grid(alpha=0.3, which="both")
@@ -655,8 +654,8 @@ def figura_dinamica(x_vis, taus, re, im, rho, x_medio, nombre_longitud: str, eti
     from plotly.subplots import make_subplots
 
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1,
-                        subplot_titles=(f"Función de onda compleja Ψ(x,t) — {titulo_estado}",
-                                        "Densidad de probabilidad |Ψ(x,t)|²  y  posición media ⟨x⟩"))
+                        subplot_titles=("Función de onda",
+                                        "Densidad de probabilidad"))
     fig.add_trace(go.Scatter(x=x_vis, y=re[0], name="Re Ψ", line=dict(color=COLORES["onda"], width=3)), 1, 1)
     fig.add_trace(go.Scatter(x=x_vis, y=im[0], name="Im Ψ", line=dict(color=COLORES["interferencia"], width=3)), 1, 1)
     fig.add_trace(go.Scatter(x=x_vis, y=rho[0], name="|Ψ|²", fill="tozeroy",
@@ -1061,8 +1060,6 @@ def _pestana_niveles(p_base: ParametrosOscilador):
     ])
     qc.seccion("Visualización")
     qc.mostrar_pyplot(figura_niveles_y_escalas(d, p, st.session_state["osc_zoom"]), archivo=f"oscilador_niveles_n{p.n}.png")
-    st.caption("En el panel derecho ψₙ y |ψₙ|² comparten el eje x pero no el eje y: tienen unidades distintas "
-               "(L^(−1/2) y L^(−1)), por eso cada una usa su propia escala, indicada por el color del eje.")
 
 
 def _pestana_comparacion(p_base: ParametrosOscilador):
@@ -1100,8 +1097,6 @@ def _pestana_comparacion(p_base: ParametrosOscilador):
                     for dd in datos],
                    numericas=("n", f"Eₙ [{u['nombre_energia']}]", "Nodos", f"Punto de retorno [{u['nombre_longitud']}]",
                               "⟨x²⟩/x₀²", f"⟨ψ{datos[0]['n']}|ψₙ⟩"), archivo="oscilador_comparacion.csv")
-    st.caption("Estados distintos son ortogonales: el solapamiento es 0 salvo consigo mismo (= 1). "
-               "La extensión espacial crece como √(2n+1)·x₀.")
 
 
 @st.cache_data(show_spinner="Calculando la distancia cuántica–clásica…", max_entries=8)
@@ -1178,21 +1173,15 @@ def _pestana_dinamica(p_base: ParametrosOscilador):
         return
     u = qc.obtener_unidades(p_base.sistema)
     if estacionario:
-        qc.nota("**Estado estacionario.** La función de onda compleja gira en el plano complejo: Re Ψ e Im Ψ "
-                "oscilan en el tiempo. Pero es solo una **fase global** e^{−iEₙt/ħ}; la densidad |Ψ|² (curva "
-                "inferior) **no cambia** y ⟨x⟩ permanece en 0. La oscilación de Re Ψ no significa que la partícula "
-                "se mueva.")
+        qc.nota("Estado estacionario: Re Ψ e Im Ψ oscilan (fase global), pero la densidad de probabilidad no cambia.")
     else:
         t_rho = 2 * np.pi / (p_base.omega * abs(int(n2) - int(n1)))
-        qc.nota(f"**Superposición.** La densidad cambia por la interferencia entre estados de energías distintas "
-                f"(frecuencia |n₂−n₁|ω) y se repite cada Δτ = 2π/|n₂−n₁| = {2 * np.pi / abs(int(n2) - int(n1)):.3f} "
-                f"(T = {t_rho / u['factor_tiempo']:.4g} {u['nombre_tiempo']}). Para (|0⟩+|1⟩)/√2, ⟨x⟩ oscila como "
-                f"x₀ cos(ωt)/√2: es el movimiento del paquete, no de una fase global.")
+        qc.nota(f"Superposición: la densidad de probabilidad se repite cada T = {t_rho / u['factor_tiempo']:.4g} "
+                f"{u['nombre_tiempo']}.")
     qc.seccion("Animación")
     figura = _animacion_cacheada("estacionario" if estacionario else "superposicion", int(n1), int(n2), float(peso),
                                  float(fase), p_base.masa, p_base.omega, p_base.sistema, p_base.rango, 72)
     qc.mostrar_plotly(figura, clave="osc_anim", archivo="oscilador_dinamica.html")
-    st.caption("Animación en el navegador: «Reproducir», «Pausa» y deslizador. Un periodo completo τ ∈ [0, 2π).")
 
 
 def interfaz() -> None:

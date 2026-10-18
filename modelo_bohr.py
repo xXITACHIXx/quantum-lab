@@ -420,8 +420,7 @@ def figura_transicion(t: Transicion, d: dict, n_max: int, escala_real: bool):
         ax.set_yticks([])
     for lado in ("top", "right", "bottom") + (() if escala_real else ("left",)):
         ax.spines[lado].set_visible(False)
-    ax.set_title(f"{d['tipo']} {t.n_inicial} → {t.n_final} · {NUCLEOS[t.nucleo][2]} · serie de {d['serie']} "
-                 f"(flechas tenues: otras líneas de la misma serie)", fontsize=12)
+    ax.set_title(f"{d['tipo']} {t.n_inicial} → {t.n_final} · {NUCLEOS[t.nucleo][2]}", fontsize=12)
 
     # Espectro electromagnético
     lam_min, lam_max = 60.0, 6000.0
@@ -443,7 +442,7 @@ def figura_transicion(t: Transicion, d: dict, n_max: int, escala_real: bool):
     ax2.set_ylim(0, 1)
     ax2.set_yticks([])
     ax2.set_xlabel("longitud de onda λ [nm] (escala logarítmica) · líneas tenues: resto de la serie")
-    ax2.set_title("Posición de la línea en el espectro electromagnético", fontsize=11)
+    ax2.set_title("Espectro electromagnético", fontsize=11)
     return fig
 
 
@@ -489,7 +488,7 @@ def figura_nube_3d(n: int, l: int, m: int, real: bool, puntos: int, semilla: int
     eje = dict(range=[-L, L], backgroundcolor=COLORES["panel"], gridcolor=COLORES["rejilla"], zerolinecolor=COLORES["gris"],
                showbackground=True, color=COLORES["texto"])
     nombre = nombre_orbital_real(n, l, m) if real else f"{n}{LETRAS_L[l]}, m = {m} (complejo)"
-    qc.aplicar_tema_plotly(fig, f"Nube de probabilidad del orbital {nombre} · {puntos} medidas de la posición", altura=altura)
+    qc.aplicar_tema_plotly(fig, f"Nube de probabilidad · {nombre}", altura=altura)
     fig.update_layout(scene=dict(xaxis=dict(title="x [a₀]", **eje), yaxis=dict(title="y [a₀]", **eje),
                                  zaxis=dict(title="z [a₀]", **eje), aspectmode="cube",
                                  camera=dict(eye=dict(x=1.35, y=1.35, z=0.85))),
@@ -531,7 +530,7 @@ def figura_orbital_2d(n: int, l: int, m: int, real: bool, nucleo: str, masa_redu
     ax.set_ylim(0, P.max() * 1.18)
     ax.set_xlabel("distancia al núcleo r [a₀]")
     ax.set_ylabel("densidad radial [1/a₀]")
-    ax.set_title("Distribución radial: dónde es probable encontrar el electrón")
+    ax.set_title("Densidad de probabilidad radial")
     ax.legend(loc="upper right", fontsize=9)
     ax.grid(alpha=0.3)
     e = c["ejes"]
@@ -544,8 +543,8 @@ def figura_orbital_2d(n: int, l: int, m: int, real: bool, nucleo: str, masa_redu
     ejes = {"xz": ("x", "z"), "xy": ("x", "y"), "yz": ("y", "z")}[c["plano"]]
     ax2.set_xlabel(f"{ejes[0]} [a₀]")
     ax2.set_ylabel(f"{ejes[1]} [a₀]")
-    ax2.set_title(f"Corte de |ψ|² en el plano {c['plano']} (línea: radio de Bohr)")
-    fig.colorbar(im, ax=ax2, label="densidad relativa (escala ^0.6)", shrink=0.85)
+    ax2.set_title(f"Densidad de probabilidad · plano {c['plano']}")
+    fig.colorbar(im, ax=ax2, label="Densidad de probabilidad [relativa]", shrink=0.85)
     return fig
 
 
@@ -669,7 +668,7 @@ def figura_serie(s: dict):
     ax2.set_ylim(0, 1)
     ax2.set_yticks([])
     ax2.set_xlabel("longitud de onda λ [nm]  (franja de color: región visible)")
-    ax2.set_title("Líneas de emisión de la serie")
+    ax2.set_title("Líneas de emisión")
     return fig
 
 
@@ -689,7 +688,7 @@ def figura_espectro(nucleo: str, masa_reducida: bool, n_max: int = 9):
     ax.set_yticks(range(1, 6))
     ax.set_yticklabels([f"$n_f$ = {k}" for k in range(1, 6)])
     ax.set_xlabel("longitud de onda λ [nm] (escala logarítmica)")
-    ax.set_title(f"Espectro de emisión de {NUCLEOS[nucleo][2]} · líneas punteadas: límites de serie")
+    ax.set_title(f"Espectro de emisión · {NUCLEOS[nucleo][2]}")
     ax.grid(alpha=0.25, which="both", axis="x")
     return fig
 

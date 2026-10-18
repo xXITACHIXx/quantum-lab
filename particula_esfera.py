@@ -62,8 +62,8 @@ def letra(l: int) -> str:
     return LETRAS[l] if 0 <= l < len(LETRAS) else f"[l={l}]"
 
 MODOS = {
-    "densidad": "Densidad angular |Y|²",
-    "prob": "Densidad de probabilidad |Y|²/R² (por área)",
+    "densidad": "Densidad angular",
+    "prob": "Densidad de probabilidad",
     "re": "Parte real Re Y",
     "im": "Parte imaginaria Im Y",
     "fase": "Fase arg Y",
@@ -728,15 +728,14 @@ def figura_densidad_3d(l: int, m: int, real: bool, radio: float, sistema: str, n
     xp, yp, zp = esfericas_a_cartesianas(dens, T, P)
     unidad_area = f"{u['nombre_longitud']}⁻²"
     fig = make_subplots(rows=1, cols=2, specs=[[{"type": "scene"}, {"type": "scene"}]], horizontal_spacing=0.02,
-                        subplot_titles=[f"Sobre la esfera de radio R: color = |Y|²/R² [{unidad_area}]",
-                                        "Superficie polar r = |Y|²(θ, φ) [sr⁻¹]"])
+                        subplot_titles=["Densidad de probabilidad", "Densidad angular"])
     fig.add_trace(go.Surface(x=xs, y=ys, z=zs, surfacecolor=dens / R ** 2, colorscale="Viridis", cmin=0,
-                             colorbar=dict(title=dict(text=f"|Y|²/R²<br>[{unidad_area}]", side="right"), x=0.44, len=0.75, thickness=12),
+                             colorbar=dict(title=dict(text=f"Densidad de probabilidad<br>[{unidad_area}]", side="right"), x=0.44, len=0.75, thickness=12),
                              hovertemplate=f"x=%{{x:.3f}} {u['nombre_longitud']}<br>y=%{{y:.3f}}<br>z=%{{z:.3f}}<br>"
-                                           f"|Y|²/R²=%{{surfacecolor:.4g}} {unidad_area}<extra></extra>"), row=1, col=1)
+                                           f"Densidad de probabilidad=%{{surfacecolor:.4g}} {unidad_area}<extra></extra>"), row=1, col=1)
     fig.add_trace(go.Surface(x=xp, y=yp, z=zp, surfacecolor=dens, colorscale="Viridis", cmin=0,
-                             colorbar=dict(title=dict(text="|Y|²<br>[sr⁻¹]", side="right"), x=1.0, len=0.75, thickness=12),
-                             hovertemplate="x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{z:.4f}<br>|Y|²=%{surfacecolor:.4g} sr⁻¹<extra></extra>"),
+                             colorbar=dict(title=dict(text="Densidad angular<br>[sr⁻¹]", side="right"), x=1.0, len=0.75, thickness=12),
+                             hovertemplate="x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{z:.4f}<br>Densidad angular=%{surfacecolor:.4g} sr⁻¹<extra></extra>"),
                   row=1, col=2)
     lim = 1.15 * float(np.max(dens)) or 1.0
     qc.aplicar_tema_plotly(fig, None, altura=560)
@@ -763,17 +762,17 @@ def figura_densidad_cartesiana(l: int, m: int, real: bool):
         h, v, dens, _ = curva_densidad_plano(l, m, plano, real)
         lim = max(lim, float(np.max(np.abs(np.concatenate([h, v])))))
         ax.fill(h, v, color=COLORES["densidad"], alpha=0.30, lw=0)
-        ax.plot(h, v, color=COLORES["densidad"], lw=2.2, label="|Y|² en cada dirección")
+        ax.plot(h, v, color=COLORES["densidad"], lw=2.2, label=None)
         ax.axhline(0, color=COLORES["gris"], lw=0.8)
         ax.axvline(0, color=COLORES["gris"], lw=0.8)
         a, b = ejes_letras[plano]
-        ax.set_xlabel(f"{a}   (distancia al origen = |Y|² [sr⁻¹])")
+        ax.set_xlabel(f"{a}")
         ax.set_ylabel(f"{b}")
-        ax.set_title(f"{PLANOS[plano]}: |Y|² frente a la dirección")
+        ax.set_title(f"Plano {plano}")
         ax.set_aspect("equal")
         ax.grid(True, alpha=0.3)
         if float(np.max(dens)) < 1e-12 * escala:
-            ax.text(0.5, 0.62, "Densidad nula en todo este plano\n(es un plano nodal del estado)", transform=ax.transAxes,
+            ax.text(0.5, 0.62, "Densidad nula", transform=ax.transAxes,
                     ha="center", va="center", fontsize=11, color=COLORES["gris"])
     lim = 1.12 * (lim or 1.0)
     for ax in ejes[:3]:
@@ -782,21 +781,15 @@ def figura_densidad_cartesiana(l: int, m: int, real: bool):
     ax = ejes[3]
     phi_max = meridiano_maximo(m, real)
     z, d0 = densidad_frente_a_z(l, m, real, phi_max)
-    etiqueta = (f"meridiano de máxima densidad, φ = {np.degrees(phi_max):.4g}°" if (real and m != 0)
-                else "cualquier meridiano (|Y|² no depende de φ)")
-    ax.plot(z, d0, color=COLORES["densidad"], lw=2.4, label=etiqueta)
+    ax.plot(z, d0, color=COLORES["densidad"], lw=2.4)
     for t in nodos_latitud(l, m):
         ax.axvline(np.cos(t), color=COLORES["gris"], ls=":", lw=1.2)
-    ax.set_xlabel("posición z / R = cos θ")
-    ax.set_ylabel("|Y|²  [sr⁻¹]")
-    ax.set_title("Densidad sobre la esfera frente a la coordenada z" + ("" if (real and m != 0) else "  (no depende de φ)"))
+    ax.set_xlabel("z / R")
+    ax.set_ylabel("Densidad angular [sr⁻¹]")
+    ax.set_title("Densidad angular frente a z")
     ax.set_xlim(-1, 1)
     ax.set_ylim(bottom=0)
     ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper center", fontsize=9)
-    tipo = "combinación real" if (real and m != 0) else "armónico complejo"
-    fig.suptitle(f"Densidad de probabilidad |Y_{l}^{m}|² en coordenadas cartesianas  ({tipo}, l = {l}, m = {m})",
-                 fontsize=14, fontweight="bold")
     return fig
 
 
@@ -1253,15 +1246,9 @@ def _pestana_3d(p: ParametrosEsfera):
     if forma_ef == "esfera" and p.forma != "esfera":
         qc.nota("La fase no se puede «deformar»: la esfera se mantiene intacta.")
     if p.forma == "lobulos" and p.modo != "fase":
-        qc.aviso("Modo «lóbulos»: la distancia al origen codifica |valor| (r = R·|f|/max|f|). No es una superficie "
-                 "física: la partícula no está «en» el lóbulo; solo indica en qué direcciones es más probable.")
-    if p.modo == "prob":
-        qc.nota("Densidad de probabilidad por unidad de ÁREA sobre la esfera de radio R: |Y|²/R². Multiplicada por el "
-                "elemento de área R² sinθ dθ dφ da la probabilidad de hallar la partícula en esa región. Para el armónico "
-                "complejo solo depende de z/R = cosθ; la pestaña «Densidad de probabilidad» la muestra frente a x, y, z.")
+        qc.aviso("Lóbulos: la distancia al origen representa el valor; no es una superficie física.")
     if p.forma == "suave":
-        qc.aviso(f"Deformación artificial r = R(1 + α f/max|f|) con α = {p.alfa:.2f}, para apreciar el patrón. "
-                 "La esfera real de radio R no cambia de forma.")
+        qc.aviso("Deformación artificial, solo para apreciar el patrón.")
     qc.mostrar_plotly(figura, "esf_fig3d", archivo=f"esfera_Y_l{p.l}_m{p.m}.html")
     T, P = malla_angular(p.n_theta)
     Y = armonico_esferico(p.l, p.m, T, P)
@@ -1318,31 +1305,19 @@ def _pestana_densidad(p: ParametrosEsfera):
     u = qc.obtener_unidades(p.sistema)
     L = u["nombre_longitud"]
     R = p.radio / u["factor_longitud"]
-    st.markdown(
-        f"Estado elegido arriba: **l = {p.l}, mₗ = {p.m}**. Para una partícula sobre una esfera de radio R, la densidad de "
-        "probabilidad depende solo de la dirección del punto (x, y, z):")
-    st.latex(r"P(\theta,\varphi)=|Y_l^{m_l}(\theta,\varphi)|^2,\qquad \cos\theta=\frac{z}{r},\quad "
-             r"\tan\varphi=\frac{y}{x},\quad r=\sqrt{x^2+y^2+z^2}")
-    st.caption("|Y|² se mide por estereorradián [sr⁻¹]; dividida entre R² es la probabilidad por unidad de área de la esfera. "
-               "La probabilidad en un ángulo sólido dΩ = sinθ dθ dφ es |Y|² dΩ, y ∫|Y|² dΩ = 1.")
     real = False
     if p.m != 0:
-        real = st.toggle("Usar la combinación real de ±mₗ (orbitales pₓ, p_y, d_xy…)", key="esf_dens_real", value=False,
-                         help="El armónico complejo Y_l^m tiene L_z = mħ definido y |Y|² con simetría axial (no depende de φ). "
-                              "La combinación real mezcla +m y −m: tiene lóbulos orientados pero no L_z definido.")
-    qc.seccion("Densidad en coordenadas cartesianas")
+        real = st.toggle("Orbital real (±mₗ)", key="esf_dens_real", value=False,
+                         help="Complejo: L_z definido y simetría axial. Real: mezcla +m y −m (pₓ, p_y, d_xy…).")
     try:
         qc.mostrar_plotly(_cache_densidad_3d(p.l, p.m, real, p.radio, p.sistema), "esf_fig_densidad3d",
                           archivo=f"esfera_densidad_l{p.l}_m{p.m}.html")
     except ValueError as error:
         qc.error(error)
         return
-    st.caption("Izquierda: la esfera real de radio R; cada punto (x, y, z) tiene el color de su densidad. Derecha: la "
-               "distancia al origen en cada dirección es |Y|² (representación polar habitual de los libros).")
     qc.mostrar_pyplot(figura_densidad_cartesiana(p.l, p.m, real), archivo=f"esfera_densidad_cortes_l{p.l}_m{p.m}.png")
-    qc.seccion("Evaluar la densidad en un punto (x, y, z)")
+    qc.seccion("Punto (x, y, z)")
     c1, c2, c3 = st.columns(3)
-    st.caption("Escriba las coordenadas de un punto; por defecto, el punto de la esfera a 45° del eje z en el plano xz.")
     x = c1.number_input(f"x [{L}]", value=float(R * np.sqrt(0.5)), format="%.4g", key="esf_px")
     y = c2.number_input(f"y [{L}]", value=0.0, format="%.4g", key="esf_py")
     z = c3.number_input(f"z [{L}]", value=float(R * np.sqrt(0.5)), format="%.4g", key="esf_pz")
@@ -1354,13 +1329,13 @@ def _pestana_densidad(p: ParametrosEsfera):
     px, py, pz = d["punto_esfera"]
     qc.metricas([
         ("θ (polar)", f"{np.degrees(d['theta']):.4f}°"), ("φ (azimutal)", f"{np.degrees(d['phi']):.4f}°"),
-        ("|Y|²", f"{d['densidad_sr']:.6g} sr⁻¹"), ("|Y|²/R²", f"{d['densidad_area']:.6g} {L}⁻²"),
+        ("Densidad angular", f"{d['densidad_sr']:.6g} sr⁻¹"),
+        ("Densidad de probabilidad", f"{d['densidad_area']:.6g} {L}⁻²"),
     ])
     if abs(d["r"] - R) > 1e-9 * max(R, 1.0):
-        st.caption(f"El punto no está sobre la esfera (r = {d['r']:.4g} {L}): se usa su dirección, es decir, el punto "
-                   f"({px:.4g}, {py:.4g}, {pz:.4g}) {L} de la esfera de radio R = {R:.4g} {L}.")
+        st.caption(f"Fuera de la esfera: se usa su dirección, punto ({px:.4g}, {py:.4g}, {pz:.4g}) {L}.")
     if d["densidad_sr"] == 0:
-        st.caption("La densidad es cero: el punto está sobre una superficie nodal.")
+        st.caption("Densidad nula: superficie nodal.")
     h, v, dens, t = curva_densidad_plano(p.l, p.m, "xz", real, n=361)
     theta = np.where(t <= np.pi, t, 2 * np.pi - t)
     phi = np.where(t <= np.pi, 0.0, np.pi)

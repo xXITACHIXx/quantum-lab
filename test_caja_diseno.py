@@ -19,8 +19,7 @@ def test_figura_individual_sin_textos_encimados(longitud):
         for otro in ejes:
             if otro is not ax and otro.get_position().y0 > ax.get_position().y0:
                 assert not t.overlaps(otro.xaxis.label.get_window_extent(r))
-    sup = fig._suptitle.get_window_extent(r)
-    assert not any(sup.overlaps(ax.title.get_window_extent(r)) for ax in ejes)
+    assert fig._suptitle is None                           # sin título general: solo los títulos cortos de cada panel
 
 
 def test_superposicion_acepta_cantidad_estados_y_coeficientes_escritos():

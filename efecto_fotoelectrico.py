@@ -239,7 +239,7 @@ def figura_experimento(p: ParametrosFoto, d: dict):
             label=f"radiación elegida (λ = {d['longitud_nm']:.1f} nm)")
     ax.set_xlabel(r"frecuencia $\nu$ [10¹⁴ Hz]")
     ax.set_ylabel(r"$K_{\max}$ [eV]")
-    ax.set_title(f"Energía cinética máxima · {p.metal} (Φ = {p.phi:.2f} eV)")
+    ax.set_title(f"Energía cinética máxima · {p.metal}")
     ax.set_ylim(min(-0.4, (energia_foton_ev(nus[0]) - p.phi) * 0.5), max(kmax.max(), d["kmax_ev"], 0.5) * 1.15)
     ax.grid(alpha=0.3)
     ax.legend(loc="upper left", fontsize=8.5)
@@ -279,7 +279,7 @@ def figura_experimento(p: ParametrosFoto, d: dict):
     ax2.axhline(0, color="white", lw=0.7, alpha=0.4)
     ax2.set_xlabel("voltaje aplicado V [V]")
     ax2.set_ylabel("corriente fotoeléctrica I [μA]")
-    ax2.set_title("Característica corriente–voltaje (modelo simplificado)")
+    ax2.set_title("Corriente frente a voltaje")
     ax2.grid(alpha=0.3)
     if i_sat > 0:
         ax2.legend(loc="upper left", fontsize=8.5)
@@ -308,7 +308,7 @@ def figura_metales(metales: list[str], nu_sel: float | None = None):
         ax.text(nu_sel / ESCALA_NU, ax.get_ylim()[1] * 0.95, "  radiación elegida", color="white", va="top", fontsize=9)
     ax.set_xlabel(r"frecuencia $\nu$ [10¹⁴ Hz]")
     ax.set_ylabel(r"$K_{\max}$ [eV]")
-    ax.set_title("Todas las rectas tienen la misma pendiente h; el corte con el eje es la frecuencia umbral ν₀ = Φ/h")
+    ax.set_title("Energía cinética máxima frente a frecuencia")
     ax.grid(alpha=0.3)
     ax.legend(loc="upper left", fontsize=8.5)
     return fig
@@ -337,7 +337,7 @@ def figura_millikan(res: dict, phi_real: float, metal: str):
     ax.set_ylim(min(-phi_real * 1.1, -0.5), max(res["v0"].max() * 1.25, 0.5))
     ax.set_xlabel(r"frecuencia $\nu$ [10¹⁴ Hz]")
     ax.set_ylabel(r"potencial de frenado $V_0$ [V]")
-    ax.set_title(f"Determinación de h con una lámpara de mercurio · {metal}: pendiente = h/e, ordenada = −Φ/e")
+    ax.set_title(f"Potencial de frenado · {metal}")
     ax.grid(alpha=0.3)
     ax.legend(loc="upper left", fontsize=9)
     return fig
