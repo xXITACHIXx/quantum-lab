@@ -437,6 +437,7 @@ def figura_estado_individual(d: dict, p: ParametrosOscilador, zoom: bool = True)
     hw_vis = HBAR * p.omega / fe
 
     fig, ejes = qc.rejilla(2, 3, (17.5, 9.2), constrained_layout=True, sharex=True)
+    fig.descripcion_ql = f"Oscilador armónico cuántico 1D, estado n = {n}"
     for ax in ejes.flat:
         ax.set_xlim(-lim, lim)
         ax.grid(alpha=0.3)

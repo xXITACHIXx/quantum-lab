@@ -416,6 +416,7 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     maximos_vis = d["maximos"] / fx
 
     fig, ejes = qc.rejilla(2, 2, (14, 9.4), constrained_layout=True)
+    fig.descripcion_ql = f"Partícula en una caja 1D, estado n = {n}"
     # Márgenes explícitos entre paneles: los títulos y las etiquetas del eje x de la fila de arriba no deben tocar los de abajo.
     fig.get_layout_engine().set(h_pad=0.16, w_pad=0.12, hspace=0.12, wspace=0.08)
 
@@ -502,6 +503,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
                                        1e-300)
 
     fig, ejes = qc.rejilla(1, 3, (17.5, 5.4), constrained_layout=True)
+    fig.descripcion_ql = f"Partícula en una caja 1D, superposición de estados {[int(k) for k in sup.numeros]}"
 
     ax = ejes[0]
     ax.plot(x_vis, d["psi"].real * np.sqrt(fx), color=COLORES["onda"], lw=2.4,
