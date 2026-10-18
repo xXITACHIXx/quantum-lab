@@ -728,7 +728,7 @@ def figura_densidad_3d(l: int, m: int, real: bool, radio: float, sistema: str, n
     xp, yp, zp = esfericas_a_cartesianas(dens, T, P)
     unidad_area = f"{u['nombre_longitud']}⁻²"
     fig = make_subplots(rows=1, cols=2, specs=[[{"type": "scene"}, {"type": "scene"}]], horizontal_spacing=0.02,
-                        subplot_titles=["Densidad de probabilidad", "Densidad angular"])
+                        subplot_titles=["Densidad de probabilidad  P = |Y|²/R²", "Densidad angular  |Y|²"])
     fig.add_trace(go.Surface(x=xs, y=ys, z=zs, surfacecolor=dens / R ** 2, colorscale="Viridis", cmin=0,
                              colorbar=dict(title=dict(text=f"Densidad de probabilidad<br>[{unidad_area}]", side="right"), x=0.40, len=0.75, thickness=12),
                              hovertemplate=f"x=%{{x:.3f}} {u['nombre_longitud']}<br>y=%{{y:.3f}}<br>z=%{{z:.3f}}<br>"
@@ -738,9 +738,10 @@ def figura_densidad_3d(l: int, m: int, real: bool, radio: float, sistema: str, n
                              hovertemplate="x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{z:.4f}<br>Densidad angular=%{surfacecolor:.4g} sr⁻¹<extra></extra>"),
                   row=1, col=2)
     lim = 1.15 * float(np.max(dens)) or 1.0
-    qc.aplicar_tema_plotly(fig, None, altura=560)
+    tipo = " · orbital real" if (real and m != 0) else ""
+    qc.aplicar_tema_plotly(fig, f"l = {l}, mₗ = {m} · radio R = {R:.4g} {u['nombre_longitud']}{tipo}", altura=600)
     fig.update_layout(scene=_estilo_escena(1.15 * R, u["nombre_longitud"]),
-                      scene2=_estilo_escena(lim, "sr⁻¹"), margin=dict(l=0, r=0, t=40, b=0))
+                      scene2=_estilo_escena(lim, "sr⁻¹"), margin=dict(l=0, r=0, t=90, b=0))
     return fig
 
 
@@ -790,6 +791,8 @@ def figura_densidad_cartesiana(l: int, m: int, real: bool):
     ax.set_xlim(-1, 1)
     ax.set_ylim(bottom=0)
     ax.grid(True, alpha=0.3)
+    tipo = " · orbital real" if (real and m != 0) else ""
+    fig.suptitle(f"Densidad angular |Y|² [sr⁻¹] · l = {l}, mₗ = {m}{tipo}", fontsize=13, fontweight="bold")
     return fig
 
 
@@ -1305,6 +1308,9 @@ def _pestana_densidad(p: ParametrosEsfera):
     u = qc.obtener_unidades(p.sistema)
     L = u["nombre_longitud"]
     R = p.radio / u["factor_longitud"]
+    st.latex(r"P=\frac{|Y_l^{m_l}(\theta,\varphi)|^{2}}{R^{2}}\qquad dA=R^{2}\sin\theta\,d\theta\,d\varphi")
+    st.caption(f"Densidad de probabilidad P [{L}⁻²]: P·dA es la probabilidad de hallar la partícula en el área dA "
+               "(interpretación de Born). Densidad angular |Yₗᵐ|² [sr⁻¹].")
     real = False
     if p.m != 0:
         real = st.toggle("Orbital real (±mₗ)", key="esf_dens_real", value=False,
@@ -1330,7 +1336,7 @@ def _pestana_densidad(p: ParametrosEsfera):
     qc.metricas([
         ("θ (polar)", f"{np.degrees(d['theta']):.4f}°"), ("φ (azimutal)", f"{np.degrees(d['phi']):.4f}°"),
         ("Densidad angular", f"{d['densidad_sr']:.6g} sr⁻¹"),
-        ("Densidad de probabilidad", f"{d['densidad_area']:.6g} {L}⁻²"),
+        ("Densidad de probabilidad P", f"{d['densidad_area']:.6g} {L}⁻²"),
     ])
     if abs(d["r"] - R) > 1e-9 * max(R, 1.0):
         st.caption(f"Fuera de la esfera: se usa su dirección, punto ({px:.4g}, {py:.4g}, {pz:.4g}) {L}.")
