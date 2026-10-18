@@ -23,7 +23,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `ejercicios/` | **Ejercicios de práctica**: `__init__.py` (página, filtros y pruebas), `_modelo.py` (ejercicio, fuentes y temas), `_progreso.py`, `_figuras.py`, `_calidad.py` y los ejercicios por fuente: `clase_s1_s5.py`, `clase_s6_s13.py` (diapositivas), `libro.py` y `cuaderno.py` |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
 | `oscilador_armonico.py` | 02 · Oscilador armónico: Hermite, densidades de energía, virial, **límite clásico**, dinámica |
-| `particula_esfera.py` | 03 · Armónicos esféricos Yₗᵐ en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
+| `particula_esfera.py` | 03 · Densidad de probabilidad |Yₗᵐ|² frente a la posición (x, y, z), armónicos esféricos en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
 | `efecto_fotoelectrico.py` | 04 · Efecto fotoeléctrico: Einstein, umbral, corriente, comparación de metales, **determinación de h**, teoría e historia |
 | `modelo_bohr.py` | 05 · Átomo de hidrógeno: modelo de Bohr (transiciones, series, Rydberg, masa reducida) y **átomo cuántico en 3D** (nubes de probabilidad, orbitales, animación del salto), teoría |
 | `principio_incertidumbre.py` | 06 · Principio de incertidumbre: paquetes de ondas en x y p, límite ħ/2, evolución libre, difracción por una rendija, teoría |
@@ -33,6 +33,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `test_interfaz.py` | Pruebas de interfaz (cada página se ejecuta con `AppTest` sin excepciones) |
 | `test_escena.py`, `test_arte.py`, `test_tema.py`, `test_movil.py`, `test_caja_diseno.py` | Pruebas de la portada y la navegación, las ilustraciones, la paleta y el contraste, el celular y la accesibilidad (texto alternativo, fuente de símbolos, fondo estable) y la figura y la superposición de la caja |
 | `test_herramientas.py` | Pruebas de biblioteca, solucionador y tutor |
+| `test_esfera_densidad.py`, `test_colab.py` | Densidad |Yₗᵐ|² en coordenadas cartesianas (web) y ejecución de los cuadernos de Colab, con la densidad comparada con la web |
 | `test_ruta.py`, `test_formulario.py`, `test_talleres.py`, `test_ejercicios*.py`, `test_examen.py`, `test_repaso.py`, `test_teoria.py` | Pruebas de las secciones de estudio |
 | `requirements.txt` | Dependencias con límites de versión |
 | `requirements-lock.txt` | Versiones exactas con las que se probó el proyecto |
@@ -111,7 +112,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 750 pruebas: numéricas, verificación, interfaz y accesibilidad (unos 3 minutos)
+python -m pytest -q          # 789 pruebas: numéricas, verificación, interfaz y accesibilidad (unos 3 minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador
@@ -352,3 +353,15 @@ Capítulo 04 de la portada, con tres páginas (pruebas en `test_herramientas.py`
 **Ideas adoptadas de referencias** (el diseño y el código son propios): de PhET (Quantum Bound States, Quantum Tunneling and Wave Packets, Photoelectric
 Effect), varias representaciones de un mismo concepto, objetivos explícitos y confusiones típicas como la de intensidad con energía del fotón; de Quantum
 Composer, el enlace entre conceptos (mapa de conexiones); de la documentación de Streamlit, `st.session_state`, claves únicas de widgets y `AppTest`.
+
+## 12. Criterios del curso y dónde se cumplen
+
+| Criterio | Web | Colab |
+|:--|:--|:--|
+| Densidad de probabilidad (armónicos esféricos) frente a la posición en coordenadas cartesianas, para cualquier estado; el usuario da l y mₗ | Esfera → pestaña **Densidad de probabilidad**: esfera de radio R coloreada por \|Y\|²/R² en x, y, z; superficie polar r = \|Y\|²; cortes xz, yz, xy; \|Y\|² frente a z; evaluación en un punto (x, y, z) | `QUANTUM_LAB_particula_esfera_colab.ipynb` → panel «Estado de la partícula» (l, mₗ) y pestaña **Densidad de probabilidad** |
+| Oscilador: ψ, densidad de probabilidad, densidad de energía cinética, densidad de energía potencial y energía frente a x, para cualquier n | Oscilador → **Estado individual** (seis paneles con el mismo eje x) | Oscilador → **Estado individual** |
+| Caja de longitud a: ψ, densidad de probabilidad y energía frente a x, para cualquier n y a | Caja → **Estado individual** | Caja → **Estado individual** |
+| Caja: superposición e interferencia; el usuario indica cuántos estados, cuáles y sus coeficientes | Caja → **Superposición e interferencia** (tabla o lista n:coeficiente) | Caja → **Superposición** (número de filas, n, amplitud y fase, o lista) |
+
+Para un estado complejo Yₗᵐ, |Y|² depende solo de z/R = cos θ (simetría axial); los orbitales reales (pₓ, d_xy…) mezclan +mₗ y −mₗ
+y sí dependen de x e y. Cada cuaderno declara al principio los criterios que cumple.
