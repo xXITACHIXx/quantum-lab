@@ -416,9 +416,9 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     maximos_vis = d["maximos"] / fx
 
     fig, ejes = qc.rejilla(2, 2, (14, 9.4), constrained_layout=True)
+    fig.descripcion_ql = f"Partícula en una caja 1D, estado n = {n}"
     # Márgenes explícitos entre paneles: los títulos y las etiquetas del eje x de la fila de arriba no deben tocar los de abajo.
     fig.get_layout_engine().set(h_pad=0.16, w_pad=0.12, hspace=0.12, wspace=0.08)
-    fig.suptitle(f"Partícula en una caja 1D — estado n = {n}", fontsize=17, fontweight="bold")
 
     # Panel 1: función de onda (lóbulos positivo/negativo sombreados)
     ax = ejes[0, 0]
@@ -466,7 +466,7 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     ax.plot(x_vis, e_vis + 0.28 * e_vis * rho_vis / rho_vis.max(), color=COLORES["densidad"],
             lw=1.3, alpha=0.9, label=r"$|\psi_n|^2$ (escala arbitraria)")
     ax.set_ylim(0, techo)
-    ax.set_title("Potencial y nivel energético")
+    ax.set_title("Potencial y energía")
     ax.set_xlabel(f"x [{L}]")
     ax.set_ylabel(f"Energía [{U}]")
     ax.grid(alpha=0.3)
@@ -486,7 +486,7 @@ def figura_estado_individual(d: dict, p: ParametrosCaja):
     ax.set_xlim(0, 1)
     ax.set_ylim(0, energias.max() * 1.08)
     ax.set_xticks([])
-    ax.set_title(r"Diagrama de niveles  ($E_n \propto n^2$)")
+    ax.set_title("Niveles de energía")
     ax.set_ylabel(f"Energía [{U}]")
     ax.grid(axis="y", alpha=0.3)
     return fig
@@ -503,8 +503,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
                                        1e-300)
 
     fig, ejes = qc.rejilla(1, 3, (17.5, 5.4), constrained_layout=True)
-    fig.suptitle(rf"Superposición de estados {[int(k) for k in sup.numeros]} — "
-                 rf"$\tau = E_1 t/\hbar$ = {d['tau']:.3f}", fontsize=15, fontweight="bold")
+    fig.descripcion_ql = f"Partícula en una caja 1D, superposición de estados {[int(k) for k in sup.numeros]}"
 
     ax = ejes[0]
     ax.plot(x_vis, d["psi"].real * np.sqrt(fx), color=COLORES["onda"], lw=2.4,
@@ -515,7 +514,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
                     label=rf"$\mathrm{{Re}}[c_{{{int(k)}}}\psi_{{{int(k)}}}e^{{-iE_{{{int(k)}}}t/\hbar}}]$")
     ax.axhline(0, color="white", lw=0.8, alpha=0.5)
     ax.set_ylim(-amp_max, amp_max)
-    ax.set_title(r"Parte real de $\Psi(x,t)$")
+    ax.set_title("Parte real")
     ax.set_xlabel(f"x [{L}]")
     ax.set_ylabel(rf"$\Psi\ [{Ltex}^{{-1/2}}]$")
     ax.grid(alpha=0.3)
@@ -526,7 +525,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
             label=r"$\mathrm{Im}\,\Psi$")
     ax.axhline(0, color="white", lw=0.8, alpha=0.5)
     ax.set_ylim(-amp_max, amp_max)
-    ax.set_title(r"Parte imaginaria de $\Psi(x,t)$")
+    ax.set_title("Parte imaginaria")
     ax.set_xlabel(f"x [{L}]")
     ax.set_ylabel(rf"$\Psi\ [{Ltex}^{{-1/2}}]$")
     ax.grid(alpha=0.3)
@@ -562,7 +561,7 @@ def figura_superposicion(d: dict, p: ParametrosCaja, sup: Superposicion, region:
                 ax.scatter(d["x_min"][~vistos_nodo] / fx, y_min[~vistos_nodo], s=40, facecolors="none",
                            edgecolors=COLORES["energia"], zorder=6, label="Mínimos locales (ρ > 0)")
     ax.set_ylim(bottom=-0.02 * rho_vis.max(), top=1.35 * rho_vis.max())
-    ax.set_title("Densidad de probabilidad total")
+    ax.set_title("Densidad de probabilidad")
     ax.set_xlabel(f"x [{L}]")
     ax.set_ylabel(rf"$|\Psi|^2\ [{Ltex}^{{-1}}]$")
     ax.grid(alpha=0.3)
@@ -580,7 +579,7 @@ def figura_animacion_superposicion(x_vis, taus, re, im, rho, nombre_longitud: st
     from plotly.subplots import make_subplots
 
     fig = make_subplots(rows=1, cols=2, column_widths=[0.5, 0.5], horizontal_spacing=0.09,
-                        subplot_titles=("Función de onda compleja Ψ(x,t)", "Densidad |Ψ(x,t)|²"))
+                        subplot_titles=("Función de onda", "Densidad de probabilidad"))
     fig.add_trace(go.Scatter(x=x_vis, y=re[0], name="Re Ψ", line=dict(color=COLORES["onda"], width=3)), 1, 1)
     fig.add_trace(go.Scatter(x=x_vis, y=im[0], name="Im Ψ",
                              line=dict(color=COLORES["interferencia"], width=3)), 1, 1)
@@ -1085,11 +1084,10 @@ def _pestana_superposicion(p_base: ParametrosCaja):
     qc.exportar_datos({"x [m]": d["x"], "Psi [m^-1/2]": d["psi"], "rho = |Psi|^2 [1/m]": d["rho"]},
                       "caja_superposicion_datos.csv", "Descargar Ψ y |Ψ|² en este instante (CSV)")
     if len(d["x_min"]) and not np.any(d["nodal"]):
-        st.caption("Los mínimos locales de ρ no llegan a cero: en una superposición de energías distintas la "
-                   "densidad generalmente no tiene nodos verdaderos (a diferencia de un estado estacionario).")
+        st.caption("Sin nodos verdaderos: los mínimos de la densidad no llegan a cero.")
     if extremos and d["regiones"]:
         txt = ", ".join(f"[{i / u['factor_longitud']:.4g}, {f / u['factor_longitud']:.4g}]" for i, f in d["regiones"])
-        st.caption(f"Regiones de probabilidad elevada (ρ ≥ 75 % del máximo) en {u['nombre_longitud']}: {txt}")
+        st.caption(f"Probabilidad alta (≥ 75 % del máximo) en {u['nombre_longitud']}: {txt}")
 
     qc.seccion("Coeficientes")
     qc.tabla_libre([{"n": int(k), "cₙ": f"{c.real:+.4f} {c.imag:+.4f}i", "|cₙ|²": f"{abs(c) ** 2:.6f}",
@@ -1098,9 +1096,7 @@ def _pestana_superposicion(p_base: ParametrosCaja):
                     for k, c in zip(sup.numeros, sup.coeficientes)],
                    numericas=("n", "cₙ", "|cₙ|²", "arg cₙ [rad]", f"Eₙ [{U}]"), archivo="caja_coeficientes.csv")
 
-    with st.expander("Animación temporal de la interferencia (un periodo completo)", expanded=True):
-        st.caption("Pulsar «Reproducir». La animación se ejecuta en el navegador y no bloquea la aplicación. "
-                   "Se muestra la función de onda compleja (Re y Im) y la densidad |Ψ|².")
+    with st.expander("Animación", expanded=True):
         try:
             figura = _animacion_cacheada(tuple(int(k) for k in sup.numeros),
                                          tuple(float(c.real) for c in sup.coeficientes),

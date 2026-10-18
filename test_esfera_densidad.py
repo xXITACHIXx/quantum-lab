@@ -80,7 +80,7 @@ def test_complejo_no_depende_de_phi_y_real_si():
 def test_figuras_se_generan():
     import matplotlib.pyplot as plt
     fig = pe.figura_densidad_cartesiana(2, 1, False)
-    assert len(fig.axes) == 4 and "cartesianas" in fig._suptitle.get_text()
+    assert len(fig.axes) == 4
     plt.close(fig)
     f3 = pe.figura_densidad_3d(2, 1, True, 1e-9, "SI", n_theta=40)
     assert len(f3.data) == 2
@@ -92,7 +92,7 @@ def test_pestana_densidad_en_la_web():
     at.run()
     assert not at.exception, [e.value for e in at.exception]
     assert at.tabs[0].label == "Densidad de probabilidad"
-    valor = [mm.value for mm in at.metric if mm.label == "|Y|²"][0]
+    valor = [mm.value for mm in at.metric if mm.label == "Densidad angular"][0]
     assert float(valor.split()[0]) == pytest.approx(15 / (8 * pi) * 0.25, rel=1e-5)     # l = 2, m = 1 a 45°
     at.number_input(key="esf_px").set_value(0.0).run()
     at.number_input(key="esf_pz").set_value(0.0).run()
@@ -110,5 +110,5 @@ def test_magnitud_prob_en_la_lista_y_escala_con_radio():
     for sis, r in (("SI", 1e-9), ("Atómicas", 5.0)):
         p = pe.validar_parametros_esfera(2, 1, r, sis, 40, "prob", "lobulos")
         fig, _ = pe.figura_superficie_3d(p)
-        assert "R" in fig.data[0].colorbar.title.text and "⁻²" in fig.data[0].colorbar.title.text
+        assert fig.data[0].colorbar.title.text.startswith("Densidad de probabilidad") and "⁻²" in fig.data[0].colorbar.title.text
         pe.figura_proyeccion_2d(p, 1.0, 1.0)

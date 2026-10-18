@@ -337,7 +337,7 @@ def figura_compresion(p: Paquete, compacto: bool = False):
     k_lim = (k0_ - 3.0 * dk_max, k0_ + 3.0 * dk_max)
     filas, cols = (2, 1) if compacto else (1, 2)
     fig = make_subplots(rows=filas, cols=cols, horizontal_spacing=0.08, vertical_spacing=0.16,
-                        subplot_titles=("Posición: |ψ(x)|²", "Momento: |φ(p)|²"))
+                        subplot_titles=("Densidad de probabilidad · posición", "Densidad de probabilidad · momento"))
     pos2 = (2, 1) if compacto else (1, 2)
 
     def trazas(c):
@@ -435,7 +435,7 @@ def figura_relacion(p: Paquete):
     ax.set_xscale("log"); ax.set_yscale("log")
     ax.set_xlim(dxs[0], dxs[-1]); ax.set_ylim(0.5 / dxs[-1], 0.5 / dxs[0] * 3)
     ax.set_xlabel("Δx [nm]"); ax.set_ylabel("Δp [ħ/nm]")
-    ax.set_title(f"Plano de incertidumbres (ancho = {p.ancho:g} nm)")
+    ax.set_title("Plano de incertidumbres")
     ax.legend(loc="upper right", fontsize=8.5)
     ax.grid(alpha=0.25, which="both")
     nombres = [n + ("\n(β = %g)" % q.beta if t == "chirp" else "\n(d = %g nm)" % q.separacion if t == "dos" else "")
@@ -450,7 +450,7 @@ def figura_relacion(p: Paquete):
     ax2.invert_yaxis()
     ax2.set_xlim(0, max(valores) * 1.3)
     ax2.set_xlabel("Δx·Δp [ħ]")
-    ax2.set_title("Producto de incertidumbres de cada paquete")
+    ax2.set_title("Producto de incertidumbres")
     ax2.legend(loc="lower right", fontsize=9)
     ax2.grid(alpha=0.25, axis="x")
     ax2.set_axisbelow(True)
@@ -510,7 +510,7 @@ def figura_anchura(p: Paquete, ev: dict, tau_s: float):
                 label="σ₀√(1 + 2βs + (1+β²)s²)")
     ax.set_xlabel("tiempo t/τ")
     ax.set_ylabel("Δx [nm]")
-    ax.set_title(f"Ensanchamiento del paquete (τ = {texto_tiempo(tau_s)})")
+    ax.set_title("Ensanchamiento del paquete")
     ax.legend(fontsize=9)
     ax.grid(alpha=0.3)
     ax2.plot(s, ev["delta_x"] * ev["delta_k"], color=COLORES["onda"], lw=2.6, label="Δx·Δp(t)")
@@ -520,7 +520,7 @@ def figura_anchura(p: Paquete, ev: dict, tau_s: float):
     ax2.set_xlabel("tiempo t/τ")
     ax2.set_ylabel("[ħ]")
     ax2.set_ylim(0, max(1.0, float(np.max(ev["delta_x"] * ev["delta_k"])) * 1.1))
-    ax2.set_title("Producto de incertidumbres en el tiempo")
+    ax2.set_title("Producto de incertidumbres")
     ax2.legend(fontsize=9)
     ax2.grid(alpha=0.3)
     return fig
@@ -551,8 +551,7 @@ def figura_rendija(r: Rendija, d: dict):
                 bbox=dict(boxstyle="round,pad=0.3", fc=COLORES["fondo"], ec=COLORES["rejilla"], alpha=0.9))
     ax.set_xlabel(f"posición en la pantalla y [{unidad}]")
     ax.set_ylabel("intensidad relativa I/I₀")
-    ancho_txt = f"{r.ancho_nm / 1000:.3g} µm" if r.ancho_nm >= 1000 else f"{r.ancho_nm:.3g} nm"
-    ax.set_title(f"Patrón a {r.distancia_m:g} m de una rendija de {ancho_txt} (λ = {r.longitud_onda_nm:.4g} nm)")
+    ax.set_title("Patrón de difracción")
     ax.set_ylim(0, 1.08)
     ax.grid(alpha=0.3)
     anchos = np.geomspace(r.longitud_onda_nm * 1.02, r.longitud_onda_nm * 1e4, 300)
@@ -564,7 +563,7 @@ def figura_rendija(r: Rendija, d: dict):
     ax2.set_xscale("log"); ax2.set_yscale("log")
     ax2.set_xlabel("ancho de la rendija a [nm]  (Δy ≈ a)")
     ax2.set_ylabel("ángulo del primer mínimo θ₁ [°]  (Δp_y ∝ sen θ₁)")
-    ax2.set_title("Más estrecha la rendija → más se abre el haz")
+    ax2.set_title("Apertura del haz")
     ax2.legend(fontsize=9)
     ax2.grid(alpha=0.25, which="both")
     return fig

@@ -839,6 +839,7 @@ def descripcion_figura(figura) -> str:
         return re.sub(r"\s+", " ", t).strip()
 
     general = limpio(figura._suptitle.get_text()) if getattr(figura, "_suptitle", None) is not None else ""
+    general = general or limpio(getattr(figura, "descripcion_ql", ""))   # título solo para lectores de pantalla
     paneles = []
     for ax in figura.axes:
         partes = [limpio(ax.get_title())]
