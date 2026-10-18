@@ -46,7 +46,19 @@ def test_descripcion_de_figura_usa_solo_lo_que_la_figura_contiene():
     d = qc.descripcion_figura(fig)
     assert "estado n = 3" in d and "4 paneles" in d and "Función de onda" in d and "eje x: x [nm]" in d
     assert "\\" not in d and "$" not in d and "mathrm" not in d        # sin restos de LaTeX
-    assert "ψ_n(x)" in d
+    assert "Función de onda [nm^-1/2]" in d and "Densidad de probabilidad [nm^-1]" in d
+
+
+def test_descripcion_de_figura_limpia_latex():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    ax.set_title(r"$|\psi_n(x)|^2$")
+    ax.set_ylabel(r"$\psi_n(x)\ [\mathrm{nm}^{-1/2}]$")
+    d = qc.descripcion_figura(fig)
+    plt.close(fig)
+    assert "ψ_n(x)" in d and "\\" not in d and "$" not in d and "mathrm" not in d
 
 
 def test_las_imagenes_de_las_graficas_llevan_alt():
