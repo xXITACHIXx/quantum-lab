@@ -2,7 +2,7 @@
 quantum_lab.py — QUANTUM LAB · menú principal
 =============================================
 
-Laboratorio interactivo de mecánica cuántica con seis simuladores independientes y herramientas de estudio (biblioteca, solucionador, tutor):
+Laboratorio interactivo de mecánica cuántica con seis simuladores independientes y herramientas de estudio (biblioteca, solucionador, tutor, guía de usuario):
 
     particula_caja.py       Partícula en una caja 1D (estados, superposición e interferencia)
     oscilador_armonico.py   Oscilador armónico cuántico 1D (energías, virial, límite clásico, dinámica)
@@ -28,6 +28,7 @@ import biblioteca
 import ejercicios
 import examen
 import formulario
+import guia
 import modelo_bohr
 import oscilador_armonico
 import particula_caja
@@ -62,6 +63,7 @@ PAGINAS = {
     "biblioteca": ("Biblioteca científica", ":material/local_library:", biblioteca),
     "solucionador": ("Solucionador paso a paso", ":material/function:", solucionador),
     "tutor": ("Tutor de errores conceptuales", ":material/psychology_alt:", tutor),
+    "guia": ("Guía de usuario", ":material/account_tree:", guia),
     "verificacion": ("Verificación", ":material/verified:", verificacion),
     "pruebas": ("Pruebas numéricas", ":material/fact_check:", None),
 }
@@ -69,7 +71,7 @@ GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
     ("Teoría y repaso", ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
-    ("Herramientas de estudio", ["biblioteca", "solucionador", "tutor"], True),
+    ("Herramientas de estudio", ["biblioteca", "solucionador", "tutor", "guia"], True),
     ("Verificación", ["verificacion", "pruebas"], True),
 ]
 
@@ -81,7 +83,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, tutor, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, tutor, guia, verificacion)]
 
 
 # ---------------------------------------------------------------------

@@ -392,9 +392,26 @@ def tutor() -> str:
     return _envolver("".join(partes), "Ilustración conceptual: una confusión frecuente, su corrección y una pista")
 
 
+def guia() -> str:
+    """Diagrama de flujo en miniatura: entradas → decisión (con rama de error) → física → gráficas."""
+    partes = []
+    cajas = ((18, "Entradas", P["cian"]), (186, "Física", P["violeta"]), (270, "Gráficas", P["verde"]))
+    for x, txt, col in cajas:
+        partes.append(_caja_texto(x, 44, 72, 34, col, 7, P["panel"]))
+        partes.append(_texto(x + 36, 66, txt, P["texto"], 11, peso=600))
+    partes.append(f'<path d="M137 36 L163 61 L137 86 L111 61 Z" fill="{P["panel"]}" stroke="{P["amarillo"]}" stroke-width="1.6"/>')
+    partes.append(_texto(137, 65, "¿Válido?", P["texto"], 9.5, peso=600))
+    partes += [_flecha(91, 61, 109, 61, P["tenue"], 1.4), _flecha(164, 61, 184, 61, P["tenue"], 1.4), _flecha(259, 61, 268, 61, P["tenue"], 1.4),
+               _texto(174, 54, "sí", P["tenue"], 9), _flecha(137, 88, 137, 118, P["rojo"], 1.4), _texto(146, 106, "no", P["tenue"], 9, "start")]
+    partes.append(f'<rect x="82" y="120" width="110" height="30" rx="7" fill="none" stroke="{P["rojo"]}" stroke-width="1.4" stroke-dasharray="4 3"/>')
+    partes.append(_texto(137, 139, "mensaje de error", P["texto"], 10))
+    partes.append(_texto(180, 188, "cada simulador, paso a paso", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: diagrama de flujo con una decisión y una rama de error")
+
+
 ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre,
                  "ruta": ruta, "teoria": teoria, "formulario": formulario, "talleres": talleres, "ejercicios": ejercicios, "examen": examen,
-                 "repaso": repaso, "biblioteca": biblioteca, "solucionador": solucionador, "tutor": tutor, "verificacion": verificacion, "pruebas": pruebas}
+                 "repaso": repaso, "biblioteca": biblioteca, "solucionador": solucionador, "tutor": tutor, "guia": guia, "verificacion": verificacion, "pruebas": pruebas}
 _CACHE: dict[str, str] = {}
 
 
@@ -462,6 +479,7 @@ _ICONOS = {
     "biblioteca": '<path d="M5 4h4v16H5zM10 4h4v16h-4z"/><path d="M15.5 5.5l3.8-1 3 14.5-3.8 1z"/>',
     "solucionador": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11l3 3M11 11l-3 3M13 15h3M13 18h3"/>',
     "tutor": '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
+    "guia": '<rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="16" width="7" height="5" rx="1"/><path d="M12 9l3 3-3 3-3-3z"/><path d="M6.5 8v4H9M15 12h2.5v4"/>',
     "verificacion": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
     "pruebas": '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 15h8"/>',
 }

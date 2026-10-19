@@ -57,9 +57,11 @@ MODULOS = [
      "Ecuación, datos, sustitución numérica con unidades, resultado e interpretación física de un problema.", ""),
     ("tutor", "16", "Herramientas de estudio", ESTUDIO, "Tutor de errores conceptuales",
      "Detecta confusiones frecuentes, como amplitud con probabilidad, y ofrece una pista y una explicación.", ""),
-    ("verificacion", "17", "Verificación", VERIFICACION, "Verificación",
+    ("guia", "17", "Herramientas de estudio", ESTUDIO, "Guía de usuario",
+     "Diagramas de flujo de cada simulador y de sus códigos en la web y en Colab.", ""),
+    ("verificacion", "18", "Verificación", VERIFICACION, "Verificación",
      "Contraste de los resultados con cálculos independientes y con los cuadernos de Colab.", ""),
-    ("pruebas", "18", "Verificación", VERIFICACION, "Pruebas numéricas",
+    ("pruebas", "19", "Verificación", VERIFICACION, "Pruebas numéricas",
      "Ejecución de todas las comprobaciones numéricas de la aplicación.", ""),
 ]
 CATEGORIAS = ("Mecánica cuántica", "Fundamentos", "Teoría y repaso", "Herramientas de estudio", "Verificación")
@@ -67,7 +69,7 @@ CAPITULOS = {
     "Mecánica cuántica": ("01", "Sistemas modelo", "Soluciones exactas de la ecuación de Schrödinger: confinamiento, oscilación y rotación."),
     "Fundamentos": ("02", "Origen de la teoría", "Los experimentos y modelos que obligaron a abandonar la física clásica."),
     "Teoría y repaso": ("03", "Estaciones de estudio", "Teoría, fórmulas, práctica y evaluación conectadas con cada simulador."),
-    "Herramientas de estudio": ("04", "Consulta, cálculo y corrección", "Biblioteca, solucionador paso a paso y tutor que detecta confusiones conceptuales."),
+    "Herramientas de estudio": ("04", "Consulta, cálculo y corrección", "Biblioteca, solucionador paso a paso, tutor de errores conceptuales y guía de usuario."),
     "Verificación": ("05", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
 }
 CAT_CLAVE = {c: f"cat{i}" for i, c in enumerate(CATEGORIAS, start=1)}      # página de cada capítulo (sub-portada)
