@@ -18,7 +18,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `fuente_simbolos.css` | Fuente de símbolos (subíndices, superíndices, operadores) incrustada y **pregenerada**: evita cuadros vacíos en celulares |
 | `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `talleres/` | **Talleres de repaso**: `__init__.py` (índice, página y pruebas), `_calificar.py` (lectura de números y tolerancias), `_modelo.py` (preguntas y calificación por partes), `_fisica.py` (cálculos verificados) y un archivo por taller (`t1_espectros.py`…) |
-| `biblioteca/`, `solucionador/`, `tutor/` | Herramientas de estudio: biblioteca científica, solucionador paso a paso y tutor de errores conceptuales (ver apartado 11) |
+| `biblioteca/`, `solucionador/`, `tutor/`, `guia/` | Herramientas de estudio: biblioteca científica, solucionador paso a paso, tutor de errores conceptuales y guía de usuario con diagramas de flujo (ver apartado 11) |
 | `ruta/`, `formulario/`, `examen/`, `repaso/` | Ruta de estudio, formulario de constantes y fórmulas, modo examen y repaso personalizado (cada uno con su `__init__.py` y módulos de apoyo) |
 | `ejercicios/` | **Ejercicios de práctica**: `__init__.py` (página, filtros y pruebas), `_modelo.py` (ejercicio, fuentes y temas), `_progreso.py`, `_figuras.py`, `_calidad.py` y los ejercicios por fuente: `clase_s1_s5.py`, `clase_s6_s13.py` (diapositivas), `libro.py` y `cuaderno.py` |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
@@ -336,7 +336,7 @@ secciones (por ahora solo la ficha de entrada); las gráficas de Plotly se redib
 
 ## 11. Herramientas de estudio
 
-Capítulo 04 de la portada, con tres páginas (pruebas en `test_herramientas.py` y en las pruebas globales de la aplicación).
+Capítulo 04 de la portada, con cuatro páginas (pruebas en `test_herramientas.py`, `test_guia.py` y en las pruebas globales de la aplicación).
 
 * **Biblioteca científica** (`biblioteca/`): glosario de 48 conceptos con definición, ecuación, advertencia de error frecuente y enlaces a la
   teoría y al simulador; 9 derivaciones paso a paso que terminan con una **comprobación numérica** (el código del laboratorio frente a una
@@ -349,6 +349,10 @@ Capítulo 04 de la portada, con tres páginas (pruebas en `test_herramientas.py`
   estacionario con reposo…). Dos entradas: un texto libre revisado por un detector **basado en reglas** (solo reconoce formulaciones típicas; que no
   encuentre nada no prueba que la explicación sea correcta) y 19 preguntas de diagnóstico cuyos distractores corresponden a una confusión; al fallar
   se da primero una pista y luego la explicación. El progreso vive solo en la sesión.
+* **Guía de usuario** (`guia/`): diagramas de flujo de la ruta de un cálculo en la web, de las seis celdas de los cuadernos de Colab y de cada
+  simulador (caja, oscilador y esfera), con una rama de error en el paso de validación y una fila «Para recordar». Cada paso cita las funciones
+  que lo hacen en la web y en Colab, y las pruebas comprueban que existan. Cada diagrama se puede copiar en sintaxis Mermaid para editarlo en
+  mermaid.live o draw.io. Añadir un diagrama: un `Diagrama` en `guia/_flujos.py`.
 
 **Ideas adoptadas de referencias** (el diseño y el código son propios): de PhET (Quantum Bound States, Quantum Tunneling and Wave Packets, Photoelectric
 Effect), varias representaciones de un mismo concepto, objetivos explícitos y confusiones típicas como la de intensidad con energía del fotón; de Quantum
