@@ -2,7 +2,7 @@
 # Los límites superiores evitan que una versión mayor futura rompa la aplicación sin aviso.
 # Las versiones exactas con las que se probó el proyecto están en requirements-lock.txt.
 # scipy >= 1.11 (con SciPy >= 1.15 se usa sph_harm_y; con anteriores el programa calibra solo la firma antigua sph_harm).
-numpy>=1.26,<3
+numpy>=2.5.4,<3
 scipy>=1.11,<2
 matplotlib>=3.8,<4
 plotly>=5.20,<8
