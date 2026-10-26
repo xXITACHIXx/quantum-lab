@@ -144,7 +144,7 @@ def panel(retos: list[Reto], prefijo: str) -> None:
     r = por_id[r_id]
     st.markdown(f"**Objetivo.** {r.enunciado}")
     if r.mostrar_objetivo:
-        st.markdown(f"Condición: **{r.magnitud} = {r.objetivo:.6g} {r.unidad}**")
+        st.markdown(f"Condición: **{f'{r.magnitud} = {r.objetivo:.6g} {r.unidad}'.strip()}**")
     st.caption(r.soluciones)
     columnas = st.columns(len(r.variables))
     valores = {}

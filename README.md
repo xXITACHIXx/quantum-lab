@@ -31,6 +31,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `inverso.py` | **Laboratorio inverso**: retos con un objetivo; clasifica el intento como exacto, aproximado o incorrecto con las mismas funciones del simulador |
 | `instrumentos.py` | Instrumentos de lectura: cursor, probabilidad en un intervalo (con la integral exacta), fotón entre niveles y comparación |
 | `informes.py` | **Informe de experimento** descargable en PDF y CSV (objetivo, modelo, parámetros, resultados, conclusiones) |
+| `test_navegador.py` | Recorrido en Chromium real con Playwright (opcional: se omite si no está instalado) |
 | `test_predice.py`, `test_mejoras.py` | Pruebas de predicción, retos inversos, instrumentos, informes y enlaces de estudio |
 | `quantum_lab_comun.py` | Código compartido (constantes, unidades, estilo, componentes de interfaz, enlaces, descargas, guías, autoevaluación, pruebas). No contiene física de los simuladores |
 | `verificacion.py` | Página «Verificación»: compara cada simulador con una referencia independiente (diagonalización del hamiltoniano, diferencias finitas, integrales, valores tabulados) |
@@ -117,7 +118,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 905 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
+python -m pytest -q          # 923 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador

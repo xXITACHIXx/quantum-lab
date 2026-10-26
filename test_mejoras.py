@@ -113,7 +113,7 @@ def test_valores_independientes_de_la_caja_en_el_experimento():
 # =============================================================================================
 # 2. Laboratorio inverso
 # =============================================================================================
-@pytest.mark.parametrize("modulo", [caja, osc, foto, bohr, inc], ids=lambda m: m.__name__)
+@pytest.mark.parametrize("modulo", [caja, osc, foto, bohr, inc, esf], ids=lambda m: m.__name__)
 def test_retos_bien_construidos(modulo):
     assert modulo.RETOS_INVERSOS
     for r in modulo.RETOS_INVERSOS:
@@ -414,7 +414,7 @@ def test_cada_simulador_tiene_las_pestanas_nuevas_y_las_pruebas_al_final(pagina)
     assert not at.exception, [e.value for e in at.exception]
     etiquetas = [t.label for t in at.tabs]
     assert "Predice y experimenta" in etiquetas and etiquetas[-1] == "Pruebas numéricas"
-    assert ("Laboratorio inverso" in etiquetas) == (pagina != "esfera")
+    assert "Laboratorio inverso" in etiquetas
 
 
 @pytest.mark.parametrize("pagina", list(PREFIJOS))
@@ -507,3 +507,45 @@ def test_enlaces_de_estudio_navegan_desde_el_laboratorio_completo():
     at.button(key="ql_est_bohr_pd_energia_2n_sol").click().run()
     assert at.session_state["ql_pagina"] == "solucionador" and at.session_state["sol_problema"] == "rydberg"
     assert not at.exception
+
+
+def test_esfera_reto_nodos_solucion_independiente():
+    """l = 5, m = ±3 (2 conos + 3 planos) sale de contar a mano: l − |m| = 2 y |m| = 3. Otras parejas con l = 5 no valen."""
+    r = next(x for x in esf.RETOS_INVERSOS if x.id == "esf_nodos")
+    for m in (3, -3):
+        assert inverso.evaluar_intento(r, {"l": 5, "m": m}).nivel == "exacta"
+    # l = 5 pero otro reparto de conos y planos: 5 superficies, mal reparto
+    assert inverso.evaluar_intento(r, {"l": 5, "m": 1}).nivel == "incorrecta"
+    assert inverso.evaluar_intento(r, {"l": 4, "m": 2}).nivel == "incorrecta"
+    with pytest.raises(ValueError):
+        inverso.evaluar_intento(r, {"l": 2, "m": 5})
+
+
+def test_esfera_reto_l2_cualquier_m_vale():
+    """L²/ħ² = l(l+1) = 12 solo para l = 3 (3·4); m no influye y |m| ≤ 3."""
+    r = next(x for x in esf.RETOS_INVERSOS if x.id == "esf_l2")
+    for m in range(-3, 4):
+        assert inverso.evaluar_intento(r, {"l": 3, "m": m}).nivel == "exacta"
+    assert inverso.evaluar_intento(r, {"l": 2, "m": 0}).nivel == "incorrecta"      # 6
+    assert inverso.evaluar_intento(r, {"l": 4, "m": 0}).nivel == "incorrecta"      # 20
+    with pytest.raises(ValueError):
+        inverso.evaluar_intento(r, {"l": 3, "m": 4})
+
+
+def test_informe_de_prediccion_incluye_figura():
+    pypdf = pytest.importorskip("pypdf")
+    at = _abrir("caja")
+    at.button(key="caja_pd_duplicar_a_b_run").click().run()
+    at.button(key="caja_pd_duplicar_a_inf_prep").click().run()
+    assert not at.exception, [e.value for e in at.exception]
+    pdf = at.session_state["caja_pd_duplicar_a_inf_pdf"]
+    assert pdf and pdf.startswith(b"%PDF-")
+    texto = " ".join(p.extract_text() for p in pypdf.PdfReader(io.BytesIO(pdf)).pages)
+    assert "cociente" in texto
+
+
+def test_condicion_del_reto_sin_unidad_no_deja_asteriscos_sueltos():
+    """Regresión: con unidad vacía el texto quedaba «**… = 5 **» y Markdown no lo ponía en negrita."""
+    at = _abrir("esfera")
+    textos = [m.value for m in at.markdown if m.value.startswith("Condición")]
+    assert textos and all(not t.rstrip().endswith(" **") for t in textos), textos

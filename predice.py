@@ -124,8 +124,14 @@ def informe_experimento(q: Pregunta, res: Resultado, datos: dict, conclusiones: 
     """Informe de un experimento de predicción. `datos`: simulador, modelo, ecuaciones, parametros (filas)."""
     import informes
     fila_pred = q.opciones[res.elegida].texto if res.elegida is not None else "Sin predicción"
+    with informes.estilo_claro():
+        fig, ax = informes.figura_clara(5.0, 2.6)
+        barras = ax.bar(["Referencia", "Modificado"], [res.referencia, res.modificado], color=["#1F3A93", "#B03A2E"])
+        ax.bar_label(barras, labels=[f"{res.referencia:.4g}", f"{res.modificado:.4g}"], padding=2)
+        ax.set(title=f"{q.magnitud}: cociente {res.razon:.6g}", ylabel=res.unidad or "valor (sin unidad)")
+        ax.margins(y=0.15)
     return informes.Informe(
-        titulo=f"Predicción y experimento: {q.enunciado}", simulador=datos["simulador"],
+        figuras=[fig], titulo=f"Predicción y experimento: {q.enunciado}", simulador=datos["simulador"],
         objetivo=f"{q.enunciado} Se compara {q.magnitud} antes y después del cambio: {q.cambio}.",
         modelo=datos["modelo"], ecuaciones=datos.get("ecuaciones", []), parametros=datos["parametros"],
         procedimiento=["Se registra la predicción (opcional).", f"Se calcula {q.magnitud} con los parámetros actuales.",

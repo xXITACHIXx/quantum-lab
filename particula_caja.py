@@ -1366,7 +1366,12 @@ def _pestana_predice(p_base: ParametrosCaja):
     except ValueError as error:
         qc.error(error)
         return
-    predice.panel(PREGUNTAS_PREDICE, p, "caja")
+    u = qc.obtener_unidades(p.sistema)
+    datos = {"simulador": "Partícula en una caja 1D", "modelo": "Pozo infinito unidimensional de ancho a.",
+             "ecuaciones": [r"E_n=\frac{n^2\pi^2\hbar^2}{2ma^2}"],
+             "parametros": [("Número cuántico n", f"{p.n}", ""), ("Longitud a", f"{p.longitud / u['factor_longitud']:.6g}", u["nombre_longitud"]),
+                            ("Masa m", f"{p.masa / M_E:.6g}", "mₑ")]}
+    predice.panel(PREGUNTAS_PREDICE, p, "caja", datos_informe=datos)
 
 
 def interfaz() -> None:
