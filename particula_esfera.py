@@ -45,6 +45,7 @@ from scipy.optimize import brentq
 
 import informes
 import instrumentos
+import inverso
 import predice
 import quantum_lab_comun as qc
 from quantum_lab_comun import COLORES, HBAR, M_E
@@ -962,6 +963,72 @@ def _pestana_instrumentos(p: ParametrosEsfera):
     informes.boton_informe(lambda texto: informe_estado_angular(p, texto), "esf_inf", f"esfera_informe_l{p.l}_m{p.m}")
 
 
+# ---------------------------------------------------------------------
+# Retos del laboratorio inverso
+# ---------------------------------------------------------------------
+def _nodales_de_reto(v: dict) -> float:
+    return float(numero_total_superficies_nodales(v["l"], v["m"]))
+
+
+def _conos_de_reto(v: dict, obtenido: float) -> str | None:
+    conos = len(nodos_latitud(v["l"], v["m"]))
+    if conos != 2:
+        return (f"Con l = {v['l']} y m = {v['m']} hay {conos} conos nodales y {abs(v['m'])} planos nodales; "
+                "el reto pide exactamente 2 conos (l − |m| = 2) y 3 planos (|m| = 3).")
+    return None
+
+
+def _solucion_nodales(v: dict) -> str:
+    return ("Una combinación real de Yₗᵐ tiene **l − |m| conos** nodales (ceros de Pₗ^|m|(cos θ)) y **|m| planos** nodales. "
+            "Con 2 conos y 3 planos: |m| = 3 y l − 3 = 2, es decir **l = 5, m = ±3** (5 superficies en total). "
+            "Es la única pareja (salvo el signo de m).")
+
+
+def _l2_de_reto(v: dict) -> float:
+    if abs(v["m"]) > v["l"]:
+        raise ValueError("|m| no puede superar a l.")
+    return float(v["l"] * (v["l"] + 1))
+
+
+def _solucion_l2(v: dict) -> str:
+    return ("L² tiene valores propios ħ²·l(l+1) y no depende de m. Para L²/ħ² = 12 se resuelve l(l+1) = 12, "
+            "es decir **l = 3**. Cualquier m con |m| ≤ 3 sirve (7 valores): es la degeneración 2l + 1.")
+
+
+RETOS_INVERSOS = [
+    inverso.Reto(
+        "esf_nodos", "Dos conos y tres planos nodales",
+        "Elige l y m para que la combinación real de Yₗᵐ tenga 5 superficies nodales en total, repartidas en "
+        "exactamente 2 conos (latitudes) y 3 planos (meridianos).",
+        "Superficies nodales totales", "", 5.0,
+        (inverso.Variable("l", "Número cuántico l", "", 0, 8, 1, 1, True),
+         inverso.Variable("m", "Número cuántico m", "", -8, 8, 1, 0, True)),
+        _nodales_de_reto,
+        ("El número total de superficies nodales es l, pero eso no fija m.",
+         "Los planos nodales son |m|; los conos son l − |m|.", "Necesitas |m| = 3 y l − |m| = 2."),
+        "Conos = l − |m| y planos = |m|; fijar ambas cantidades determina l y |m|.",
+        _solucion_nodales,
+        "Recuerda: superficies totales = l, pero la mezcla entre conos y planos depende de |m|.",
+        tol_exacta=1e-9, tol_aprox=1e-6, condicion=_conos_de_reto,
+        soluciones="Hay dos soluciones equivalentes: m = 3 y m = −3.",
+        metodo="Conteo exacto de ceros de Pₗ^|m| (sin búsqueda numérica)."),
+    inverso.Reto(
+        "esf_l2", "Momento angular objetivo",
+        "Elige l y m para que el cuadrado del momento angular valga L² = 12 ħ².",
+        "L² / ħ²", "", 12.0,
+        (inverso.Variable("l", "Número cuántico l", "", 0, 8, 1, 1, True),
+         inverso.Variable("m", "Número cuántico m", "", -8, 8, 1, 0, True)),
+        _l2_de_reto,
+        ("Los valores propios de L² son ħ²·l(l+1).", "Ensaya l = 2 y l = 3 y compara con 12.",
+         "m solo debe cumplir |m| ≤ l."),
+        "L² = ħ²l(l+1) no depende de m, por eso cada l admite 2l + 1 valores de m.",
+        _solucion_l2,
+        "L²/ħ² = l(l+1) crece rápido con l; m no interviene.",
+        tol_exacta=1e-9, tol_aprox=1e-6, soluciones="l = 3 con cualquier m entre −3 y 3.",
+        metodo="Despeje directo de l(l+1) = 12."),
+]
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     r = qc.RegistroPruebas("Armónicos esféricos y partícula en una esfera")
     r.comprobar(f"Calibración del backend: «{NOMBRE_BACKEND}» reproduce las fórmulas cerradas (l ≤ 2, con Condon–Shortley)",
@@ -1167,6 +1234,9 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     for q in PREGUNTAS_PREDICE:
         r.comprobar(f"Pregunta de predicción «{q.id}»: la respuesta correcta sale del cálculo",
                     predice.validar_pregunta(q, p_pd) == [], "; ".join(predice.validar_pregunta(q, p_pd)))
+    for reto in RETOS_INVERSOS:
+        r.comprobar(f"Reto inverso «{reto.id}» bien construido", inverso.validar_reto(reto) == [],
+                    "; ".join(inverso.validar_reto(reto)))
     return r
 
 
@@ -1598,7 +1668,7 @@ def interfaz() -> None:
     if p is None:
         return
     tabs = st.tabs(["Densidad de probabilidad", "Armónico 3D", "Proyección 2D y cortes", "Comparación de orbitales", "Complejos y reales",
-                    "Partícula confinada", "Guía de práctica", "Autoevaluación", "Predice y experimenta", "Instrumentos e informe", "Pruebas numéricas"])
+                    "Partícula confinada", "Guía de práctica", "Autoevaluación", "Predice y experimenta", "Laboratorio inverso", "Instrumentos e informe", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_densidad(p)
     with tabs[1]:
@@ -1618,8 +1688,10 @@ def interfaz() -> None:
     with tabs[8]:
         _pestana_predice(p)
     with tabs[9]:
-        _pestana_instrumentos(p)
+        inverso.panel(RETOS_INVERSOS, "esf")
     with tabs[10]:
+        _pestana_instrumentos(p)
+    with tabs[11]:
         qc.boton_pruebas(ejecutar_pruebas, "esf_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 
