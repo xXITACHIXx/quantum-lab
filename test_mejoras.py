@@ -637,3 +637,64 @@ def test_ningun_titulo_de_seccion_queda_solo_al_pie_de_pagina():
             titulos = ("1. Objetivo", "2. Modelo", "3. Ecuaciones", "4. Datos", "5. Procedimiento", "6. Resultados",
                        "7. Gráficas", "8. Preguntas", "9. Conclusiones")
             assert not (lineas and lineas[-1].startswith(titulos)), lineas[-2:]
+
+
+# =============================================================================================
+# Marcas de los instrumentos en las figuras de los informes
+# =============================================================================================
+def test_figura_de_bohr_marca_los_niveles_del_instrumento_de_foton():
+    pb = _p_bohr()                                              # 3 → 2
+    d = bohr.calcular_transicion(pb)
+    igual = bohr.informe_transicion(pb, d, "", [("a", "1", "")], (3, 2)).figuras[0].axes[0]
+    otro = bohr.informe_transicion(pb, d, "", [("a", "1", "")], (4, 2)).figuras[0].axes[0]
+    assert igual.get_legend() is None                           # mismos niveles: no se duplica la flecha
+    textos = [t.get_text() for t in otro.get_legend().get_texts()]
+    assert any("4 → 2" in t for t in textos) and any("3 → 2" in t for t in textos)
+    assert len(otro.texts) == len(igual.texts) + 1               # una flecha adicional
+
+
+def test_figura_de_la_esfera_marca_la_direccion_solo_si_esta_en_el_plano_xz():
+    pe = esf.validar_parametros_esfera(2, 1, 1.0, "SI", 90, "densidad", "lobulos", 0.4, "Viridis")
+    th = math.pi / 4
+    ax = esf.informe_estado_angular(pe, "", [("a", "1", "")], (th, 0.0)).figuras[0].axes[0]
+    punto = next(l for l in ax.lines if l.get_marker() == "o")
+    rho = 15 / (8 * math.pi) * math.sin(th) ** 2 * math.cos(th) ** 2          # |Y₂¹|² con la fórmula cerrada
+    assert punto.get_xdata()[0] == pytest.approx(rho * math.sin(th), rel=1e-9)
+    assert punto.get_ydata()[0] == pytest.approx(rho * math.cos(th), rel=1e-9)
+    fuera = esf.informe_estado_angular(pe, "", [("a", "1", "")], (th, 0.7)).figuras[0].axes[0]
+    assert not any(l.get_marker() == "o" for l in fuera.lines)                 # φ = 0.7 rad no está en el plano xz
+    sin = esf.informe_estado_angular(pe, "", None, None).figuras[0].axes[0]
+    assert not any(l.get_marker() == "o" for l in sin.lines)
+
+
+def test_figura_de_incertidumbre_sombrea_media_mas_menos_la_desviacion():
+    pi_ = _p_inc()
+    d = inc.calcular_paquete(pi_)
+    con = inc.informe_paquete(pi_, d, "", [("a", "1", "")]).figuras[0].axes
+    sin = inc.informe_paquete(pi_, d, "").figuras[0].axes
+    assert all(len(a.patches) == 1 for a in con) and all(len(a.patches) == 0 for a in sin)
+    assert con[0].patches[0].get_width() == pytest.approx(2 * d["delta_x"], rel=1e-9)
+    assert con[0].patches[0].get_x() == pytest.approx(d["x_medio"] - d["delta_x"], rel=1e-9, abs=1e-12)
+    assert con[1].patches[0].get_width() == pytest.approx(2 * d["delta_k"], rel=1e-9)
+
+
+@pytest.mark.parametrize("clave", list(SIMULADORES))
+def test_titulos_y_conclusiones_nunca_quedan_partidos_en_ningun_simulador(informes_listos, clave):
+    """Con distintas cantidades de filas: ningún título de sección queda al pie y «Conclusiones» va en una sola página."""
+    pypdf = pytest.importorskip("pypdf")
+    titulos = ("1. Objetivo", "2. Modelo", "3. Ecuaciones", "4. Datos", "5. Procedimiento", "6. Resultados",
+               "7. Gráficas", "8. Preguntas", "9. Conclusiones")
+    base = informes_listos[clave]
+    for extra in range(0, 16):
+        inf = dataclasses.replace(base, conclusiones="",
+                                  lecturas=[(f"Lectura {i}", "1", "u") for i in range(extra)],
+                                  resultados=base.resultados + [(f"Extra {i}", "1", "") for i in range(extra % 7)])
+        lector = pypdf.PdfReader(io.BytesIO(informes.pdf_informe(inf)))
+        paginas = [p.extract_text() for p in lector.pages]
+        for pagina, pag in zip(lector.pages, paginas, strict=True):
+            lineas = [x for x in pag.splitlines() if x.strip() and not x.startswith(("Quantum Lab ·", "Página"))]
+            if lineas and lineas[-1].startswith("7. Gráficas"):          # la figura es una imagen: debe estar en esa página
+                assert len(pagina.images) >= 1, (clave, extra, "título de gráficas sin figura")
+                continue
+            assert not (lineas and lineas[-1].startswith(titulos)), (clave, extra, lineas[-2:])
+        assert "9. Conclusiones del estudiante" in paginas[-1] or "9. Conclusiones del estudiante" in paginas[-2], (clave, extra)

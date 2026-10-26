@@ -118,7 +118,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 938 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
+python -m pytest -q          # 947 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador

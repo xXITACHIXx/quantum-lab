@@ -97,6 +97,7 @@ class _Lienzo:
         self.paginas: list = []
         self.fig = None
         self.y = 0.0
+        self._ultima_seccion = None
         self.nueva()
 
     @property
@@ -110,7 +111,7 @@ class _Lienzo:
 
     def _hay_sitio(self, alto: float) -> None:
         if self.y + alto > ALTO_A4 - MARGEN - 0.2:
-            self.nueva()
+            self._nueva_con_titulo()
 
     def texto(self, s: str, tam: float = 10, peso: str = "normal", color: str = "#111111", sangria: float = 0.0,
               estilo: str = "normal", familia: str = "DejaVu Sans") -> None:
@@ -135,10 +136,24 @@ class _Lienzo:
     def seccion(self, s: str, reserva: float = 0.8) -> None:
         self._hay_sitio(reserva)
         self.espacio(0.1)
+        antes = (self.fig, len(self.fig.texts), len(self.fig.artists), self.y)
         self.texto(s, 12, "bold", "#1F3A93")
         self.fig.add_artist(plt.Line2D([MARGEN / ANCHO_A4, (ANCHO_A4 - MARGEN) / ANCHO_A4],
                                        [1 - (self.y + 0.02) / ALTO_A4] * 2, color="#1F3A93", lw=0.7))
         self.espacio(0.08)
+        self._ultima_seccion = (s, *antes, self.y)       # (título, figura, textos, artistas, y antes, y después)
+
+    def _nueva_con_titulo(self) -> None:
+        """Pasa a otra página; si lo último dibujado fue el título de una sección, lo lleva consigo (sin dejarlo huérfano)."""
+        u = self._ultima_seccion
+        if u and u[1] is self.fig and abs(self.y - u[5]) < 1e-9:
+            titulo, fig, n_textos, n_artistas = u[0], u[1], u[2], u[3]
+            del fig.texts[n_textos:]
+            del fig.artists[n_artistas:]
+            self.nueva()
+            self.seccion(titulo, reserva=0.0)
+        else:
+            self.nueva()
 
     def lista(self, items: list[str], numerada: bool = False) -> None:
         for i, t in enumerate(items, 1):
@@ -189,7 +204,7 @@ class _Lienzo:
         total = 0.25 + alto_cab + sum(alturas)
         minimo = 0.25 + alto_cab + sum(alturas[:2])          # título + encabezado + al menos dos filas
         if (total > libre and total <= pagina_util) or minimo > libre:
-            self.nueva()                                        # tabla corta: entera en la página siguiente
+            self._nueva_con_titulo()                            # tabla corta: entera en la página siguiente
         self.texto(titulo, 10, "bold")
         fila(cab, "bold", "#DDE3F0")
         for i, f in enumerate(cuerpo):
@@ -276,7 +291,7 @@ def pdf_informe(informe: Informe, fecha: datetime | None = None) -> bytes:
         if informe.preguntas:
             lienzo.seccion("8. Preguntas de análisis")
             lienzo.lista(informe.preguntas, numerada=True)
-        lienzo.seccion("9. Conclusiones del estudiante")
+        lienzo.seccion("9. Conclusiones del estudiante", reserva=1.2 if informe.conclusiones.strip() else 3.4)
         lienzo.texto("Esta sección la escribe la persona que realiza el experimento; el simulador no la rellena.",
                      9, estilo="italic", color="#555555")
         if informe.conclusiones.strip():
