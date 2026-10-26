@@ -35,6 +35,9 @@ import numpy as np
 import streamlit as st
 from scipy.signal import find_peaks
 
+import informes
+import instrumentos
+import inverso
 import predice
 import quantum_lab_comun as qc
 from quantum_lab_comun import COLORES, E_CARGA, E_HARTREE, HBAR, M_E
@@ -720,6 +723,89 @@ PREGUNTAS_PREDICE = [
 ]
 
 
+# ---------------------------------------------------------------------
+# Retos del laboratorio inverso
+# ---------------------------------------------------------------------
+def _energia_ev_de_reto(v: dict) -> float:
+    return energia_nivel(v["n"], v["a"] * 1e-9, M_E) / E_CARGA
+
+
+def _solucion_reto_energia(v: dict) -> str:
+    n = int(v["n"])
+    objetivo = RETOS_INVERSOS[0].objetivo
+    a_nm = n * np.pi * HBAR / np.sqrt(2.0 * M_E * objetivo * E_CARGA) * 1e9
+    return (f"De Eₙ = n²π²ħ²/(2ma²) se despeja **a = nπħ/√(2mEₙ)**. Con n = {n}, m = mₑ y Eₙ = {objetivo:g} eV:\n\n"
+            f"**a = {a_nm:.6g} nm**. Cualquier pareja (n, a) con a = n · {a_nm / n:.6g} nm también sirve.")
+
+
+RETOS_INVERSOS = [
+    inverso.Reto(
+        "caja_energia", "Energía objetivo de un electrón en una caja",
+        "Un electrón está confinado en una caja unidimensional. Elige el número cuántico n y la longitud a para que su "
+        "energía Eₙ tenga el valor indicado.",
+        "Energía Eₙ", "eV", 1.5041,
+        (inverso.Variable("n", "Número cuántico n", "", 1, 20, 1, 1, True),
+         inverso.Variable("a", "Longitud de la caja a", "nm", 0.1, 20.0, 0.01, 1.0)),
+        _energia_ev_de_reto,
+        ("Eₙ crece con n² y decrece con a². Si dejas n fijo, ¿cómo debe cambiar a para aumentar la energía?",
+         "Para un electrón en 1 nm, E₁ ≈ 0.376 eV. El objetivo es unas 4 veces mayor.",
+         "Con n = 1 necesitas a² cuatro veces menor, es decir, la mitad de la longitud."),
+        "Eₙ = n²π²ħ²/(2ma²): la energía fija la combinación n/a. Por eso hay muchas soluciones, todas con a ∝ n.",
+        _solucion_reto_energia,
+        "Recuerda que Eₙ ∝ n² y Eₙ ∝ 1/a²: un cambio en a se compensa con un cambio proporcional en n.",
+        tol_exacta=5e-5, soluciones="Hay infinitas combinaciones válidas: con a = n · 0.5 nm la energía no cambia.",
+        metodo="Despeje directo de la ecuación (sin búsqueda numérica)."),
+]
+
+
+# ---------------------------------------------------------------------
+# Informe del experimento
+# ---------------------------------------------------------------------
+def informe_estado(p: ParametrosCaja, d: dict, conclusiones: str = "") -> informes.Informe:
+    """Informe del estado individual: todo sale de `d` (el mismo cálculo que ven las gráficas y las métricas)."""
+    u = qc.obtener_unidades(p.sistema)
+    fx, fe, L, U = u["factor_longitud"], u["factor_energia"], u["nombre_longitud"], u["nombre_energia"]
+    with informes.estilo_claro():
+        fig, (ax1, ax2) = informes.figura_clara(7.0, 3.0, ncols=2)
+        ax1.plot(d["x"] / fx, d["psi"] * np.sqrt(fx), color="#1F3A93")
+        ax1.axhline(0, color="gray", lw=0.6)
+        ax1.set(title=f"Función de onda ψ{_sub(p.n)}", xlabel=f"x [{L}]", ylabel=f"ψ [{L}$^{{-1/2}}$]")
+        ax2.plot(d["x"] / fx, d["rho"] * fx, color="#B03A2E")
+        ax2.plot(d["maximos"] / fx, np.interp(d["maximos"], d["x"], d["rho"]) * fx, "k*", label="máximos")
+        ax2.set(title=f"Densidad de probabilidad |ψ{_sub(p.n)}|²", xlabel=f"x [{L}]", ylabel=f"|ψ|² [{L}$^{{-1}}$]")
+        ax2.legend()
+        fig.tight_layout()
+    return informes.Informe(
+        titulo=f"Partícula en una caja 1D: estado n = {p.n}",
+        simulador="Partícula en una caja unidimensional",
+        objetivo="Relacionar el número cuántico n con la energía, los nodos y la forma de la función de onda de una "
+                 "partícula confinada en un pozo de potencial infinito.",
+        modelo="Pozo infinito unidimensional con paredes en x = 0 y x = a; estados estacionarios exactos. Resultados "
+               "calculados numéricamente sobre una malla, sin aproximaciones adicionales.",
+        ecuaciones=[r"\psi_n(x)=\sqrt{\frac{2}{a}}\,\sin\left(\frac{n\pi x}{a}\right)",
+                    r"E_n=\frac{n^2\pi^2\hbar^2}{2ma^2}", r"\lambda_n=\frac{2a}{n}"],
+        parametros=[("Número cuántico n", f"{p.n}", ""), ("Longitud de la caja a", f"{p.longitud / fx:.6g}", L),
+                    ("Masa m", f"{p.masa / M_E:.6g}", "mₑ"), ("Puntos de la malla", f"{p.puntos}", ""),
+                    ("Sistema de unidades", p.sistema, "")],
+        procedimiento=["Se construye la malla de x entre 0 y a.", "Se evalúa ψₙ(x) = √(2/a)·sen(nπx/a).",
+                       "Se calcula ρ = |ψₙ|² y se comprueba que ∫ρ dx = 1.",
+                       "Se calculan Eₙ, el momento |p| = nπħ/a y λ = 2a/n con las fórmulas de arriba."],
+        resultados=[(f"Energía E{_sub(p.n)}", qc.cientifico(d["energia"] / fe, 8), U),
+                    (f"Energía E{_sub(p.n)}", qc.cientifico(d["energia"], 8), "J"),
+                    ("Longitud de onda de De Broglie 2a/n", f"{d['lambda_db'] / fx:.8g}", L),
+                    ("Momento |p| = nπħ/a", qc.cientifico(d["momento"], 6), "kg·m/s"),
+                    ("Nodos interiores", f"{p.n - 1}", ""), ("Máximos de |ψ|²", f"{p.n}", ""),
+                    ("Normalización ∫|ψ|²dx", f"{d['norma']:.10f}", "")],
+        tablas=[("Posiciones de los máximos de |ψ|²", ["Máximo", f"x [{L}]"],
+                 [[str(k + 1), f"{v / fx:.6g}"] for k, v in enumerate(d["maximos"][:12])])],
+        figuras=[fig],
+        preguntas=["¿Cómo cambia Eₙ si se duplica la longitud de la caja? Compruébalo cambiando a.",
+                   "¿Cuántos nodos tiene el estado n y qué relación guardan con el número de máximos?",
+                   "¿Por qué la energía del estado fundamental no puede ser cero?"],
+        referencias=[],
+        conclusiones=conclusiones)
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     """Pruebas de física, de la superposición y de la validación de entradas."""
     r = qc.RegistroPruebas("Partícula en una caja 1D")
@@ -995,6 +1081,39 @@ def _leer_parametros_fisicos():
         return None
 
 
+def _instrumentos_caja(p: ParametrosCaja, d: dict, u: dict) -> None:
+    """Cursor, probabilidad en un intervalo (con su error numérico) y fotón entre niveles."""
+    fx, L = u["factor_longitud"], u["nombre_longitud"]
+    a_vis = p.longitud / fx
+    st.markdown("**Cursor.** Lee ψ y |ψ|² en una posición. *Mide:* el valor calculado de la función. "
+                "*No mide:* una posición real de la partícula ni una trayectoria.")
+    x0 = st.slider(f"Posición x [{L}]", 0.0, float(a_vis), float(a_vis) / 2, key="caja_inst_x", format="%.4g")
+    try:
+        psi0 = instrumentos.leer_valor(d["x"] / fx, d["psi"] * np.sqrt(fx), x0)
+        rho0 = instrumentos.leer_valor(d["x"] / fx, d["rho"] * fx, x0)
+    except ValueError as error:
+        qc.error(error)
+        return
+    qc.metricas([(f"ψ(x) [{L}⁻¹ᐟ²]", f"{psi0:.6g}", f"x = {x0:.4g} {L}"),
+                 (f"|ψ(x)|² [{L}⁻¹]", f"{rho0:.6g}", "Densidad, no probabilidad")], columnas=2)
+    st.markdown("**Probabilidad en un intervalo.** *Mide:* P = ∫|ψ|²dx entre x₁ y x₂. *No mide:* un resultado "
+                "experimental. La diferencia con la integral exacta es **error numérico** de la malla.")
+    x1, x2 = st.slider(f"Intervalo [x₁, x₂] en {L}", 0.0, float(a_vis), (float(a_vis) * 0.25, float(a_vis) * 0.5),
+                       key="caja_inst_intervalo", format="%.4g")
+    try:
+        pn = instrumentos.probabilidad_intervalo(d["x"], d["rho"], x1 * fx, x2 * fx)
+        pe = instrumentos.probabilidad_caja_exacta(p.n, p.longitud, x1 * fx, x2 * fx)
+    except ValueError as error:
+        qc.error(error)
+        return
+    err = abs(pn - pe)
+    qc.metricas([("P numérica", f"{pn:.8f}", "Regla del trapecio"), ("P exacta", f"{pe:.8f}", "Integral analítica"),
+                 ("Error numérico |ΔP|", f"{err:.2e}", "Depende de la malla")], columnas=3)
+    st.latex(r"P=\int_{x_1}^{x_2}|\psi_n|^2dx=\left[\dfrac{x}{a}-\dfrac{\sin(2n\pi x/a)}{2n\pi}\right]_{x_1}^{x_2}")
+    st.markdown("**Fotón entre niveles.** Con las energías Eₙ de esta caja.")
+    instrumentos.panel_fotones(lambda k: energia_nivel(int(k), p.longitud, p.masa), "caja", N_MAX, n_ini=min(6, N_MAX), n_fin=3)
+
+
 def _pestana_individual(p_base: ParametrosCaja):
     c1, _, _, _ = st.columns(4)
     n = c1.number_input("Número cuántico n", min_value=1, max_value=N_MAX, step=1, key="caja_n")
@@ -1037,6 +1156,9 @@ def _pestana_individual(p_base: ParametrosCaja):
             ("Máximos de |ψ|²", max_txt, L, f"{p.n} máximos"),
             ("Normalización numérica ∫|ψ|²dx", f"{d['norma']:.12f}", "", f"error {abs(d['norma'] - 1):.2e}"),
         ], archivo=f"caja_valores_n{p.n}.csv")
+    with st.expander("Instrumentos de medición", expanded=False):
+        _instrumentos_caja(p, d, u)
+    informes.boton_informe(lambda texto: informe_estado(p, d, texto), "caja_inf", f"caja_informe_n{p.n}")
     with st.expander("Interpretación física", expanded=False):
         st.markdown(
             "- Un **estado estacionario** tiene energía definida; su densidad |ψₙ|² **no cambia con el tiempo**: "
@@ -1268,7 +1390,7 @@ def interfaz() -> None:
     if p_base is None:
         return
     tabs = st.tabs(["Estado individual", "Superposición e interferencia", "Experimento 1, 2 y 1 + 2", "Guía de práctica",
-                    "Autoevaluación", "Predice y experimenta", "Pruebas numéricas"])
+                    "Autoevaluación", "Predice y experimenta", "Laboratorio inverso", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_individual(p_base)
     with tabs[1]:
@@ -1282,6 +1404,8 @@ def interfaz() -> None:
     with tabs[5]:
         _pestana_predice(p_base)
     with tabs[6]:
+        inverso.panel(RETOS_INVERSOS, "caja")
+    with tabs[7]:
         qc.boton_pruebas(ejecutar_pruebas, "caja_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 

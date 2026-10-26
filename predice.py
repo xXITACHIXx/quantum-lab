@@ -37,6 +37,7 @@ class Pregunta:
     concepto: str                     # tema de teoría al que se vincula (clave de `teoria`)
     magnitud: str                     # nombre de la magnitud comparada, p. ej. «Energía Eₙ»
     calcular: Callable                # calcular(parametros) -> (valor_referencia, valor_modificado, unidad)
+    tol: float = 1e-6                 # tolerancia relativa para reconocer la opción correcta (mayor si el cálculo es numérico)
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,15 @@ def _indice_mas_cercano(opciones: tuple[Opcion, ...], razon: float) -> int:
     return min(range(len(opciones)), key=distancias.__getitem__)
 
 
+def _razon(q: Pregunta, parametros) -> tuple[float, float, str, float]:
+    """(referencia, modificado, unidad, cociente). Lanza ValueError si la magnitud no es positiva y finita."""
+    ref, mod, unidad = q.calcular(parametros)
+    if not (ref > 0 and mod > 0 and math.isfinite(ref) and math.isfinite(mod)):
+        raise ValueError("Con los parámetros actuales la magnitud de esta pregunta es cero o no está definida "
+                         "(por ejemplo, por debajo del umbral). Cambia los parámetros del simulador y vuelve a ejecutar.")
+    return ref, mod, unidad, mod / ref
+
+
 def validar_pregunta(q: Pregunta, parametros) -> list[str]:
     """
     Comprueba que la pregunta esté bien construida para los parámetros dados: razones positivas y distintas, y una
@@ -73,13 +83,13 @@ def validar_pregunta(q: Pregunta, parametros) -> list[str]:
         return problemas
     if len({round(math.log(r), 9) for r in razones}) != len(razones):
         problemas.append("Dos opciones afirman el mismo cociente.")
-    ref, mod, _ = q.calcular(parametros)
-    if not (ref > 0 and mod > 0 and math.isfinite(ref) and math.isfinite(mod)):
+    try:
+        _, _, _, razon = _razon(q, parametros)
+    except ValueError:
         problemas.append("El cálculo no entrega valores positivos y finitos.")
         return problemas
-    razon = mod / ref
     mejor = _indice_mas_cercano(q.opciones, razon)
-    if abs(q.opciones[mejor].razon / razon - 1.0) > 1e-6:
+    if abs(q.opciones[mejor].razon / razon - 1.0) > q.tol:
         problemas.append(f"Ninguna opción coincide con el cociente calculado ({razon:.6g}).")
     if not q.pistas:
         problemas.append("No hay pistas.")
@@ -88,10 +98,9 @@ def validar_pregunta(q: Pregunta, parametros) -> list[str]:
 
 def evaluar(q: Pregunta, parametros, elegida: int | None) -> Resultado:
     """Ejecuta el experimento con los parámetros actuales y compara la predicción (si existe) con el cálculo."""
-    ref, mod, unidad = q.calcular(parametros)
-    razon = mod / ref
+    ref, mod, unidad, razon = _razon(q, parametros)
     correcta = _indice_mas_cercano(q.opciones, razon)
-    if abs(q.opciones[correcta].razon / razon - 1.0) > 1e-6:
+    if abs(q.opciones[correcta].razon / razon - 1.0) > q.tol:
         raise ValueError("Ninguna opción de la pregunta coincide con el cálculo: la pregunta no es válida "
                          "para estos parámetros.")
     if elegida is None:
@@ -111,7 +120,32 @@ def evaluar(q: Pregunta, parametros, elegida: int | None) -> Resultado:
 # =====================================================================
 # Interfaz
 # =====================================================================
-def panel(preguntas: list[Pregunta], parametros, prefijo: str, formatear: Callable[[float], str] | None = None) -> None:
+def informe_experimento(q: Pregunta, res: Resultado, datos: dict, conclusiones: str = ""):
+    """Informe de un experimento de predicción. `datos`: simulador, modelo, ecuaciones, parametros (filas)."""
+    import informes
+    fila_pred = q.opciones[res.elegida].texto if res.elegida is not None else "Sin predicción"
+    return informes.Informe(
+        titulo=f"Predicción y experimento: {q.enunciado}", simulador=datos["simulador"],
+        objetivo=f"{q.enunciado} Se compara {q.magnitud} antes y después del cambio: {q.cambio}.",
+        modelo=datos["modelo"], ecuaciones=datos.get("ecuaciones", []), parametros=datos["parametros"],
+        procedimiento=["Se registra la predicción (opcional).", f"Se calcula {q.magnitud} con los parámetros actuales.",
+                       f"Se aplica el cambio: {q.cambio}.", "Se calcula de nuevo y se obtiene el cociente modificado / referencia.",
+                       "Se compara el cociente calculado con el que afirma cada opción."],
+        resultados=[("Predicción del estudiante", fila_pred, ""), ("Resultado calculado", q.opciones[res.correcta].texto, ""),
+                    (f"{q.magnitud} (referencia)", f"{res.referencia:.8g}", res.unidad),
+                    (f"{q.magnitud} (modificado)", f"{res.modificado:.8g}", res.unidad),
+                    ("Cociente modificado / referencia", f"{res.razon:.8g}", ""),
+                    ("Comparación", {True: "La predicción coincide con el cálculo", False: "La predicción no coincide",
+                                     None: "Sin predicción"}[res.acierto], "")],
+        tablas=[("Opciones de la pregunta", ["Opción", "Cociente que afirma"],
+                 [[o.texto, f"{o.razon:.6g}"] for o in q.opciones])],
+        preguntas=["¿Qué relación matemática explica el cociente obtenido?",
+                   "Repite el experimento con otros parámetros: ¿el cociente cambia o se conserva?"],
+        conclusiones=conclusiones)
+
+
+def panel(preguntas: list[Pregunta], parametros, prefijo: str, formatear: Callable[[float], str] | None = None,
+          datos_informe: dict | None = None) -> None:
     """
     Panel «Predice, experimenta y explica». `parametros` son los parámetros YA validados del simulador (solo lectura);
     `prefijo` identifica las claves de sesión. Los resultados se recalculan en cada ejecución de la página, de modo que
@@ -184,4 +218,9 @@ def panel(preguntas: list[Pregunta], parametros, prefijo: str, formatear: Callab
     else:
         st.info(res.mensaje, icon=":material/info:")
     st.markdown(f"**Explicación física.** {q.explicacion}")
+    qc.enlaces_de_estudio(q.concepto, f"{prefijo}_pd_{q.id}")
     st.caption("Para repetir con otros valores, cambia los parámetros del simulador y pulsa de nuevo «Ejecutar experimento».")
+    if datos_informe:
+        import informes
+        informes.boton_informe(lambda texto: informe_experimento(q, res, datos_informe, texto), f"{prefijo}_pd_{q.id}_inf",
+                               f"{prefijo}_predice_{q.id}")

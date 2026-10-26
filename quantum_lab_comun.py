@@ -1113,6 +1113,47 @@ def enlace_teoria(tema: str) -> None:
         st.caption("La teoría de este tema está en el Centro de teoría del laboratorio completo (quantum_lab.py).")
 
 
+# Tema de teoría → (tema de ejercicios, problema del solucionador). None si no existe esa herramienta para el tema.
+RELACIONES_ESTUDIO = {"caja": ("caja", "caja"), "oscilador": ("oscilador", "oscilador"),
+                      "fotoelectrico": ("fotoelectrico", "fotoelectrico"), "bohr": ("bohr", "rydberg"),
+                      "incertidumbre": ("conmutadores", "incertidumbre"), "esfera": ("esfera", None)}
+# Prefijo de claves de cada simulador → tema de teoría
+TEMA_DE_PREFIJO = {"caja": "caja", "osc": "oscilador", "foto": "fotoelectrico", "bohr": "bohr", "esf": "esfera",
+                   "inc": "incertidumbre"}
+
+
+def _ir_a_ejercicios(tema_ej: str) -> None:
+    import streamlit as st
+
+    import ejercicios
+    from ejercicios._modelo import TEMAS
+    st.session_state.update(ql_pagina="ejercicios", ej_fuente=ejercicios.TODAS, ej_tema=TEMAS[tema_ej], ej_buscar="")
+
+
+def _ir_a_solucionador(problema: str) -> None:
+    import streamlit as st
+    st.session_state.update(ql_pagina="solucionador", sol_problema=problema)
+
+
+def enlaces_de_estudio(tema: str, clave: str) -> None:
+    """
+    Fila de enlaces desde un experimento hacia la teoría, los ejercicios del tema y el solucionador paso a paso.
+    Solo existe dentro del laboratorio completo (quantum_lab.py); en un simulador suelto no se muestra nada.
+    """
+    import streamlit as st
+    if "ql_pagina" not in st.session_state or tema not in RELACIONES_ESTUDIO:
+        return
+    tema_ej, problema = RELACIONES_ESTUDIO[tema]
+    cols = st.columns(3)
+    cols[0].button("Teoría del tema", key=f"ql_est_{clave}_teo", icon=":material/menu_book:", on_click=ir_a_tema,
+                   args=(tema,), width="stretch")
+    cols[1].button("Ejercicios del tema", key=f"ql_est_{clave}_ej", icon=":material/quiz:", on_click=_ir_a_ejercicios,
+                   args=(tema_ej,), width="stretch")
+    if problema:
+        cols[2].button("Solucionador paso a paso", key=f"ql_est_{clave}_sol", icon=":material/function:",
+                       on_click=_ir_a_solucionador, args=(problema,), width="stretch")
+
+
 def boton_compartir(valores_iniciales: dict) -> None:
     """Ventana desplegable con el enlace de la configuración actual, listo para copiar."""
     import streamlit as st

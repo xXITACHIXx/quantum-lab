@@ -25,12 +25,16 @@ Estructura: 1. Física · 2. Figuras · 3. Pruebas · 4. Interfaz Streamlit
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import streamlit as st
 from scipy import constants as const
 
+import informes
+import instrumentos
+import inverso
+import predice
 import quantum_lab_comun as qc
 from quantum_lab_comun import COLORES
 
@@ -346,6 +350,172 @@ def figura_millikan(res: dict, phi_real: float, metal: str):
 # =====================================================================
 # 3. PRUEBAS NUMÉRICAS
 # =====================================================================
+# ---------------------------------------------------------------------
+# Predice y experimenta · Laboratorio inverso · Informe
+# ---------------------------------------------------------------------
+def _calc_foto(magnitud, modificar, unidad):
+    def f(p: ParametrosFoto):
+        return float(magnitud(p)), float(magnitud(modificar(p))), unidad
+    return f
+
+
+def _mag_isat(p):
+    return corriente_saturacion(p)
+
+
+def _mag_kmax(p):
+    return float(energia_cinetica_maxima(p.frecuencia, p.phi))
+
+
+def _mag_efoton(p):
+    return float(energia_foton_ev(p.frecuencia))
+
+
+def _mag_nu0(p):
+    return frecuencia_umbral(p.phi)
+
+
+PREGUNTAS_PREDICE = [
+    predice.Pregunta(
+        "intensidad_corriente", "¿Qué le pasa a la corriente de saturación si se duplica la potencia luminosa (con emisión)?",
+        "Se cambia P → 2P (frecuencia y metal fijos)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("No cambia", 1.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("Se cuadruplica", 4.0)),
+        ("La corriente cuenta electrones por segundo.", "Más potencia a la misma frecuencia son más fotones por segundo.",
+         "I_sat = η·e·P/(hν): es proporcional a P."),
+        "Más intensidad significa más fotones y, con la misma eficiencia, más electrones: la corriente se duplica. "
+        "La energía de cada electrón no cambia.", "fotoelectrico", "Corriente de saturación",
+        _calc_foto(_mag_isat, lambda p: replace(p, potencia=2.0 * p.potencia), "A")),
+    predice.Pregunta(
+        "intensidad_kmax", "¿Qué le pasa a la energía cinética máxima de los electrones si se duplica la intensidad?",
+        "Se cambia P → 2P (frecuencia y metal fijos)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("No cambia", 1.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("Se cuadruplica", 4.0)),
+        ("Un electrón absorbe un solo fotón.", "K_max = hν − φ: ¿aparece la intensidad en la fórmula?"),
+        "K_max = hν − φ depende de la frecuencia y del metal, no de la intensidad: es el resultado que la física clásica "
+        "no podía explicar.", "fotoelectrico", "Energía cinética máxima",
+        _calc_foto(_mag_kmax, lambda p: replace(p, potencia=2.0 * p.potencia), "eV")),
+    predice.Pregunta(
+        "frecuencia_fotones", "¿Qué le pasa a la energía de cada fotón si se duplica la frecuencia?",
+        "Se cambia ν → 2ν",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se cuadruplica", 4.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("No cambia", 1.0)),
+        ("E = hν.",), "La energía del fotón es proporcional a la frecuencia: E = hν.", "fotoelectrico",
+        "Energía del fotón", _calc_foto(_mag_efoton, lambda p: replace(p, frecuencia=2.0 * p.frecuencia), "eV")),
+    predice.Pregunta(
+        "phi_umbral", "¿Qué le pasa a la frecuencia umbral si el metal tiene el doble de función de trabajo?",
+        "Se cambia φ → 2φ",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("No cambia", 1.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("Se cuadruplica", 4.0)),
+        ("El umbral es la frecuencia cuyo fotón tiene justo la energía φ.", "ν₀ = φ/h."),
+        "ν₀ = φ/h: un metal que retiene más a sus electrones necesita fotones de mayor frecuencia.", "fotoelectrico",
+        "Frecuencia umbral ν₀", _calc_foto(_mag_nu0, lambda p: replace(p, phi=2.0 * p.phi), "Hz")),
+]
+
+
+def _cond_umbral(v: dict, obtenido: float) -> str | None:
+    e = float(energia_foton_ev(v["nu"] * 1e14))
+    return (f"No hay emisión: el fotón tiene {e:.4g} eV y la función de trabajo del cesio es "
+            f"{METALES['Cesio']} eV. Necesitas hν ≥ φ.") if e < METALES["Cesio"] else None
+
+
+def _cond_kmax(v: dict, obtenido: float) -> str | None:
+    e = float(energia_foton_ev(C / (v["lam"] * 1e-9)))
+    return (f"No hay emisión: el fotón tiene {e:.4g} eV y φ(Zn) = {METALES['Zinc']} eV. Reduce λ.") if e < METALES["Zinc"] else None
+
+
+RETOS_INVERSOS = [
+    inverso.Reto(
+        "foto_umbral", "Frecuencia mínima para emitir electrones del cesio",
+        f"Encuentra la frecuencia más baja a la que la luz arranca electrones del cesio (φ = {METALES['Cesio']} eV). "
+        "Con una frecuencia menor no hay emisión; con una mayor sí, pero ya no es la mínima.",
+        "Frecuencia ν", "10¹⁴ Hz", frecuencia_umbral(METALES["Cesio"]) / 1e14,
+        (inverso.Variable("nu", "Frecuencia ν", "10¹⁴ Hz", 1.0, 20.0, 0.01, 5.0),),
+        lambda v: v["nu"],
+        ("La emisión empieza cuando la energía de un fotón iguala la función de trabajo.", "Condición: hν = φ.",
+         "ν₀ = φ/h, con φ en julios (1 eV = 1.602×10⁻¹⁹ J)."),
+        "En el umbral hν₀ = φ, de modo que K_max = 0. Por debajo no hay electrones; por encima, K_max = h(ν − ν₀).",
+        lambda v: f"**ν₀ = φ/h = {METALES['Cesio']} eV / h = {frecuencia_umbral(METALES['Cesio']) / 1e14:.6g} × 10¹⁴ Hz**.",
+        "Para emitir se necesita hν ≥ φ; la frecuencia mínima es la que hace K_max = 0.",
+        tol_exacta=1e-3, tol_aprox=0.05, mostrar_objetivo=False, condicion=_cond_umbral,
+        soluciones="Solo hay una frecuencia mínima (el umbral).", metodo="Despeje directo: ν₀ = φ/h."),
+    inverso.Reto(
+        "foto_kmax", "Longitud de onda para K_max = 0.50 eV en el zinc",
+        f"Encuentra la longitud de onda de la luz que arranca electrones del zinc (φ = {METALES['Zinc']} eV) con una "
+        "energía cinética máxima de 0.50 eV.",
+        "Energía cinética máxima", "eV", 0.5,
+        (inverso.Variable("lam", "Longitud de onda λ", "nm", 50.0, 1000.0, 0.1, 300.0),),
+        lambda v: float(energia_cinetica_maxima(C / (v["lam"] * 1e-9), METALES["Zinc"])),
+        ("La energía del fotón debe ser φ + 0.50 eV.", "E = hc/λ, con hc ≈ 1239.84 eV·nm.",
+         "λ = hc/(φ + K_max)."),
+        "K_max = hc/λ − φ: al fijar K_max y φ queda determinada λ.",
+        lambda v: f"**λ = hc/(φ + K_max) = 1239.84 eV·nm / ({METALES['Zinc']} + 0.50) eV = "
+                  f"{H * C / ((METALES['Zinc'] + 0.5) * E) * 1e9:.5g} nm**.",
+        "K_max = hc/λ − φ: una λ menor da fotones más energéticos y mayor K_max.",
+        tol_exacta=5e-3, tol_aprox=0.1, condicion=_cond_kmax, soluciones="Hay una única longitud de onda válida.",
+        metodo="Despeje directo: λ = hc/(φ + K_max)."),
+]
+
+
+def informe_experimento(p: ParametrosFoto, d: dict, conclusiones: str = "") -> informes.Informe:
+    nu = np.linspace(0.5 * d["nu0"], 2.0 * max(p.frecuencia, d["nu0"]), 300)
+    with informes.estilo_claro():
+        fig, ax = informes.figura_clara(6.0, 3.2)
+        ax.plot(nu / ESCALA_NU, energia_cinetica_maxima(nu, p.phi), color="#1F3A93", label="K_max = máx(hν − φ, 0)")
+        ax.axvline(d["nu0"] / ESCALA_NU, color="gray", ls="--", label="umbral ν₀")
+        ax.plot([p.frecuencia / ESCALA_NU], [d["kmax_ev"]], "o", color="#B03A2E", label="radiación elegida")
+        ax.set(xlabel="ν [10¹⁴ Hz]", ylabel="K_max [eV]", title=f"Efecto fotoeléctrico ({p.metal})")
+        ax.legend()
+        fig.tight_layout()
+    return informes.Informe(
+        titulo=f"Efecto fotoeléctrico: {p.metal}", simulador="Efecto fotoeléctrico",
+        objetivo="Aplicar la ecuación de Einstein para hallar la frecuencia umbral y la energía de los electrones emitidos.",
+        modelo="Modelo de Einstein: un fotón libera un electrón si hν ≥ φ. No incluye efectos de superficie ni de temperatura. "
+               "La corriente de saturación usa una eficiencia cuántica constante.",
+        ecuaciones=[r"K_{max}=h\nu-\phi", r"\nu_0=\frac{\phi}{h}", r"I_{sat}=\eta\,e\,\frac{P}{h\nu}"],
+        parametros=[("Metal", p.metal, ""), ("Función de trabajo φ", f"{p.phi:.4g}", "eV"),
+                    ("Frecuencia ν", f"{p.frecuencia:.6g}", "Hz"), ("Longitud de onda λ", f"{d['longitud_nm']:.6g}", "nm"),
+                    ("Potencia luminosa P", f"{p.potencia * 1e3:.4g}", "mW"), ("Eficiencia cuántica η", f"{p.eficiencia * 100:.4g}", "%")],
+        procedimiento=["Se calcula la energía del fotón E = hν.", "Se compara con φ: hay emisión si E ≥ φ.",
+                       "Se calcula K_max = E − φ, la velocidad máxima y el potencial de frenado V₀ = K_max/e.",
+                       "Se calcula el flujo de fotones y la corriente de saturación."],
+        resultados=[("Energía del fotón hν", f"{d['energia_foton_ev']:.6g}", "eV"), ("Frecuencia umbral ν₀", f"{d['nu0']:.6g}", "Hz"),
+                    ("Longitud de onda umbral λ₀", f"{d['lambda0_nm']:.6g}", "nm"),
+                    ("Hay emisión", "Sí" if d["emision"] else "No", ""), ("Energía cinética máxima K_max", f"{d['kmax_ev']:.6g}", "eV"),
+                    ("Velocidad máxima", f"{d['vmax']:.6g}", "m/s"), ("Potencial de frenado V₀", f"{d['v0']:.6g}", "V"),
+                    ("Corriente de saturación", f"{d['i_sat']:.6g}", "A")],
+        figuras=[fig],
+        preguntas=["¿Qué pasa con K_max al aumentar la intensidad? ¿Y con la corriente?",
+                   "¿Qué ocurre por debajo de la frecuencia umbral, por intensa que sea la luz?"],
+        conclusiones=conclusiones)
+
+
+def _pestana_predice(p: ParametrosFoto):
+    st.markdown("Predice, ejecuta y compara. Para que las preguntas de intensidad y de K_max tengan sentido, elige una "
+                "radiación **por encima del umbral** del metal.")
+    datos = {"simulador": "Efecto fotoeléctrico", "modelo": "Modelo de Einstein: hν ≥ φ.",
+             "ecuaciones": [r"K_{max}=h\nu-\phi"],
+             "parametros": [("Metal", p.metal, ""), ("φ", f"{p.phi:.4g}", "eV"), ("ν", f"{p.frecuencia:.6g}", "Hz"),
+                            ("Potencia", f"{p.potencia * 1e3:.4g}", "mW")]}
+    predice.panel(PREGUNTAS_PREDICE, p, "foto", datos_informe=datos)
+
+
+def _pestana_instrumentos(p: ParametrosFoto):
+    d = calcular_foto(p)
+    st.markdown("**Lector de umbral.** Compara la energía del fotón con la función de trabajo. *Mide:* la diferencia de "
+                "dos valores calculados. *No mide:* una corriente real ni efectos de superficie.")
+    c = instrumentos.comparar(d["energia_foton_ev"], p.phi)
+    qc.metricas([("hν [eV]", f"{d['energia_foton_ev']:.6g}", f"λ = {d['longitud_nm']:.5g} nm · {d['region']}"),
+                 ("φ [eV]", f"{p.phi:.4g}", p.metal),
+                 ("hν − φ [eV]", f"{c['absoluta']:+.6g}", f"{c['relativa'] * 100:+.4g} % de φ"),
+                 ("Umbral λ₀ [nm]", f"{d['lambda0_nm']:.6g}", d["region_umbral"])], columnas=4)
+    if d["emision"]:
+        st.success("hν ≥ φ: hay emisión.", icon=":material/check_circle:")
+    else:
+        st.warning("hν < φ: no hay emisión, por intensa que sea la luz.", icon=":material/block:")
+    informes.boton_informe(lambda texto: informe_experimento(p, d, texto), "foto_inf", "fotoelectrico_informe")
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     r = qc.RegistroPruebas("Efecto fotoeléctrico")
     phi = METALES["Cesio"]
@@ -408,6 +578,14 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     r.comprobar_error("Rechaza potencia negativa", v_, "Cesio", 0, "longitud", 400, -1.0)
     r.comprobar_error("Rechaza eficiencia > 100 %", v_, "Cesio", 0, "longitud", 400, 1.0, 150.0)
     r.comprobar_error("Rechaza metal desconocido", v_, "Kriptonita", 0, "longitud", 400)
+    # --- Modo «Predice y experimenta» y laboratorio inverso: la respuesta correcta sale del cálculo
+    p_pd = validar_parametros_foto("Cesio", 2.5, "longitud", 400.0, 1.0, 10.0)
+    for q in PREGUNTAS_PREDICE:
+        r.comprobar(f"Pregunta de predicción «{q.id}»: la respuesta correcta sale del cálculo",
+                    predice.validar_pregunta(q, p_pd) == [], "; ".join(predice.validar_pregunta(q, p_pd)))
+    for reto in RETOS_INVERSOS:
+        r.comprobar(f"Reto inverso «{reto.id}» bien construido", inverso.validar_reto(reto) == [],
+                    "; ".join(inverso.validar_reto(reto)))
     return r
 
 
@@ -669,7 +847,7 @@ def interfaz() -> None:
     if p is None:
         return
     tabs = st.tabs(["Experimento", "Comparación de metales", "Determinación de h", "Guía de práctica", "Autoevaluación",
-                    "Pruebas numéricas"])
+                    "Predice y experimenta", "Laboratorio inverso", "Instrumentos e informe", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_experimento(p)
     with tabs[1]:
@@ -681,6 +859,12 @@ def interfaz() -> None:
     with tabs[4]:
         qc.autoevaluacion(PREGUNTAS, "foto")
     with tabs[5]:
+        _pestana_predice(p)
+    with tabs[6]:
+        inverso.panel(RETOS_INVERSOS, "foto")
+    with tabs[7]:
+        _pestana_instrumentos(p)
+    with tabs[8]:
         qc.boton_pruebas(ejecutar_pruebas, "foto_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 

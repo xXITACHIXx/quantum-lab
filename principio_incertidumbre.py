@@ -25,15 +25,18 @@ Estructura: 1. Física · 2. Figuras · 3. Pruebas · 4. Interfaz Streamlit
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import streamlit as st
 from scipy import constants as const
 
+import informes
+import instrumentos
+import inverso
+import predice
 import quantum_lab_comun as qc
 from quantum_lab_comun import COLORES
-
 
 # =====================================================================
 # 1. FÍSICA
@@ -572,6 +575,129 @@ def figura_rendija(r: Rendija, d: dict):
 # =====================================================================
 # 3. PRUEBAS
 # =====================================================================
+# ---------------------------------------------------------------------
+# Predice y experimenta · Laboratorio inverso · Informe
+# ---------------------------------------------------------------------
+def _mitad(p: Paquete) -> Paquete:
+    """Mismo paquete con todas las longitudes a la mitad (ancho y separación)."""
+    return replace(p, ancho=p.ancho / 2.0, separacion=p.separacion / 2.0)
+
+
+def _calc_inc(magnitud, modificar, unidad):
+    def f(p: Paquete):
+        return float(magnitud(p)), float(magnitud(modificar(p))), unidad
+    return f
+
+
+def _delta_k(p):
+    return calcular_paquete(p)["delta_k"]
+
+
+def _delta_x(p):
+    return calcular_paquete(p)["delta_x"]
+
+
+def _producto(p):
+    return calcular_paquete(p)["producto"]
+
+
+PREGUNTAS_PREDICE = [
+    predice.Pregunta(
+        "mitad_delta_p", "¿Qué le pasa a la incertidumbre en el momento Δp si el paquete se hace la mitad de ancho?",
+        "Se cambia el ancho a la mitad (misma forma)",
+        (predice.Opcion("Se reduce a la mitad", 0.5), predice.Opcion("No cambia", 1.0), predice.Opcion("Se duplica", 2.0),
+         predice.Opcion("Se cuadruplica", 4.0)),
+        ("Localizar más la partícula en x tiene un costo en el momento.", "Δx·Δp ≥ ħ/2: si Δx baja, Δp debe subir."),
+        "Un paquete la mitad de ancho tiene Δx la mitad y Δp el doble: el producto Δx·Δp se conserva.", "incertidumbre",
+        "Δk (Δp = ħΔk)", _calc_inc(_delta_k, _mitad, "nm⁻¹"), tol=1e-3),
+    predice.Pregunta(
+        "mitad_producto", "¿Qué le pasa al producto Δx·Δp si el paquete se hace la mitad de ancho (misma forma)?",
+        "Se cambia el ancho a la mitad",
+        (predice.Opcion("Se reduce a la mitad", 0.5), predice.Opcion("No cambia", 1.0), predice.Opcion("Se duplica", 2.0),
+         predice.Opcion("Se cuadruplica", 4.0)),
+        ("Piensa en lo que ocurre con Δx y con Δp por separado.", "Uno se reduce a la mitad y el otro se duplica."),
+        "El producto Δx·Δp depende de la forma del paquete, no de su escala: al reescalar, se conserva.",
+        "incertidumbre", "Producto Δx·Δk", _calc_inc(_producto, _mitad, ""), tol=1e-3),
+]
+
+
+def _delta_k_reto(v: dict) -> float:
+    return calcular_paquete(validar_paquete("gaussiano", v["sigma"], 0.0))["delta_k"]
+
+
+RETOS_INVERSOS = [
+    inverso.Reto(
+        "inc_ancho", "Ancho de un paquete gaussiano para Δk = 0.25 nm⁻¹",
+        "Encuentra el ancho σ de un paquete gaussiano (sin desplazamiento de momento) cuya incertidumbre en el número de "
+        "onda sea Δk = 0.25 nm⁻¹.",
+        "Incertidumbre Δk", "nm⁻¹", 0.25,
+        (inverso.Variable("sigma", "Ancho σ", "nm", ANCHO_MIN, ANCHO_MAX, 0.01, 1.0),),
+        _delta_k_reto,
+        ("En un gaussiano, Δx = σ y Δx·Δk alcanza su mínimo.", "El mínimo es Δx·Δk = 1/2.", "σ = 1/(2Δk)."),
+        "Un gaussiano cumple Δx·Δk = 1/2 exactamente: fijar Δk fija σ = 1/(2Δk).",
+        lambda v: "**σ = 1/(2Δk) = 1/(2 · 0.25 nm⁻¹) = 2 nm**.",
+        "Δk = 1/(2σ): un paquete más estrecho tiene mayor Δk.",
+        tol_exacta=1e-3, tol_aprox=0.05, soluciones="Hay una única solución.",
+        metodo="Despeje directo; el valor calculado se obtiene con FFT, por eso la tolerancia exacta es 10⁻³ (error numérico)."),
+]
+
+
+def informe_paquete(p: Paquete, d: dict, conclusiones: str = "") -> informes.Informe:
+    with informes.estilo_claro():
+        fig, (ax1, ax2) = informes.figura_clara(7.0, 3.0, ncols=2)
+        ax1.plot(d["x"], np.abs(d["psi"]) ** 2, color="#1F3A93")
+        ax1.set(title="Densidad en posición |ψ|²", xlabel="x [nm]", ylabel="|ψ|² [nm⁻¹]")
+        ax1.set_xlim(d["x_medio"] - 6 * d["delta_x"] - 1e-9, d["x_medio"] + 6 * d["delta_x"] + 1e-9)
+        ax2.plot(d["k"], np.abs(d["phi"]) ** 2, color="#B03A2E")
+        ax2.set(title="Densidad en momento |φ|²", xlabel="k [nm⁻¹]", ylabel="|φ|² [nm]")
+        ax2.set_xlim(d["k_medio"] - 6 * d["delta_k"], d["k_medio"] + 6 * d["delta_k"])
+        fig.tight_layout()
+    teorico = producto_teorico(p)
+    return informes.Informe(
+        titulo=f"Principio de incertidumbre: paquete {TIPOS[p.tipo]}", simulador="Principio de incertidumbre de Heisenberg",
+        objetivo="Comprobar el límite Δx·Δp ≥ ħ/2 con un paquete de ondas y comparar con el valor exacto de su forma.",
+        modelo="Paquetes de ondas en una dimensión; Δx y Δk se calculan numéricamente (FFT). El mínimo ħ/2 solo se alcanza "
+               "con un paquete gaussiano sin chirp.",
+        ecuaciones=[r"\Delta x\,\Delta p\geq\frac{\hbar}{2}", r"\Delta p=\hbar\,\Delta k"],
+        parametros=[("Forma del paquete", TIPOS[p.tipo], ""), ("Ancho", f"{p.ancho:.6g}", "nm"),
+                    ("Número de onda central k₀", f"{p.k0:.6g}", "nm⁻¹"), ("Chirp β", f"{p.beta:.4g}", ""),
+                    ("Separación d", f"{p.separacion:.4g}", "nm")],
+        procedimiento=["Se construye ψ(x) y se normaliza.", "Se calcula φ(k) con la transformada de Fourier.",
+                       "Se calculan Δx y Δk como desviaciones estándar de |ψ|² y |φ|².", "Se forma el producto y se compara con ħ/2."],
+        resultados=[("Δx", f"{d['delta_x']:.8g}", "nm"), ("Δk", f"{d['delta_k']:.8g}", "nm⁻¹"),
+                    ("Δx·Δp / ħ (calculado)", f"{d['producto']:.8g}", ""),
+                    ("Δx·Δp / ħ (exacto de la forma)", f"{teorico:.8g}" if teorico is not None else "no disponible", ""),
+                    ("Límite de Heisenberg", "0.5", "ħ"), ("¿Cumple Δx·Δp ≥ ħ/2?", "Sí" if d["producto"] >= 0.5 - 1e-6 else "No", "")],
+        figuras=[fig],
+        preguntas=["¿Qué pasa con Δp al estrechar el paquete?", "¿Por qué el paquete gaussiano alcanza el mínimo?"],
+        conclusiones=conclusiones)
+
+
+def _pestana_predice(p: Paquete):
+    st.markdown("Predice, ejecuta y compara con el paquete elegido arriba. Los valores se calculan numéricamente (FFT) "
+                "y se reconocen con una tolerancia de 10⁻³.")
+    datos = {"simulador": "Principio de incertidumbre de Heisenberg", "modelo": "Paquetes de ondas 1D (FFT).",
+             "ecuaciones": [r"\Delta x\,\Delta p\geq\frac{\hbar}{2}"],
+             "parametros": [("Forma", TIPOS[p.tipo], ""), ("Ancho", f"{p.ancho:.6g}", "nm"), ("k₀", f"{p.k0:.6g}", "nm⁻¹")]}
+    predice.panel(PREGUNTAS_PREDICE, p, "inc", datos_informe=datos)
+
+
+def _pestana_instrumentos(p: Paquete):
+    d = calcular_paquete(p)
+    teorico = producto_teorico(p)
+    st.markdown("**Comparador con el límite de Heisenberg.** *Mide:* el producto Δx·Δp calculado y su diferencia con ħ/2 "
+                "y con el valor exacto de la forma. *No mide:* incertidumbre experimental: el producto se calcula "
+                "exactamente para una función dada; la diferencia con el valor exacto es **error numérico** de la FFT.")
+    c = instrumentos.comparar(d["producto"], 0.5)
+    filas = [("Δx [nm]", f"{d['delta_x']:.6g}", "Desviación estándar de |ψ|²"), ("Δk [nm⁻¹]", f"{d['delta_k']:.6g}", "Δp = ħΔk"),
+             ("Δx·Δp / ħ", f"{d['producto']:.8g}", "Calculado"), ("Diferencia con ħ/2", f"{c['absoluta']:+.3e}", f"{c['relativa'] * 100:+.4g} %")]
+    if teorico is not None:
+        e = instrumentos.comparar(d["producto"], teorico)
+        filas.append(("Error numérico frente al valor exacto", f"{e['absoluta']:+.2e}", f"{e['relativa'] * 100:+.3g} %"))
+    qc.tabla(filas, encabezados=("Magnitud", "Valor", "Nota"))
+    informes.boton_informe(lambda texto: informe_paquete(p, d, texto), "inc_inf", "incertidumbre_informe")
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     r = qc.RegistroPruebas("Principio de incertidumbre")
     g = calcular_paquete(validar_paquete("gaussiano", 1.0, 0.0))
@@ -642,6 +768,14 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     r.comprobar_error("Error: energía del electrón no válida", validar_rendija, "electron", "abc", 100, 1)
     r.comprobar("Rendija más estrecha que λ: no hay mínimos (se avisa, no falla)",
                 not calcular_rendija(validar_rendija("foton", 600, 400, 1))["hay_minimo"])
+    # --- Modo «Predice y experimenta» y laboratorio inverso: la respuesta correcta sale del cálculo
+    p_pd = validar_paquete("gaussiano", 1.0, 5.0, 2.0, 6.0)
+    for q in PREGUNTAS_PREDICE:
+        r.comprobar(f"Pregunta de predicción «{q.id}»: la respuesta correcta sale del cálculo",
+                    predice.validar_pregunta(q, p_pd) == [], "; ".join(predice.validar_pregunta(q, p_pd)))
+    for reto in RETOS_INVERSOS:
+        r.comprobar(f"Reto inverso «{reto.id}» bien construido", inverso.validar_reto(reto) == [],
+                    "; ".join(inverso.validar_reto(reto)))
     return r
 
 
@@ -928,7 +1062,7 @@ def interfaz() -> None:
     if p is None:
         return
     tabs = st.tabs(["Paquete de ondas", "Relación Δx–Δp", "Evolución libre", "Difracción por una rendija",
-                    "Guía de práctica", "Autoevaluación", "Pruebas numéricas"])
+                    "Guía de práctica", "Autoevaluación", "Predice y experimenta", "Laboratorio inverso", "Instrumentos e informe", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_paquete(p)
     with tabs[1]:
@@ -942,6 +1076,12 @@ def interfaz() -> None:
     with tabs[5]:
         qc.autoevaluacion(PREGUNTAS, "inc")
     with tabs[6]:
+        _pestana_predice(p)
+    with tabs[7]:
+        inverso.panel(RETOS_INVERSOS, "inc")
+    with tabs[8]:
+        _pestana_instrumentos(p)
+    with tabs[9]:
         qc.boton_pruebas(ejecutar_pruebas, "inc_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 

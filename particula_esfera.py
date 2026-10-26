@@ -36,15 +36,18 @@ Estructura: 1. Física pura · 2. Figuras · 3. Pruebas numéricas · 4. Interfa
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import streamlit as st
 from scipy import special
 from scipy.optimize import brentq
 
+import informes
+import instrumentos
+import predice
 import quantum_lab_comun as qc
-from quantum_lab_comun import HBAR, M_E, COLORES
+from quantum_lab_comun import COLORES, HBAR, M_E
 
 # =====================================================================
 # 1. FÍSICA
@@ -849,6 +852,116 @@ def figura_confinada(p: ParametrosConfinada, d: dict, n_niveles: int = 3):
 # =====================================================================
 # 3. PRUEBAS NUMÉRICAS
 # =====================================================================
+# ---------------------------------------------------------------------
+# Predice y experimenta · Instrumentos · Informe
+# ---------------------------------------------------------------------
+_THETA_PD, _PHI_PD = 1.1, 0.5          # dirección genérica (rad) para comparar densidades
+
+
+def _calc_esf(magnitud, modificar, unidad):
+    def f(p: ParametrosEsfera):
+        return float(magnitud(p)), float(magnitud(modificar(p))), unidad
+    return f
+
+
+def _superficies_nodales(p):
+    return numero_total_superficies_nodales(p.l, 0)
+
+
+def _densidad_generica(p):
+    return float(densidad_probabilidad(p.l, p.m, _THETA_PD, _PHI_PD))
+
+
+PREGUNTAS_PREDICE = [
+    predice.Pregunta(
+        "nodales_2l", "¿Qué le pasa al número de superficies nodales del armónico Yₗ⁰ si se duplica l?",
+        "Se cambia l → 2l (m = 0)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se cuadruplica", 4.0), predice.Opcion("No cambia", 1.0),
+         predice.Opcion("Se reduce a la mitad", 0.5)),
+        ("Cuenta las superficies nodales de s, p y d: 0, 1 y 2.", "El número de superficies nodales es l."),
+        "Un armónico esférico real tiene l superficies nodales (l − |m| conos más |m| planos): al duplicar l se duplican.",
+        "esfera", "Superficies nodales", _calc_esf(_superficies_nodales, lambda p: replace(p, l=2 * p.l, m=0), "")),
+    predice.Pregunta(
+        "simetria_m", "¿Cómo se compara la densidad |Yₗᵐ|² con |Yₗ⁻ᵐ|² en una misma dirección (armónicos complejos)?",
+        "Se cambia m → −m (misma dirección θ = 1.1 rad, φ = 0.5 rad)",
+        (predice.Opcion("Son iguales", 1.0), predice.Opcion("La de −m es el doble", 2.0),
+         predice.Opcion("La de −m es la mitad", 0.5), predice.Opcion("La de −m es cuatro veces mayor", 4.0)),
+        ("Yₗ⁻ᵐ y Yₗᵐ solo se diferencian en la fase e^{imφ}.", "El módulo de una fase compleja es 1."),
+        "|Yₗ⁻ᵐ| = |Yₗᵐ|: la densidad de los complejos conjugados es la misma; solo cambia el sentido de giro de la fase.",
+        "esfera", "Densidad |Y|²", _calc_esf(_densidad_generica, lambda p: replace(p, m=-p.m), "sr⁻¹")),
+]
+
+
+def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "") -> informes.Informe:
+    h, v, _dens, _ = curva_densidad_plano(p.l, p.m, "xz", False)
+    d_polo = float(densidad_probabilidad(p.l, p.m, 0.0, 0.0))
+    d_ecuador = float(densidad_probabilidad(p.l, p.m, np.pi / 2, 0.0))
+    norma = float(np.real(integral_solapamiento(p.l, p.m, p.l, p.m)))
+    with informes.estilo_claro():
+        fig, ax = informes.figura_clara(4.6, 4.6)
+        ax.plot(h, v, color="#1F3A93")
+        ax.set_aspect("equal")
+        ax.axhline(0, color="gray", lw=0.5)
+        ax.axvline(0, color="gray", lw=0.5)
+        ax.set(xlabel="x [sr⁻¹]", ylabel="z [sr⁻¹]", title=f"Corte polar de |Y|² (l = {p.l}, m = {p.m}, plano xz)")
+        fig.tight_layout()
+    return informes.Informe(
+        titulo=f"Armónico esférico Y(l = {p.l}, m = {p.m})", simulador="Partícula en una esfera · armónicos esféricos",
+        objetivo="Interpretar la densidad angular |Yₗᵐ|² y reconocer qué información da (y cuál no) sobre la partícula.",
+        modelo="Armónicos esféricos exactos. Solo describen la parte angular: no dan información sobre la distancia al "
+               "centro, que depende de la parte radial.",
+        ecuaciones=[r"\hat L^2Y_l^m=\hbar^2\,l(l+1)\,Y_l^m", r"P\approx|Y_l^m|^2\,\Delta\Omega,\quad \Delta\Omega=\sin\theta\,\Delta\theta\,\Delta\varphi",
+                    r"\int|Y_l^m|^2\,d\Omega=1"],
+        parametros=[("Número cuántico l", f"{p.l}", ""), ("Número cuántico m", f"{p.m}", ""), ("Tipo", "Complejo", "")],
+        procedimiento=["Se evalúa Yₗᵐ(θ, φ) con la función de Legendre asociada.", "Se calcula la densidad |Y|².",
+                       "Se comprueba la normalización con una cuadratura angular."],
+        resultados=[("|Y|² en el eje z (θ = 0)", f"{d_polo:.8g}", "sr⁻¹"), ("|Y|² en el ecuador (θ = 90°, φ = 0)", f"{d_ecuador:.8g}", "sr⁻¹"),
+                    ("Superficies nodales", f"{numero_total_superficies_nodales(p.l, p.m)}", ""),
+                    ("Degeneración 2l + 1", f"{2 * p.l + 1}", ""), ("Normalización ∫|Y|²dΩ", f"{norma:.10f}", "")],
+        figuras=[fig],
+        preguntas=["¿Cómo se obtiene la probabilidad de hallar la partícula en una dirección?",
+                   "¿Dan estas gráficas información sobre la distancia al núcleo? Justifica."],
+        conclusiones=conclusiones)
+
+
+def _pestana_predice(p: ParametrosEsfera):
+    st.markdown("Predice, ejecuta y compara con el estado angular (l, m) elegido arriba. La primera pregunta necesita l ≥ 1.")
+    datos = {"simulador": "Partícula en una esfera · armónicos esféricos", "modelo": "Armónicos esféricos exactos.",
+             "ecuaciones": [r"\hat L^2Y_l^m=\hbar^2\,l(l+1)\,Y_l^m"],
+             "parametros": [("l", f"{p.l}", ""), ("m", f"{p.m}", "")]}
+    predice.panel(PREGUNTAS_PREDICE, p, "esf", datos_informe=datos)
+
+
+def _pestana_instrumentos(p: ParametrosEsfera):
+    st.markdown("**Probabilidad en una dirección.** *Mide:* la densidad angular |Y|² en una dirección y la probabilidad "
+                "P ≈ |Y|²·ΔΩ de hallar la partícula en un pequeño ángulo sólido. *No mide:* la distancia al núcleo, "
+                "ni una posición real: |Y|² solo depende de la dirección.")
+    c1, c2, c3, c4 = st.columns(4)
+    th = c1.number_input("θ [°]", 0.0, 180.0, 45.0, 1.0, key="esf_inst_th", format="%.4g")
+    ph = c2.number_input("φ [°]", 0.0, 360.0, 0.0, 1.0, key="esf_inst_ph", format="%.4g")
+    dth = c3.number_input("Δθ [°]", 0.1, 90.0, 5.0, 0.5, key="esf_inst_dth", format="%.4g")
+    dph = c4.number_input("Δφ [°]", 0.1, 180.0, 5.0, 0.5, key="esf_inst_dph", format="%.4g")
+    t, f, dt, df = np.radians([th, ph, dth, dph])
+    t1, t2 = max(0.0, t - dt / 2), min(np.pi, t + dt / 2)
+    try:
+        dens = float(densidad_probabilidad(p.l, p.m, t, f))
+        p_num = instrumentos.probabilidad_angular(lambda a, b: densidad_probabilidad(p.l, p.m, a, b), t1, t2, f - df / 2, f + df / 2)
+    except ValueError as error:
+        qc.error(error)
+        return
+    d_omega = np.sin(t) * dt * df
+    p_aprox = dens * d_omega
+    qc.metricas([("|Y|² en la dirección [sr⁻¹]", f"{dens:.8g}", "Densidad angular, no probabilidad"),
+                 ("ΔΩ = senθ·Δθ·Δφ [sr]", f"{d_omega:.6g}", "Ángulo sólido de la región"),
+                 ("P ≈ |Y|²·ΔΩ", f"{p_aprox:.6g}", "Aproximación para región pequeña"),
+                 ("P por cuadratura", f"{p_num:.6g}", "Integral numérica sobre la región")], columnas=4)
+    if p_num > 0:
+        st.caption(f"Diferencia relativa entre la aproximación y la cuadratura: {abs(p_aprox - p_num) / p_num * 100:.3g} %. "
+                   "Es **error de aproximación** (región finita), no incertidumbre experimental.")
+    st.latex(r"P\approx|Y_l^m(\theta,\varphi)|^2\,\Delta\Omega,\qquad \Delta\Omega=\sin\theta\,\Delta\theta\,\Delta\varphi")
+    informes.boton_informe(lambda texto: informe_estado_angular(p, texto), "esf_inf", f"esfera_informe_l{p.l}_m{p.m}")
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     r = qc.RegistroPruebas("Armónicos esféricos y partícula en una esfera")
     r.comprobar(f"Calibración del backend: «{NOMBRE_BACKEND}» reproduce las fórmulas cerradas (l ≤ 2, con Condon–Shortley)",
@@ -1049,6 +1162,11 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     hh, vv, dd, _ = curva_densidad_plano(2, 1, "xz")
     r.comprobar("Corte polar xz: distancia al origen = |Y|²", bool(np.allclose(np.hypot(hh, vv), dd, atol=1e-14)))
     r.comprobar_error("Densidad: el origen no define una dirección", densidad_en_punto, 1, 0, 0, 0, 0, 1.0)
+    # --- Modo «Predice y experimenta»: la respuesta correcta sale del cálculo
+    p_pd = validar_parametros_esfera(2, 1, 1.0, "SI", 90, "densidad", "lobulos", 0.4, "Viridis")
+    for q in PREGUNTAS_PREDICE:
+        r.comprobar(f"Pregunta de predicción «{q.id}»: la respuesta correcta sale del cálculo",
+                    predice.validar_pregunta(q, p_pd) == [], "; ".join(predice.validar_pregunta(q, p_pd)))
     return r
 
 
@@ -1480,7 +1598,7 @@ def interfaz() -> None:
     if p is None:
         return
     tabs = st.tabs(["Densidad de probabilidad", "Armónico 3D", "Proyección 2D y cortes", "Comparación de orbitales", "Complejos y reales",
-                    "Partícula confinada", "Guía de práctica", "Autoevaluación", "Pruebas numéricas"])
+                    "Partícula confinada", "Guía de práctica", "Autoevaluación", "Predice y experimenta", "Instrumentos e informe", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_densidad(p)
     with tabs[1]:
@@ -1498,6 +1616,10 @@ def interfaz() -> None:
     with tabs[7]:
         qc.autoevaluacion(PREGUNTAS, "esf")
     with tabs[8]:
+        _pestana_predice(p)
+    with tabs[9]:
+        _pestana_instrumentos(p)
+    with tabs[10]:
         qc.boton_pruebas(ejecutar_pruebas, "esf_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 

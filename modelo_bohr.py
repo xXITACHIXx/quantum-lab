@@ -27,6 +27,10 @@ import numpy as np
 import streamlit as st
 from scipy import constants as const
 
+import informes
+import instrumentos
+import inverso
+import predice
 import quantum_lab_comun as qc
 from quantum_lab_comun import COLORES
 
@@ -696,6 +700,142 @@ def figura_espectro(nucleo: str, masa_reducida: bool, n_max: int = 9):
 # =====================================================================
 # 3. PRUEBAS NUMÉRICAS
 # =====================================================================
+# ---------------------------------------------------------------------
+# Predice y experimenta · Laboratorio inverso · Informe
+# ---------------------------------------------------------------------
+def _calc_bohr(magnitud, modificar, unidad):
+    def f(t: Transicion):
+        return float(magnitud(t)), float(magnitud(modificar(t))), unidad
+    return f
+
+
+def _abs_energia(t):
+    return abs(float(energia_nivel(t.n_final, t.nucleo, t.masa_reducida)))
+
+
+def _radio_nm(t):
+    return float(radio_orbita(t.n_final, t.nucleo, t.masa_reducida)) * 1e9
+
+
+def _doble_n(t: Transicion):
+    return Transicion(t.n_inicial, 2 * t.n_final, t.nucleo, t.masa_reducida)
+
+
+def _sin_correccion_h(t: Transicion):
+    return Transicion(t.n_inicial, t.n_final, "H", False)
+
+
+def _sin_correccion_he(t: Transicion):
+    return Transicion(t.n_inicial, t.n_final, "He+", False)
+
+
+PREGUNTAS_PREDICE = [
+    predice.Pregunta(
+        "energia_2n", "¿Qué le pasa a la magnitud de la energía |Eₙ| si se duplica el nivel n (nivel final de la transición)?",
+        "Se cambia n → 2n (mismo átomo)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("Se reduce a la cuarta parte", 0.25), predice.Opcion("Se cuadruplica", 4.0)),
+        ("Mira la dependencia de Eₙ con n.", "Eₙ = −Z²·Ry/n²: n aparece al cuadrado en el denominador."),
+        "|Eₙ| ∝ 1/n²: al duplicar n el electrón está menos ligado y |Eₙ| se divide entre 4.", "bohr", "Energía |Eₙ|",
+        _calc_bohr(_abs_energia, _doble_n, "eV")),
+    predice.Pregunta(
+        "radio_2n", "¿Qué le pasa al radio de la órbita de Bohr si se duplica n?", "Se cambia n → 2n (mismo átomo)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se cuadruplica", 4.0), predice.Opcion("Se multiplica por 8", 8.0),
+         predice.Opcion("Se reduce a la mitad", 0.5)),
+        ("En el modelo de Bohr, el radio crece con una potencia de n.", "rₙ = n²·a₀/Z."),
+        "rₙ ∝ n²: al duplicar n el radio se cuadruplica.", "bohr", "Radio rₙ", _calc_bohr(_radio_nm, _doble_n, "nm")),
+    predice.Pregunta(
+        "carga_nuclear", "¿Qué le pasa a |Eₙ| (mismo n) si el átomo pasa de H a He⁺ (Z = 1 → 2)?",
+        "Se cambia H → He⁺ (sin corrección de masa reducida)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se cuadruplica", 4.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("No cambia", 1.0)),
+        ("Eₙ contiene Z elevada a una potencia.", "Eₙ = −Z²·Ry/n²."),
+        "|Eₙ| ∝ Z²: con el doble de carga nuclear, el electrón está cuatro veces más ligado.", "bohr", "Energía |Eₙ|",
+        lambda t: (_abs_energia(_sin_correccion_h(t)), _abs_energia(_sin_correccion_he(t)), "eV")),
+]
+
+
+def _lambda_nm_reto(v: dict) -> float:
+    if int(v["ni"]) == int(v["nf"]):
+        raise ValueError("Los niveles inicial y final deben ser distintos: una transición requiere un cambio de nivel.")
+    return longitud_rydberg(int(v["ni"]), int(v["nf"]), "H") * 1e9
+
+
+RETOS_INVERSOS = [
+    inverso.Reto(
+        "bohr_lambda", "¿Qué transición del hidrógeno emite o absorbe 486.27 nm?",
+        "Encuentra los niveles inicial y final del hidrógeno (con la masa del protón) cuya transición corresponde a "
+        "una longitud de onda de 486.27 nm (línea azul-verdosa de la serie de Balmer).",
+        "Longitud de onda λ", "nm", 486.27,
+        (inverso.Variable("ni", "Nivel inicial nᵢ", "", 1, N_MAX, 1, 3, True),
+         inverso.Variable("nf", "Nivel final n_f", "", 1, N_MAX, 1, 2, True)),
+        _lambda_nm_reto,
+        ("Esta línea pertenece a la serie de Balmer: el nivel inferior es el mismo para todas sus líneas.",
+         "La serie de Balmer termina en n = 2 (en emisión). Prueba valores de nᵢ por encima de 2.",
+         "1/λ = R·(1/n_f² − 1/nᵢ²). Con n_f = 2, la línea de 486 nm es la segunda de la serie."),
+        "La longitud de onda depende de la diferencia 1/n_f² − 1/nᵢ² (ley de Rydberg); solo una pareja la reproduce.",
+        lambda v: "Con **n_f = 2**: 1/λ = R(1/4 − 1/nᵢ²) ⇒ **nᵢ = 4** (emisión 4 → 2) reproduce λ = 486.27 nm.",
+        "λ depende de 1/n_f² − 1/nᵢ²: una diferencia mayor da una longitud de onda menor.",
+        tol_exacta=5e-5, tol_aprox=0.02,
+        soluciones="Hay dos respuestas equivalentes: la emisión 4 → 2 y la absorción 2 → 4 (misma energía de fotón).",
+        metodo="Ley de Rydberg evaluada directamente; se prueban las parejas de niveles sin búsqueda numérica."),
+]
+
+
+def informe_transicion(t: Transicion, d: dict, conclusiones: str = "") -> informes.Informe:
+    _, _, nombre = NUCLEOS[t.nucleo]
+    niveles = np.arange(1, 9)
+    with informes.estilo_claro():
+        fig, ax = informes.figura_clara(6.0, 3.6)
+        for k in niveles:
+            e = float(energia_nivel(k, t.nucleo, t.masa_reducida))
+            ax.hlines(e, 0.3, 0.7, color="#1F3A93")
+            ax.text(0.72, e, f"n = {k}", va="center", fontsize=8)
+        if max(t.n_inicial, t.n_final) <= 8:
+            ax.annotate("", xy=(0.5, d["ef"]), xytext=(0.5, d["ei"]), arrowprops={"arrowstyle": "->", "color": "#B03A2E", "lw": 2})
+        ax.set(ylabel="Energía [eV]", title=f"Niveles de {nombre}", xticks=[], xlim=(0, 1))
+        fig.tight_layout()
+    return informes.Informe(
+        titulo=f"Transición {t.n_inicial} → {t.n_final} en {nombre}", simulador="Átomo de hidrógeno · modelo de Bohr",
+        objetivo="Calcular la energía, la frecuencia y la longitud de onda del fotón asociado a una transición entre niveles.",
+        modelo="Modelo de Bohr (semiclásico) para átomos de un electrón. Sirve para niveles y series; no describe la "
+               "estructura fina ni las reglas de selección.",
+        ecuaciones=[r"E_n=-\frac{Z^2\,Ry}{n^2}", r"\Delta E=h\nu=\frac{hc}{\lambda}",
+                    r"\frac{1}{\lambda}=R\,Z^2\left|\frac{1}{n_f^2}-\frac{1}{n_i^2}\right|"],
+        parametros=[("Átomo", nombre, ""), ("Nivel inicial nᵢ", f"{t.n_inicial}", ""), ("Nivel final n_f", f"{t.n_final}", ""),
+                    ("Masa reducida", "Sí" if t.masa_reducida else "No", "")],
+        procedimiento=["Se calculan Eᵢ y E_f con Eₙ = −Z²·Ry/n².", "ΔE = E_f − Eᵢ y la energía del fotón es |ΔE|.",
+                       "ν = |ΔE|/h y λ = c/ν.", "Se comprueba λ con la ley de Rydberg."],
+        resultados=[("Tipo de transición", d["tipo"], ""), ("Energía inicial", f"{d['ei']:.8g}", "eV"),
+                    ("Energía final", f"{d['ef']:.8g}", "eV"), ("Energía del fotón", f"{d['e_foton_ev']:.8g}", "eV"),
+                    ("Frecuencia ν", f"{d['frecuencia']:.8g}", "Hz"), ("Longitud de onda λ", f"{d['longitud_nm']:.8g}", "nm"),
+                    ("λ con la ley de Rydberg", f"{d['longitud_rydberg_nm']:.8g}", "nm"),
+                    ("Diferencia relativa", f"{d['diferencia_rel']:.2e}", ""), ("Serie", d["serie"], "")],
+        figuras=[fig],
+        preguntas=["¿Por qué las líneas de una serie se acercan a un límite?", "¿Qué cambia si el átomo es He⁺ en vez de H?"],
+        conclusiones=conclusiones)
+
+
+def _pestana_predice(t: Transicion):
+    st.markdown("Predice, ejecuta y compara. Las preguntas usan el **nivel final** de la transición que elegiste arriba.")
+    _, _, nombre = NUCLEOS[t.nucleo]
+    datos = {"simulador": "Átomo de hidrógeno · modelo de Bohr", "modelo": "Modelo de Bohr para átomos de un electrón.",
+             "ecuaciones": [r"E_n=-\frac{Z^2\,Ry}{n^2}"],
+             "parametros": [("Átomo", nombre, ""), ("Nivel inicial", f"{t.n_inicial}", ""), ("Nivel final", f"{t.n_final}", ""),
+                            ("Masa reducida", "Sí" if t.masa_reducida else "No", "")]}
+    predice.panel(PREGUNTAS_PREDICE, t, "bohr", datos_informe=datos)
+
+
+def _pestana_instrumentos(t: Transicion):
+    d = calcular_transicion(t)
+    st.markdown("**Fotón entre niveles de este átomo.** Con las energías del modelo de Bohr (con la corrección de masa "
+                "reducida si está activada).")
+    instrumentos.panel_fotones(lambda k: float(energia_nivel(int(k), t.nucleo, t.masa_reducida)) * E, "bohr", N_MAX,
+                               n_ini=t.n_inicial, n_fin=t.n_final)
+    informes.boton_informe(lambda texto: informe_transicion(t, d, texto), "bohr_inf",
+                           f"bohr_informe_{t.n_inicial}_{t.n_final}")
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     r = qc.RegistroPruebas("Modelo de Bohr")
     r.comprobar("E₁ = −13.6057 eV (núcleo infinito)", abs(float(energia_nivel(1)) + 13.605693) < 1e-5,
@@ -778,6 +918,14 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     r.comprobar_error(f"Rechaza n > {N_MAX}", validar_transicion, N_MAX + 1, 1)
     r.comprobar_error("Rechaza átomo desconocido", validar_transicion, 3, 2, "U92+")
     r.comprobar_error("Serie: rechaza nᵢ máximo ≤ n_f", calcular_serie, 3, 3)
+    # --- Modo «Predice y experimenta» y laboratorio inverso: la respuesta correcta sale del cálculo
+    p_pd = Transicion(3, 2, "H", False)
+    for q in PREGUNTAS_PREDICE:
+        r.comprobar(f"Pregunta de predicción «{q.id}»: la respuesta correcta sale del cálculo",
+                    predice.validar_pregunta(q, p_pd) == [], "; ".join(predice.validar_pregunta(q, p_pd)))
+    for reto in RETOS_INVERSOS:
+        r.comprobar(f"Reto inverso «{reto.id}» bien construido", inverso.validar_reto(reto) == [],
+                    "; ".join(inverso.validar_reto(reto)))
     return r
 
 
@@ -1238,7 +1386,7 @@ def interfaz() -> None:
     if t is None:
         return
     tabs = st.tabs(["Transición", "Átomo en 3D", "Series y espectro", "Guía de práctica", "Autoevaluación",
-                    "Pruebas numéricas"])
+                    "Predice y experimenta", "Laboratorio inverso", "Instrumentos e informe", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_transicion(t)
     with tabs[1]:
@@ -1250,6 +1398,12 @@ def interfaz() -> None:
     with tabs[4]:
         qc.autoevaluacion(PREGUNTAS, "bohr")
     with tabs[5]:
+        _pestana_predice(t)
+    with tabs[6]:
+        inverso.panel(RETOS_INVERSOS, "bohr")
+    with tabs[7]:
+        _pestana_instrumentos(t)
+    with tabs[8]:
         qc.boton_pruebas(ejecutar_pruebas, "bohr_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 
