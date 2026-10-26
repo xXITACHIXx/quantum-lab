@@ -37,14 +37,18 @@ Estructura del archivo
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import streamlit as st
-from scipy.special import eval_hermite, gammaln, erfc
+from scipy.special import erfc, eval_hermite, gammaln
 
+import informes
+import instrumentos
+import inverso
+import predice
 import quantum_lab_comun as qc
-from quantum_lab_comun import HBAR, M_E, E_HARTREE, A0, COLORES
+from quantum_lab_comun import A0, COLORES, E_CARGA, E_HARTREE, HBAR, M_E
 
 # =====================================================================
 # 1. FÍSICA
@@ -681,6 +685,178 @@ def figura_dinamica(x_vis, taus, re, im, rho, x_medio, nombre_longitud: str, eti
 # =====================================================================
 # 3. PRUEBAS NUMÉRICAS
 # =====================================================================
+# ---------------------------------------------------------------------
+# Predice y experimenta · Laboratorio inverso · Informe
+# ---------------------------------------------------------------------
+def _calc_osc(magnitud, modificar):
+    """Cociente de una magnitud antes y después de modificar los parámetros (misma función de cálculo)."""
+    def f(p: ParametrosOscilador):
+        u = qc.obtener_unidades(p.sistema)
+        valor, unidad = magnitud(p, u)
+        return valor, magnitud(modificar(p), u)[0], unidad
+    return f
+
+
+def _mag_energia(p, u):
+    return energia_teorica(p.n, p.omega) / u["factor_energia"], u["nombre_energia"]
+
+
+def _mag_x0(p, u):
+    return longitud_caracteristica(p.masa, p.omega) / u["factor_longitud"], u["nombre_longitud"]
+
+
+def _mag_espaciado(p, u):
+    return (energia_teorica(p.n + 1, p.omega) - energia_teorica(p.n, p.omega)) / u["factor_energia"], u["nombre_energia"]
+
+
+PREGUNTAS_PREDICE = [
+    predice.Pregunta(
+        "duplicar_omega", "¿Qué le pasa a la energía Eₙ si se duplica la frecuencia angular ω?",
+        "Se cambia ω → 2ω (n y m fijos)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("Se cuadruplica", 4.0), predice.Opcion("No cambia", 1.0)),
+        ("Mira la fórmula de los niveles: ¿qué parámetros contiene?", "Eₙ = ħω(n + ½): ω aparece una sola vez, multiplicando."),
+        "Eₙ es proporcional a ω: al duplicar ω, todos los niveles se duplican.", "oscilador", "Energía Eₙ",
+        _calc_osc(_mag_energia, lambda p: replace(p, omega=2.0 * p.omega))),
+    predice.Pregunta(
+        "duplicar_masa_energia", "¿Qué le pasa a la energía Eₙ si se duplica la masa m (con ω fija)?",
+        "Se cambia m → 2m (n y ω fijos)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("No cambia", 1.0), predice.Opcion("Se reduce a la cuarta parte", 0.25)),
+        ("Revisa si la fórmula Eₙ = ħω(n + ½) contiene la masa.",
+         "Con ω fija, una masa mayor cambia la constante del muelle (k = mω²), no la energía de los niveles."),
+        "Eₙ = ħω(n + ½) no depende de m cuando se fija ω. Sí cambia el tamaño de la función de onda (x₀).",
+        "oscilador", "Energía Eₙ", _calc_osc(_mag_energia, lambda p: replace(p, masa=2.0 * p.masa))),
+    predice.Pregunta(
+        "duplicar_masa_x0", "¿Qué le pasa a la longitud característica x₀ = √(ħ/mω) si se duplica la masa?",
+        "Se cambia m → 2m (ω fija)",
+        (predice.Opcion("Se duplica", 2.0), predice.Opcion("Se reduce a la mitad", 0.5),
+         predice.Opcion("Se divide entre √2", 2.0 ** -0.5), predice.Opcion("Se multiplica por √2", 2.0 ** 0.5)),
+        ("x₀ contiene m dentro de una raíz.", "x₀ ∝ m^(−1/2)."),
+        "x₀ ∝ 1/√m: una partícula más pesada queda más localizada, con el mismo ω.", "oscilador", "Longitud x₀",
+        _calc_osc(_mag_x0, lambda p: replace(p, masa=2.0 * p.masa))),
+    predice.Pregunta(
+        "espaciado", "¿Cómo se compara la separación entre niveles consecutivos más arriba (n+3 → n+4) con la de n → n+1?",
+        "Se compara Eₙ₊₁ − Eₙ en n con el mismo valor en n + 3",
+        (predice.Opcion("Es la misma", 1.0), predice.Opcion("Es el doble", 2.0),
+         predice.Opcion("Es la mitad", 0.5), predice.Opcion("Es cuatro veces mayor", 4.0)),
+        ("Resta dos niveles consecutivos en la fórmula Eₙ = ħω(n + ½).",),
+        "Eₙ₊₁ − Eₙ = ħω para todo n: los niveles del oscilador armónico están igualmente espaciados.", "oscilador",
+        "Separación entre niveles", _calc_osc(_mag_espaciado, lambda p: replace(p, n=p.n + 3))),
+]
+
+
+def _energia_ev_reto(v: dict) -> float:
+    return energia_teorica(int(v["n"]), 2.0 * np.pi * v["nu"] * 1e13) / E_CARGA
+
+
+def _solucion_reto_osc(v: dict) -> str:
+    n = int(v["n"])
+    objetivo = RETOS_INVERSOS[0].objetivo
+    nu = objetivo * E_CARGA / (2.0 * np.pi * HBAR * (n + 0.5)) / 1e13
+    return (f"De Eₙ = ħω(n + ½) con ω = 2πν se despeja **ν = Eₙ/(h(n + ½))**. Con n = {n} y Eₙ = {objetivo:g} eV: "
+            f"**ν = {nu:.6g} × 10¹³ Hz**.")
+
+
+RETOS_INVERSOS = [
+    inverso.Reto(
+        "osc_energia", "Energía objetivo de un oscilador armónico",
+        "Elige el nivel n y la frecuencia ν del oscilador para que su energía Eₙ valga lo indicado.",
+        "Energía Eₙ", "eV", 0.10856,
+        (inverso.Variable("n", "Nivel n", "", 0, 10, 1, 0, True),
+         inverso.Variable("nu", "Frecuencia ν", "10¹³ Hz", 0.1, 100.0, 0.01, 1.0)),
+        _energia_ev_reto,
+        ("Los niveles son Eₙ = ħω(n + ½) con ω = 2πν.", "Si subes n, necesitas una ν menor para la misma energía.",
+         "Con n = 1, ν debe valer unos 1.75 × 10¹³ Hz."),
+        "Eₙ depende solo del producto ν·(n + ½): hay una ν para cada n.", _solucion_reto_osc,
+        "Eₙ ∝ ν(n + ½): si te pasaste de energía, baja ν o n; si te faltó, súbelos.",
+        tol_exacta=5e-5, soluciones="Hay una frecuencia válida para cada n: ν(n + ½) = constante.",
+        metodo="Despeje directo de la ecuación (sin búsqueda numérica)."),
+]
+
+
+def informe_estado(p: ParametrosOscilador, d: dict, conclusiones: str = "") -> informes.Informe:
+    u = qc.obtener_unidades(p.sistema)
+    fx, fe, L, U = u["factor_longitud"], u["factor_energia"], u["nombre_longitud"], u["nombre_energia"]
+    with informes.estilo_claro():
+        fig, (ax1, ax2) = informes.figura_clara(7.0, 3.0, ncols=2)
+        ax1.plot(d["x"] / fx, d["psi"] * np.sqrt(fx), color="#1F3A93")
+        ax1.axhline(0, color="gray", lw=0.6)
+        ax1.set(title=f"Función de onda ψ (n = {p.n})", xlabel=f"x [{L}]", ylabel=f"ψ [{L}$^{{-1/2}}$]")
+        ax2.plot(d["x"] / fx, d["u_T"] * fx / fe, color="#1E8449", label="cinética u_T")
+        ax2.plot(d["x"] / fx, d["u_V"] * fx / fe, "--", color="#7D3C98", label="potencial u_V")
+        ax2.set(title="Densidades de energía", xlabel=f"x [{L}]", ylabel=f"u [{U}/{L}]")
+        ax2.legend()
+        fig.tight_layout()
+    return informes.Informe(
+        titulo=f"Oscilador armónico cuántico: estado n = {p.n}", simulador="Oscilador armónico cuántico",
+        objetivo="Relacionar el número cuántico n con la energía, la forma de ψ y el reparto entre energía cinética y potencial.",
+        modelo="Potencial armónico ideal V = ½mω²x² en una dimensión; estados exactos de la ecuación de Schrödinger "
+               "calculados sobre una malla.",
+        ecuaciones=[r"E_n=\hbar\omega\left(n+\frac{1}{2}\right)", r"x_0=\sqrt{\frac{\hbar}{m\omega}}",
+                    r"u_T=\frac{\hbar^2}{2m}|\psi'|^2,\quad u_V=\frac{1}{2}m\omega^2x^2|\psi|^2"],
+        parametros=[("Número cuántico n", f"{p.n}", ""), ("Masa m", f"{p.masa / M_E:.6g}", "mₑ"),
+                    ("Frecuencia angular ω", f"{p.omega / u['factor_omega']:.6g}", u["nombre_omega"]),
+                    ("Intervalo espacial ±", f"{p.rango:g}", "x₀"), ("Puntos", f"{p.resolucion}", "")],
+        procedimiento=["Se calcula x₀ y se construye la malla ξ = x/x₀.", "Se evalúa ψₙ con polinomios de Hermite.",
+                       "Se calculan u_T (derivada de ψ) y u_V.", "Se integran para obtener ⟨T⟩ y ⟨V⟩ y se comparan con la teoría."],
+        resultados=[("Energía teórica Eₙ", f"{d['e_teo'] / fe:.8g}", U), ("Energía numérica ⟨T⟩ + ⟨V⟩", f"{d['e_num'] / fe:.8g}", U),
+                    ("⟨T⟩", f"{d['t_media'] / fe:.8g}", U), ("⟨V⟩", f"{d['v_media'] / fe:.8g}", U),
+                    ("Longitud característica x₀", f"{d['x0'] / fx:.8g}", L),
+                    ("Punto de retorno clásico", f"{d['xt'] / fx:.8g}", L), ("Normalización ∫|ψ|²dx", f"{d['norma']:.10f}", ""),
+                    ("Error relativo de la energía", f"{d['error_relativo']:.2e}", "")],
+        figuras=[fig],
+        preguntas=["¿Dónde domina la energía cinética y dónde la potencial?", "¿Qué relación guardan ⟨T⟩ y ⟨V⟩?",
+                   "¿Qué pasa con la distancia entre niveles al aumentar n?"],
+        conclusiones=conclusiones)
+
+
+def _pestana_predice(p_base: ParametrosOscilador):
+    st.markdown("Predice, ejecuta y compara. El resultado se calcula con las mismas funciones del simulador; puedes "
+                "ejecutarlo sin predecir y repetirlo con otros parámetros.")
+    n = st.number_input("Número cuántico n del estado de referencia", 0, N_MAX // 2, step=1, key="osc_pd_n")
+    try:
+        p = _con_n(p_base, n)
+    except ValueError as error:
+        qc.error(error)
+        return
+    u = qc.obtener_unidades(p.sistema)
+    datos = {"simulador": "Oscilador armónico cuántico", "modelo": "Potencial armónico ideal V = ½mω²x² en una dimensión.",
+             "ecuaciones": [r"E_n=\hbar\omega\left(n+\frac{1}{2}\right)"],
+             "parametros": [("Número cuántico n", f"{p.n}", ""), ("Masa m", f"{p.masa / M_E:.6g}", "mₑ"),
+                            ("Frecuencia angular ω", f"{p.omega / u['factor_omega']:.6g}", u["nombre_omega"])]}
+    predice.panel(PREGUNTAS_PREDICE, p, "osc", datos_informe=datos)
+
+
+def _pestana_instrumentos(p_base: ParametrosOscilador):
+    n = st.number_input("Estado n", 0, N_MAX // 2, step=1, key="osc_inf_n")
+    try:
+        p = _con_n(p_base, n)
+    except ValueError as error:
+        qc.error(error)
+        return
+    d = calcular_estado(p)
+    u = qc.obtener_unidades(p.sistema)
+    fx, L = u["factor_longitud"], u["nombre_longitud"]
+    st.markdown("**Cursor.** Lee ψ y las densidades u_T y u_V en una posición. *Mide:* el valor calculado. "
+                "*No mide:* una posición real de la partícula.")
+    semi = float(d["x"][-1] / fx)
+    x0 = st.slider(f"Posición x [{L}]", -semi, semi, 0.0, key="osc_inst_x", format="%.4g")
+    try:
+        psi0 = instrumentos.leer_valor(d["x"] / fx, d["psi"] * np.sqrt(fx), x0)
+        ut = instrumentos.leer_valor(d["x"] / fx, d["u_T"] * fx / u["factor_energia"], x0)
+        uv = instrumentos.leer_valor(d["x"] / fx, d["u_V"] * fx / u["factor_energia"], x0)
+    except ValueError as error:
+        qc.error(error)
+        return
+    unidad_u = f"{u['nombre_energia']}/{L}"
+    qc.metricas([(f"ψ(x) [{L}⁻¹ᐟ²]", f"{psi0:.6g}", f"x = {x0:.4g} {L}"), (f"u_T [{unidad_u}]", f"{ut:.6g}", "Cinética"),
+                 (f"u_V [{unidad_u}]", f"{uv:.6g}", "Potencial")], columnas=3)
+    st.markdown("**Fotón entre niveles.** Con los niveles Eₙ = ħω(n + ½) de este oscilador.")
+    instrumentos.panel_fotones(lambda k: energia_teorica(int(k), p.omega), "osc", N_MAX, n_ini=2, n_fin=1)
+    informes.boton_informe(lambda texto: informe_estado(p, d, texto), "osc_inf", f"oscilador_informe_n{p.n}")
+
+
 def ejecutar_pruebas() -> qc.RegistroPruebas:
     """Pruebas de física, de la derivada numérica, de las unidades y de la validación."""
     r = qc.RegistroPruebas("Oscilador armónico 1D")
@@ -811,6 +987,14 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     pf = [d["prob_fuera"] for d in lim]
     r.comprobar("La probabilidad en la zona prohibida disminuye con n (n = 0 → erfc(1))",
                 all(a > b for a, b in zip(pf, pf[1:])) and abs(pf[0] - erfc(1.0)) < 1e-4)
+    # --- Modo «Predice y experimenta» y laboratorio inverso: la respuesta correcta sale del cálculo
+    p_pd = validar_parametros_oscilador(1, 1.0, 1.0e15, "SI", 9.0, 3001)
+    for q in PREGUNTAS_PREDICE:
+        r.comprobar(f"Pregunta de predicción «{q.id}»: la respuesta correcta sale del cálculo",
+                    predice.validar_pregunta(q, p_pd) == [], "; ".join(predice.validar_pregunta(q, p_pd)))
+    for reto in RETOS_INVERSOS:
+        r.comprobar(f"Reto inverso «{reto.id}» bien construido", inverso.validar_reto(reto) == [],
+                    "; ".join(inverso.validar_reto(reto)))
     return r
 
 
@@ -818,7 +1002,7 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
 # 4. INTERFAZ (Streamlit)
 # =====================================================================
 VALORES_INICIALES = {
-    "osc_n": 0, "osc_masa": 1.0, "osc_omega": "1e15", "osc_sistema": "SI", "osc__sistema_previo": "SI",
+    "osc_n": 0, "osc_pd_n": 1, "osc_inf_n": 1, "osc_masa": 1.0, "osc_omega": "1e15", "osc_sistema": "SI", "osc__sistema_previo": "SI",
     "osc_rango": 9.0, "osc_resolucion": 3001, "osc_metodo": "numerica", "osc_zoom": True,
     "osc_niveles_n": 3, "osc_comp_n": [0, 1, 3], "osc_comp_exc": 3,
     "osc_clas_n": 20, "osc_dyn_n1": 0, "osc_dyn_n2": 1, "osc_dyn_peso": 0.5, "osc_dyn_fase": 0.0, "osc_dyn_modo": "Superposición n₁ + n₂",
@@ -1206,7 +1390,7 @@ def interfaz() -> None:
     if p_base is None:
         return
     tabs = st.tabs(["Estado individual", "Niveles y potencial", "Comparación de estados", "Límite clásico", "Dinámica",
-                    "Guía de práctica", "Autoevaluación", "Pruebas numéricas"])
+                    "Guía de práctica", "Autoevaluación", "Predice y experimenta", "Laboratorio inverso", "Instrumentos e informe", "Pruebas numéricas"])
     with tabs[0]:
         _pestana_individual(p_base)
     with tabs[1]:
@@ -1222,6 +1406,12 @@ def interfaz() -> None:
     with tabs[6]:
         qc.autoevaluacion(PREGUNTAS, "osc")
     with tabs[7]:
+        _pestana_predice(p_base)
+    with tabs[8]:
+        inverso.panel(RETOS_INVERSOS, "osc")
+    with tabs[9]:
+        _pestana_instrumentos(p_base)
+    with tabs[10]:
         qc.boton_pruebas(ejecutar_pruebas, "osc_pruebas")
     qc.escribir_en_url(VALORES_INICIALES)
 
