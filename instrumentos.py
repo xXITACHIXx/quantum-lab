@@ -115,8 +115,18 @@ def foton_entre_niveles(energia_inicial_j: float, energia_final_j: float) -> dic
 # =====================================================================
 # Interfaz
 # =====================================================================
-def panel_fotones(energia_nivel_j: Callable[[int], float], prefijo: str, n_max: int, n_ini: int = 3, n_fin: int = 1) -> None:
-    """Instrumento «Fotón entre niveles» para cualquier sistema con niveles discretos (energía en julios)."""
+def filas_foton(f: dict, ni: int, nf: int) -> list[tuple[str, str, str]]:
+    """Filas (magnitud, valor, unidad) de una lectura de «Fotón entre niveles» para el informe."""
+    return [(f"Fotón {ni} → {nf}: tipo", f["tipo"], ""), (f"Fotón {ni} → {nf}: energía", f"{f['energia_ev']:.8g}", "eV"),
+            (f"Fotón {ni} → {nf}: frecuencia ν", f"{f['frecuencia']:.8g}", "Hz"),
+            (f"Fotón {ni} → {nf}: longitud de onda λ", f"{f['longitud_nm']:.8g}", "nm")]
+
+
+def panel_fotones(energia_nivel_j: Callable[[int], float], prefijo: str, n_max: int, n_ini: int = 3, n_fin: int = 1) -> list:
+    """
+    Instrumento «Fotón entre niveles» para cualquier sistema con niveles discretos (energía en julios).
+    Devuelve las filas para el informe (lista vacía si la lectura no es válida).
+    """
     import streamlit as st
 
     st.markdown("**Qué mide:** la energía, la frecuencia y la longitud de onda de un fotón que cumpliría la "
@@ -131,7 +141,7 @@ def panel_fotones(energia_nivel_j: Callable[[int], float], prefijo: str, n_max: 
         f = foton_entre_niveles(energia_nivel_j(int(ni)), energia_nivel_j(int(nf)))
     except ValueError as error:
         qc.error(error)
-        return
+        return []
     qc.metricas([("Tipo", f["tipo"], f"n = {int(ni)} → {int(nf)}"),
                  ("Energía del fotón [eV]", qc.cientifico(f["energia_ev"], 6), qc.cientifico(f["energia_j"], 6) + " J"),
                  ("Frecuencia ν [Hz]", qc.cientifico(f["frecuencia"], 6), "ν = |ΔE|/h"),
@@ -141,3 +151,4 @@ def panel_fotones(energia_nivel_j: Callable[[int], float], prefijo: str, n_max: 
         c = comparar(f["longitud_nm"], ref)
         st.info(f"Diferencia con la referencia: {c['absoluta']:+.6g} nm ({c['relativa'] * 100:+.4g} %). "
                 "Es la diferencia entre dos valores, no una incertidumbre experimental.", icon=":material/compare_arrows:")
+    return filas_foton(f, int(ni), int(nf))

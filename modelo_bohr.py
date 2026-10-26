@@ -782,7 +782,7 @@ RETOS_INVERSOS = [
 ]
 
 
-def informe_transicion(t: Transicion, d: dict, conclusiones: str = "") -> informes.Informe:
+def informe_transicion(t: Transicion, d: dict, conclusiones: str = "", lecturas: list | None = None) -> informes.Informe:
     _, _, nombre = NUCLEOS[t.nucleo]
     niveles = np.arange(1, 9)
     with informes.estilo_claro():
@@ -796,6 +796,7 @@ def informe_transicion(t: Transicion, d: dict, conclusiones: str = "") -> inform
         ax.set(ylabel="Energía [eV]", title=f"Niveles de {nombre}", xticks=[], xlim=(0, 1))
         fig.tight_layout()
     return informes.Informe(
+        lecturas=list(lecturas or []),
         titulo=f"Transición {t.n_inicial} → {t.n_final} en {nombre}", simulador="Átomo de hidrógeno · modelo de Bohr",
         objetivo="Calcular la energía, la frecuencia y la longitud de onda del fotón asociado a una transición entre niveles.",
         modelo="Modelo de Bohr (semiclásico) para átomos de un electrón. Sirve para niveles y series; no describe la "
@@ -830,9 +831,9 @@ def _pestana_instrumentos(t: Transicion):
     d = calcular_transicion(t)
     st.markdown("**Fotón entre niveles de este átomo.** Con las energías del modelo de Bohr (con la corrección de masa "
                 "reducida si está activada).")
-    instrumentos.panel_fotones(lambda k: float(energia_nivel(int(k), t.nucleo, t.masa_reducida)) * E, "bohr", N_MAX,
-                               n_ini=t.n_inicial, n_fin=t.n_final)
-    informes.boton_informe(lambda texto: informe_transicion(t, d, texto), "bohr_inf",
+    lecturas = instrumentos.panel_fotones(lambda k: float(energia_nivel(int(k), t.nucleo, t.masa_reducida)) * E, "bohr", N_MAX,
+                                          n_ini=t.n_inicial, n_fin=t.n_final)
+    informes.boton_informe(lambda texto: informe_transicion(t, d, texto, lecturas), "bohr_inf",
                            f"bohr_informe_{t.n_inicial}_{t.n_final}")
 
 

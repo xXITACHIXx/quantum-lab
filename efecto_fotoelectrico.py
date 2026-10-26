@@ -457,7 +457,7 @@ RETOS_INVERSOS = [
 ]
 
 
-def informe_experimento(p: ParametrosFoto, d: dict, conclusiones: str = "") -> informes.Informe:
+def informe_experimento(p: ParametrosFoto, d: dict, conclusiones: str = "", lecturas: list | None = None) -> informes.Informe:
     nu = np.linspace(0.5 * d["nu0"], 2.0 * max(p.frecuencia, d["nu0"]), 300)
     with informes.estilo_claro():
         fig, ax = informes.figura_clara(6.0, 3.2)
@@ -468,6 +468,7 @@ def informe_experimento(p: ParametrosFoto, d: dict, conclusiones: str = "") -> i
         ax.legend()
         fig.tight_layout()
     return informes.Informe(
+        lecturas=list(lecturas or []),
         titulo=f"Efecto fotoeléctrico: {p.metal}", simulador="Efecto fotoeléctrico",
         objetivo="Aplicar la ecuación de Einstein para hallar la frecuencia umbral y la energía de los electrones emitidos.",
         modelo="Modelo de Einstein: un fotón libera un electrón si hν ≥ φ. No incluye efectos de superficie ni de temperatura. "
@@ -513,7 +514,10 @@ def _pestana_instrumentos(p: ParametrosFoto):
         st.success("hν ≥ φ: hay emisión.", icon=":material/check_circle:")
     else:
         st.warning("hν < φ: no hay emisión, por intensa que sea la luz.", icon=":material/block:")
-    informes.boton_informe(lambda texto: informe_experimento(p, d, texto), "foto_inf", "fotoelectrico_informe")
+    lecturas = [("Lector de umbral: hν − φ", f"{c['absoluta']:+.8g}", "eV"),
+                ("Lector de umbral: (hν − φ)/φ", f"{c['relativa'] * 100:+.6g}", "%"),
+                ("Lector de umbral: ¿hay emisión?", "Sí" if d["emision"] else "No", "")]
+    informes.boton_informe(lambda texto: informe_experimento(p, d, texto, lecturas), "foto_inf", "fotoelectrico_informe")
 
 
 def ejecutar_pruebas() -> qc.RegistroPruebas:
