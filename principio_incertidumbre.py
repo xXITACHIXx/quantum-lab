@@ -648,9 +648,15 @@ def informe_paquete(p: Paquete, d: dict, conclusiones: str = "", lecturas: list 
         ax1.plot(d["x"], np.abs(d["psi"]) ** 2, color="#1F3A93")
         ax1.set(title="Densidad en posición |ψ|²", xlabel="x [nm]", ylabel="|ψ|² [nm⁻¹]")
         ax1.set_xlim(d["x_medio"] - 6 * d["delta_x"] - 1e-9, d["x_medio"] + 6 * d["delta_x"] + 1e-9)
+        if lecturas:                                                  # intervalos ⟨x⟩ ± Δx y ⟨k⟩ ± Δk que lee el comparador
+            ax1.axvspan(d["x_medio"] - d["delta_x"], d["x_medio"] + d["delta_x"], color="#F2B134", alpha=0.3, label="⟨x⟩ ± Δx")
+            ax1.legend(fontsize=7)
         ax2.plot(d["k"], np.abs(d["phi"]) ** 2, color="#B03A2E")
         ax2.set(title="Densidad en momento |φ|²", xlabel="k [nm⁻¹]", ylabel="|φ|² [nm]")
         ax2.set_xlim(d["k_medio"] - 6 * d["delta_k"], d["k_medio"] + 6 * d["delta_k"])
+        if lecturas:
+            ax2.axvspan(d["k_medio"] - d["delta_k"], d["k_medio"] + d["delta_k"], color="#F2B134", alpha=0.3, label="⟨k⟩ ± Δk")
+            ax2.legend(fontsize=7)
         fig.tight_layout()
     teorico = producto_teorico(p)
     return informes.Informe(

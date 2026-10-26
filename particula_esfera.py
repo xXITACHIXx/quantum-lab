@@ -893,7 +893,9 @@ PREGUNTAS_PREDICE = [
 ]
 
 
-def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "", lecturas: list | None = None) -> informes.Informe:
+def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "", lecturas: list | None = None,
+                           direccion: tuple[float, float] | None = None) -> informes.Informe:
+    """`direccion` = (θ, φ) en radianes de la lectura del instrumento; se marca solo si está en el plano xz (φ = 0 o π)."""
     h, v, _dens, _ = curva_densidad_plano(p.l, p.m, "xz", False)
     d_polo = float(densidad_probabilidad(p.l, p.m, 0.0, 0.0))
     d_ecuador = float(densidad_probabilidad(p.l, p.m, np.pi / 2, 0.0))
@@ -904,6 +906,12 @@ def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "", lecturas
         ax.set_aspect("equal")
         ax.axhline(0, color="gray", lw=0.5)
         ax.axvline(0, color="gray", lw=0.5)
+        if direccion is not None:
+            th0, ph0 = direccion
+            if abs(np.sin(ph0)) < 1e-9:                         # φ = 0 o π: la dirección está en el plano xz
+                xm, _, zm = esfericas_a_cartesianas(float(densidad_probabilidad(p.l, p.m, th0, ph0)), th0, ph0)
+                ax.plot([xm], [zm], "o", color="#B03A2E", label=f"dirección leída (θ = {np.degrees(th0):.4g}°)")
+                ax.legend(fontsize=7, loc="lower right")
         ax.set(xlabel="x [sr⁻¹]", ylabel="z [sr⁻¹]", title=f"Corte polar de |Y|² (l = {p.l}, m = {p.m}, plano xz)")
         fig.tight_layout()
     return informes.Informe(
@@ -964,7 +972,7 @@ def _pestana_instrumentos(p: ParametrosEsfera):
     lecturas = [(f"Dirección θ = {th:.6g}°, φ = {ph:.6g}°: |Y|²", f"{dens:.8g}", "sr⁻¹"),
                 (f"Región Δθ = {dth:.6g}°, Δφ = {dph:.6g}°: ΔΩ", f"{d_omega:.8g}", "sr"),
                 ("P ≈ |Y|²·ΔΩ", f"{p_aprox:.8g}", ""), ("P por cuadratura", f"{p_num:.8g}", "")]
-    informes.boton_informe(lambda texto: informe_estado_angular(p, texto, lecturas), "esf_inf", f"esfera_informe_l{p.l}_m{p.m}")
+    informes.boton_informe(lambda texto: informe_estado_angular(p, texto, lecturas, (t, f)), "esf_inf", f"esfera_informe_l{p.l}_m{p.m}")
 
 
 # ---------------------------------------------------------------------

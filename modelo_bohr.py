@@ -782,17 +782,28 @@ RETOS_INVERSOS = [
 ]
 
 
-def informe_transicion(t: Transicion, d: dict, conclusiones: str = "", lecturas: list | None = None) -> informes.Informe:
+def informe_transicion(t: Transicion, d: dict, conclusiones: str = "", lecturas: list | None = None,
+                       foton: tuple[int, int] | None = None) -> informes.Informe:
     _, _, nombre = NUCLEOS[t.nucleo]
     niveles = np.arange(1, 9)
     with informes.estilo_claro():
         fig, ax = informes.figura_clara(6.0, 3.6)
-        for k in niveles:
-            e = float(energia_nivel(k, t.nucleo, t.masa_reducida))
+        energias = [float(energia_nivel(k, t.nucleo, t.masa_reducida)) for k in niveles]
+        separacion = 0.035 * (max(energias) - min(energias))          # no se rotulan niveles que se encimarían
+        ultimo = None
+        for k, e in zip(niveles, energias, strict=True):
             ax.hlines(e, 0.3, 0.7, color="#1F3A93")
-            ax.text(0.72, e, f"n = {k}", va="center", fontsize=8)
+            if ultimo is None or abs(e - ultimo) >= separacion or k in (t.n_inicial, t.n_final):
+                ax.text(0.72, e, f"n = {k}", va="center", fontsize=8)
+                ultimo = e
         if max(t.n_inicial, t.n_final) <= 8:
             ax.annotate("", xy=(0.5, d["ef"]), xytext=(0.5, d["ei"]), arrowprops={"arrowstyle": "->", "color": "#B03A2E", "lw": 2})
+        if foton and foton != (t.n_inicial, t.n_final) and max(foton) <= 8:      # niveles leídos con el instrumento de fotón
+            e_i, e_f = (float(energia_nivel(n, t.nucleo, t.masa_reducida)) for n in foton)
+            ax.annotate("", xy=(0.4, e_f), xytext=(0.4, e_i), arrowprops={"arrowstyle": "->", "color": "#2E7D32", "lw": 2, "ls": "--"})
+            ax.plot([], [], color="#2E7D32", ls="--", label=f"instrumento de fotón: {foton[0]} → {foton[1]}")
+            ax.plot([], [], color="#B03A2E", label=f"transición elegida: {t.n_inicial} → {t.n_final}")
+            ax.legend(fontsize=7, loc="lower right")
         ax.set(ylabel="Energía [eV]", title=f"Niveles de {nombre}", xticks=[], xlim=(0, 1))
         fig.tight_layout()
     return informes.Informe(
@@ -833,7 +844,7 @@ def _pestana_instrumentos(t: Transicion):
                 "reducida si está activada).")
     lecturas = instrumentos.panel_fotones(lambda k: float(energia_nivel(int(k), t.nucleo, t.masa_reducida)) * E, "bohr", N_MAX,
                                           n_ini=t.n_inicial, n_fin=t.n_final)
-    informes.boton_informe(lambda texto: informe_transicion(t, d, texto, lecturas), "bohr_inf",
+    informes.boton_informe(lambda texto: informe_transicion(t, d, texto, lecturas, (int(st.session_state["bohr_foton_ni"]), int(st.session_state["bohr_foton_nf"]))), "bohr_inf",
                            f"bohr_informe_{t.n_inicial}_{t.n_final}")
 
 
