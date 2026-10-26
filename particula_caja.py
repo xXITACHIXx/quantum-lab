@@ -761,8 +761,13 @@ RETOS_INVERSOS = [
 # ---------------------------------------------------------------------
 # Informe del experimento
 # ---------------------------------------------------------------------
-def informe_estado(p: ParametrosCaja, d: dict, conclusiones: str = "") -> informes.Informe:
-    """Informe del estado individual: todo sale de `d` (el mismo cálculo que ven las gráficas y las métricas)."""
+def informe_estado(p: ParametrosCaja, d: dict, conclusiones: str = "", lecturas: list | None = None,
+                   marcas: dict | None = None) -> informes.Informe:
+    """
+    Informe del estado individual: todo sale de `d` (el mismo cálculo que ven las gráficas y las métricas).
+    `lecturas`: filas de los instrumentos; `marcas`: {"x0", "x1", "x2"} (en la unidad de longitud elegida) para dibujar
+    el cursor y el intervalo leídos.
+    """
     u = qc.obtener_unidades(p.sistema)
     fx, fe, L, U = u["factor_longitud"], u["factor_energia"], u["nombre_longitud"], u["nombre_energia"]
     with informes.estilo_claro():
@@ -773,9 +778,14 @@ def informe_estado(p: ParametrosCaja, d: dict, conclusiones: str = "") -> inform
         ax2.plot(d["x"] / fx, d["rho"] * fx, color="#B03A2E")
         ax2.plot(d["maximos"] / fx, np.interp(d["maximos"], d["x"], d["rho"]) * fx, "k*", label="máximos")
         ax2.set(title=f"Densidad de probabilidad |ψ{_sub(p.n)}|²", xlabel=f"x [{L}]", ylabel=f"|ψ|² [{L}$^{{-1}}$]")
+        if marcas:
+            for ax in (ax1, ax2):
+                ax.axvline(marcas["x0"], color="#2E7D32", ls="--", lw=1.0, label="cursor")
+            ax2.axvspan(marcas["x1"], marcas["x2"], color="#F2B134", alpha=0.35, label="intervalo")
         ax2.legend()
         fig.tight_layout()
     return informes.Informe(
+        lecturas=list(lecturas or []),
         titulo=f"Partícula en una caja 1D: estado n = {p.n}",
         simulador="Partícula en una caja unidimensional",
         objetivo="Relacionar el número cuántico n con la energía, los nodos y la forma de la función de onda de una "
@@ -1081,8 +1091,11 @@ def _leer_parametros_fisicos():
         return None
 
 
-def _instrumentos_caja(p: ParametrosCaja, d: dict, u: dict) -> None:
-    """Cursor, probabilidad en un intervalo (con su error numérico) y fotón entre niveles."""
+def _instrumentos_caja(p: ParametrosCaja, d: dict, u: dict) -> tuple[list, dict | None]:
+    """
+    Cursor, probabilidad en un intervalo (con su error numérico) y fotón entre niveles.
+    Devuelve (filas para el informe, marcas del cursor y del intervalo); ([], None) si alguna lectura no es válida.
+    """
     fx, L = u["factor_longitud"], u["nombre_longitud"]
     a_vis = p.longitud / fx
     st.markdown("**Cursor.** Lee ψ y |ψ|² en una posición. *Mide:* el valor calculado de la función. "
@@ -1093,7 +1106,7 @@ def _instrumentos_caja(p: ParametrosCaja, d: dict, u: dict) -> None:
         rho0 = instrumentos.leer_valor(d["x"] / fx, d["rho"] * fx, x0)
     except ValueError as error:
         qc.error(error)
-        return
+        return [], None
     qc.metricas([(f"ψ(x) [{L}⁻¹ᐟ²]", f"{psi0:.6g}", f"x = {x0:.4g} {L}"),
                  (f"|ψ(x)|² [{L}⁻¹]", f"{rho0:.6g}", "Densidad, no probabilidad")], columnas=2)
     st.markdown("**Probabilidad en un intervalo.** *Mide:* P = ∫|ψ|²dx entre x₁ y x₂. *No mide:* un resultado "
@@ -1105,13 +1118,19 @@ def _instrumentos_caja(p: ParametrosCaja, d: dict, u: dict) -> None:
         pe = instrumentos.probabilidad_caja_exacta(p.n, p.longitud, x1 * fx, x2 * fx)
     except ValueError as error:
         qc.error(error)
-        return
+        return [], None
     err = abs(pn - pe)
     qc.metricas([("P numérica", f"{pn:.8f}", "Regla del trapecio"), ("P exacta", f"{pe:.8f}", "Integral analítica"),
                  ("Error numérico |ΔP|", f"{err:.2e}", "Depende de la malla")], columnas=3)
     st.latex(r"P=\int_{x_1}^{x_2}|\psi_n|^2dx=\left[\dfrac{x}{a}-\dfrac{\sin(2n\pi x/a)}{2n\pi}\right]_{x_1}^{x_2}")
     st.markdown("**Fotón entre niveles.** Con las energías Eₙ de esta caja.")
-    instrumentos.panel_fotones(lambda k: energia_nivel(int(k), p.longitud, p.masa), "caja", N_MAX, n_ini=min(6, N_MAX), n_fin=3)
+    filas_foton = instrumentos.panel_fotones(lambda k: energia_nivel(int(k), p.longitud, p.masa), "caja", N_MAX,
+                                             n_ini=min(6, N_MAX), n_fin=3)
+    filas = [(f"Cursor: ψ en x = {x0:.6g} {L}", f"{psi0:.8g}", f"{L}⁻¹ᐟ²"), (f"Cursor: |ψ|² en x = {x0:.6g} {L}", f"{rho0:.8g}", f"{L}⁻¹"),
+             (f"Probabilidad entre {x1:.6g} y {x2:.6g} {L}: numérica", f"{pn:.10f}", ""),
+             (f"Probabilidad entre {x1:.6g} y {x2:.6g} {L}: exacta", f"{pe:.10f}", ""),
+             ("Error numérico |ΔP| de la malla", f"{err:.3e}", "")]
+    return filas + filas_foton, {"x0": x0, "x1": x1, "x2": x2}
 
 
 def _pestana_individual(p_base: ParametrosCaja):
@@ -1157,8 +1176,8 @@ def _pestana_individual(p_base: ParametrosCaja):
             ("Normalización numérica ∫|ψ|²dx", f"{d['norma']:.12f}", "", f"error {abs(d['norma'] - 1):.2e}"),
         ], archivo=f"caja_valores_n{p.n}.csv")
     with st.expander("Instrumentos de medición", expanded=False):
-        _instrumentos_caja(p, d, u)
-    informes.boton_informe(lambda texto: informe_estado(p, d, texto), "caja_inf", f"caja_informe_n{p.n}")
+        lecturas, marcas = _instrumentos_caja(p, d, u)
+    informes.boton_informe(lambda texto: informe_estado(p, d, texto, lecturas, marcas), "caja_inf", f"caja_informe_n{p.n}")
     with st.expander("Interpretación física", expanded=False):
         st.markdown(
             "- Un **estado estacionario** tiene energía definida; su densidad |ψₙ|² **no cambia con el tiempo**: "

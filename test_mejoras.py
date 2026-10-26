@@ -567,3 +567,73 @@ def test_tabla_larga_repite_encabezado_y_tabla_corta_no_se_parte():
             assert lineas[0] == "Resultados (continuación)" and lineas[1] == "Magnitud Valor Unidad", lineas[:3]
     corta = next(p for p in paginas if "Tabla corta" in p)
     assert all(fila in corta for fila in ("1 2", "3 4", "5 6"))       # la tabla corta no se parte
+
+
+# =============================================================================================
+# Lecturas de los instrumentos dentro del informe
+# =============================================================================================
+def _csv_lecturas(at, prefijo):
+    at.button(key=f"{prefijo}_inf_prep").click().run()
+    assert not at.exception, [e.value for e in at.exception]
+    filas = list(csv.reader(at.session_state[f"{prefijo}_inf_csv"].decode("utf-8-sig").splitlines()))
+    return {f[1]: f for f in filas if f[0].startswith("Lecturas de instrumentos")}
+
+
+def test_informe_de_la_caja_incluye_cursor_intervalo_y_foton_con_valores_independientes():
+    at = _abrir("caja")
+    lec = _csv_lecturas(at, "caja")
+    # n = 1, a = 1 nm, intervalo (0.25, 0.5) nm: P = [x/a − sen(2πx/a)/(2π)] evaluado a mano
+    primitiva = lambda x: x - math.sin(2 * math.pi * x) / (2 * math.pi)
+    p_exacta = primitiva(0.5) - primitiva(0.25)
+    clave = next(k for k in lec if k.endswith("exacta"))
+    assert float(lec[clave][2]) == pytest.approx(p_exacta, abs=1e-9)
+    # fotón 6 → 3: ΔE = (36 − 9)·E₁, λ = hc/ΔE con E₁ = 0.376030 eV y hc = 1239.84198 eV·nm
+    lam = next(v for k, v in lec.items() if "longitud de onda" in k)
+    assert float(lam[2]) == pytest.approx(1239.84198 / (27 * 0.376030), rel=2e-5)
+    assert any(k.startswith("Cursor: ψ") for k in lec)
+
+
+def test_informe_de_bohr_incluye_el_foton_calculado():
+    at = _abrir("bohr")
+    lec = _csv_lecturas(at, "bohr")
+    lam = next(v for k, v in lec.items() if "longitud de onda" in k)
+    assert 656.0 < float(lam[2]) < 656.6                       # Hα del hidrógeno (656.28 nm en el vacío, ± masa reducida)
+    assert next(v for k, v in lec.items() if k.endswith("tipo"))[2] == "Emisión"
+
+
+@pytest.mark.parametrize("pagina,prefijo", [("oscilador", "osc"), ("fotoelectrico", "foto"), ("esfera", "esf"),
+                                            ("incertidumbre", "inc")])
+def test_informes_incluyen_lecturas_de_instrumentos(pagina, prefijo):
+    pypdf = pytest.importorskip("pypdf")
+    at = _abrir(pagina)
+    lec = _csv_lecturas(at, prefijo)
+    assert lec, "el informe no trae lecturas de instrumentos"
+    texto = " ".join(p.extract_text() for p in pypdf.PdfReader(io.BytesIO(at.session_state[f"{prefijo}_inf_pdf"])).pages)
+    assert "Lecturas de los instrumentos" in texto
+
+
+def test_figura_del_informe_de_la_caja_marca_cursor_e_intervalo():
+    pc = _p_caja()
+    d = caja.calcular_estado_individual(pc)
+    inf = caja.informe_estado(pc, d, "", [("a", "1", "")], {"x0": 0.4, "x1": 0.25, "x2": 0.5})
+    ax2 = inf.figuras[0].axes[1]
+    assert len(ax2.patches) == 1                                # axvspan del intervalo
+    assert any(abs(l.get_xdata()[0] - 0.4) < 1e-12 for l in ax2.lines if len(set(l.get_xdata())) == 1)
+    assert inf.lecturas == [("a", "1", "")]
+
+
+def test_ningun_titulo_de_seccion_queda_solo_al_pie_de_pagina():
+    """Regresión: «6. Resultados…» quedaba como última línea de la página 1 y su tabla en la página 2."""
+    pypdf = pytest.importorskip("pypdf")
+    pc = _p_caja()
+    d = caja.calcular_estado_individual(pc)
+    lec = [(f"Lectura {i}", "1", "u") for i in range(5)]
+    for extra in range(0, 12):
+        inf = caja.informe_estado(pc, d, "", lec[:extra % 6] or None)
+        inf = dataclasses.replace(inf, parametros=inf.parametros + [(f"Extra {i}", "1", "") for i in range(extra)])
+        for pag in pypdf.PdfReader(io.BytesIO(informes.pdf_informe(inf))).pages:
+            lineas = [x for x in pag.extract_text().splitlines() if x.strip() and not x.startswith("Quantum Lab ·")
+                      and not x.startswith("Página")]
+            titulos = ("1. Objetivo", "2. Modelo", "3. Ecuaciones", "4. Datos", "5. Procedimiento", "6. Resultados",
+                       "7. Gráficas", "8. Preguntas", "9. Conclusiones")
+            assert not (lineas and lineas[-1].startswith(titulos)), lineas[-2:]

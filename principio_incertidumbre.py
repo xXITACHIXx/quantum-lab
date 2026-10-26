@@ -642,7 +642,7 @@ RETOS_INVERSOS = [
 ]
 
 
-def informe_paquete(p: Paquete, d: dict, conclusiones: str = "") -> informes.Informe:
+def informe_paquete(p: Paquete, d: dict, conclusiones: str = "", lecturas: list | None = None) -> informes.Informe:
     with informes.estilo_claro():
         fig, (ax1, ax2) = informes.figura_clara(7.0, 3.0, ncols=2)
         ax1.plot(d["x"], np.abs(d["psi"]) ** 2, color="#1F3A93")
@@ -654,6 +654,7 @@ def informe_paquete(p: Paquete, d: dict, conclusiones: str = "") -> informes.Inf
         fig.tight_layout()
     teorico = producto_teorico(p)
     return informes.Informe(
+        lecturas=list(lecturas or []),
         titulo=f"Principio de incertidumbre: paquete {TIPOS[p.tipo]}", simulador="Principio de incertidumbre de Heisenberg",
         objetivo="Comprobar el límite Δx·Δp ≥ ħ/2 con un paquete de ondas y comparar con el valor exacto de su forma.",
         modelo="Paquetes de ondas en una dimensión; Δx y Δk se calculan numéricamente (FFT). El mínimo ħ/2 solo se alcanza "
@@ -695,7 +696,8 @@ def _pestana_instrumentos(p: Paquete):
         e = instrumentos.comparar(d["producto"], teorico)
         filas.append(("Error numérico frente al valor exacto", f"{e['absoluta']:+.2e}", f"{e['relativa'] * 100:+.3g} %"))
     qc.tabla(filas, encabezados=("Magnitud", "Valor", "Nota"))
-    informes.boton_informe(lambda texto: informe_paquete(p, d, texto), "inc_inf", "incertidumbre_informe")
+    lecturas = [(m, v, n) for m, v, n in filas]
+    informes.boton_informe(lambda texto: informe_paquete(p, d, texto, lecturas), "inc_inf", "incertidumbre_informe")
 
 
 def ejecutar_pruebas() -> qc.RegistroPruebas:

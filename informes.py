@@ -46,6 +46,7 @@ class Informe:
     tablas: list[tuple[str, list[str], list[list[str]]]] = field(default_factory=list)   # (título, encabezados, filas)
     figuras: list = field(default_factory=list)                  # figuras de Matplotlib con fondo claro
     resultados: list[Fila] = field(default_factory=list)
+    lecturas: list[Fila] = field(default_factory=list)           # lecturas de los instrumentos (cursor, intervalo, fotón)
     preguntas: list[str] = field(default_factory=list)
     referencias: list[str] = field(default_factory=list)
     conclusiones: str = ""                                        # escrito por el estudiante (puede estar vacío)
@@ -58,7 +59,8 @@ def validar(informe: Informe) -> None:
                              ("parámetros", informe.parametros), ("resultados", informe.resultados)) if not v]
     if faltan:
         raise ValueError("Informe incompleto: falta " + ", ".join(faltan) + ".")
-    for nombre, filas in (("parámetros", informe.parametros), ("resultados", informe.resultados)):
+    for nombre, filas in (("parámetros", informe.parametros), ("resultados", informe.resultados),
+                          ("lecturas", informe.lecturas)):
         if any(len(f) != 3 for f in filas):
             raise ValueError(f"Las filas de {nombre} deben tener (magnitud, valor, unidad).")
 
@@ -77,6 +79,8 @@ def csv_informe(informe: Informe) -> bytes:
         w.writerow(["Parámetros (entrada)", magnitud, valor, unidad])
     for magnitud, valor, unidad in informe.resultados:
         w.writerow(["Resultados (calculados por el simulador)", magnitud, valor, unidad])
+    for magnitud, valor, unidad in informe.lecturas:
+        w.writerow(["Lecturas de instrumentos (cálculo del modelo)", magnitud, valor, unidad])
     for titulo, encabezados, filas in informe.tablas:
         w.writerow([f"Tabla: {titulo}", " | ".join(encabezados), "", ""])
         for fila in filas:
@@ -251,13 +255,18 @@ def pdf_informe(informe: Informe, fecha: datetime | None = None) -> bytes:
             lienzo.seccion("3. Ecuaciones")
             for e in informe.ecuaciones:
                 lienzo.ecuacion(e)
-        lienzo.seccion("4. Datos y parámetros utilizados (entrada)")
+        lienzo.seccion("4. Datos y parámetros utilizados (entrada)",
+                       reserva=min(0.5 + 0.25 * (len(informe.parametros) + 1), 4.5))
         lienzo.tabla("Parámetros", ["Magnitud", "Valor", "Unidad"], [list(f) for f in informe.parametros])
         if informe.procedimiento:
             lienzo.seccion("5. Procedimiento de cálculo")
             lienzo.lista(informe.procedimiento, numerada=True)
-        lienzo.seccion("6. Resultados calculados por el simulador")
+        lienzo.seccion("6. Resultados calculados por el simulador",
+                       reserva=min(0.5 + 0.25 * (len(informe.resultados) + 1), 4.5))     # el título no queda solo al pie
         lienzo.tabla("Resultados", ["Magnitud", "Valor", "Unidad"], [list(f) for f in informe.resultados])
+        if informe.lecturas:
+            lienzo.tabla("Lecturas de los instrumentos (valores calculados por el modelo, no mediciones)",
+                         ["Magnitud", "Valor", "Unidad"], [list(f) for f in informe.lecturas])
         for titulo, enc, filas in informe.tablas:
             lienzo.tabla(titulo, enc, filas)
         if informe.figuras:

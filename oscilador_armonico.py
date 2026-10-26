@@ -775,7 +775,8 @@ RETOS_INVERSOS = [
 ]
 
 
-def informe_estado(p: ParametrosOscilador, d: dict, conclusiones: str = "") -> informes.Informe:
+def informe_estado(p: ParametrosOscilador, d: dict, conclusiones: str = "", lecturas: list | None = None,
+                   x_cursor: float | None = None) -> informes.Informe:
     u = qc.obtener_unidades(p.sistema)
     fx, fe, L, U = u["factor_longitud"], u["factor_energia"], u["nombre_longitud"], u["nombre_energia"]
     with informes.estilo_claro():
@@ -786,9 +787,13 @@ def informe_estado(p: ParametrosOscilador, d: dict, conclusiones: str = "") -> i
         ax2.plot(d["x"] / fx, d["u_T"] * fx / fe, color="#1E8449", label="cinética u_T")
         ax2.plot(d["x"] / fx, d["u_V"] * fx / fe, "--", color="#7D3C98", label="potencial u_V")
         ax2.set(title="Densidades de energía", xlabel=f"x [{L}]", ylabel=f"u [{U}/{L}]")
+        if x_cursor is not None:
+            for ax in (ax1, ax2):
+                ax.axvline(x_cursor, color="#2E7D32", ls="--", lw=1.0, label="cursor" if ax is ax2 else None)
         ax2.legend()
         fig.tight_layout()
     return informes.Informe(
+        lecturas=list(lecturas or []),
         titulo=f"Oscilador armónico cuántico: estado n = {p.n}", simulador="Oscilador armónico cuántico",
         objetivo="Relacionar el número cuántico n con la energía, la forma de ψ y el reparto entre energía cinética y potencial.",
         modelo="Potencial armónico ideal V = ½mω²x² en una dimensión; estados exactos de la ecuación de Schrödinger "
@@ -853,8 +858,10 @@ def _pestana_instrumentos(p_base: ParametrosOscilador):
     qc.metricas([(f"ψ(x) [{L}⁻¹ᐟ²]", f"{psi0:.6g}", f"x = {x0:.4g} {L}"), (f"u_T [{unidad_u}]", f"{ut:.6g}", "Cinética"),
                  (f"u_V [{unidad_u}]", f"{uv:.6g}", "Potencial")], columnas=3)
     st.markdown("**Fotón entre niveles.** Con los niveles Eₙ = ħω(n + ½) de este oscilador.")
-    instrumentos.panel_fotones(lambda k: energia_teorica(int(k), p.omega), "osc", N_MAX, n_ini=2, n_fin=1)
-    informes.boton_informe(lambda texto: informe_estado(p, d, texto), "osc_inf", f"oscilador_informe_n{p.n}")
+    filas_foton = instrumentos.panel_fotones(lambda k: energia_teorica(int(k), p.omega), "osc", N_MAX, n_ini=2, n_fin=1)
+    lecturas = [(f"Cursor: ψ en x = {x0:.6g} {L}", f"{psi0:.8g}", f"{L}⁻¹ᐟ²"), (f"Cursor: u_T en x = {x0:.6g} {L}", f"{ut:.8g}", unidad_u),
+                (f"Cursor: u_V en x = {x0:.6g} {L}", f"{uv:.8g}", unidad_u)] + filas_foton
+    informes.boton_informe(lambda texto: informe_estado(p, d, texto, lecturas, x0), "osc_inf", f"oscilador_informe_n{p.n}")
 
 
 def ejecutar_pruebas() -> qc.RegistroPruebas:

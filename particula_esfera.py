@@ -893,7 +893,7 @@ PREGUNTAS_PREDICE = [
 ]
 
 
-def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "") -> informes.Informe:
+def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "", lecturas: list | None = None) -> informes.Informe:
     h, v, _dens, _ = curva_densidad_plano(p.l, p.m, "xz", False)
     d_polo = float(densidad_probabilidad(p.l, p.m, 0.0, 0.0))
     d_ecuador = float(densidad_probabilidad(p.l, p.m, np.pi / 2, 0.0))
@@ -907,6 +907,7 @@ def informe_estado_angular(p: ParametrosEsfera, conclusiones: str = "") -> infor
         ax.set(xlabel="x [sr⁻¹]", ylabel="z [sr⁻¹]", title=f"Corte polar de |Y|² (l = {p.l}, m = {p.m}, plano xz)")
         fig.tight_layout()
     return informes.Informe(
+        lecturas=list(lecturas or []),
         titulo=f"Armónico esférico Y(l = {p.l}, m = {p.m})", simulador="Partícula en una esfera · armónicos esféricos",
         objetivo="Interpretar la densidad angular |Yₗᵐ|² y reconocer qué información da (y cuál no) sobre la partícula.",
         modelo="Armónicos esféricos exactos. Solo describen la parte angular: no dan información sobre la distancia al "
@@ -960,7 +961,10 @@ def _pestana_instrumentos(p: ParametrosEsfera):
         st.caption(f"Diferencia relativa entre la aproximación y la cuadratura: {abs(p_aprox - p_num) / p_num * 100:.3g} %. "
                    "Es **error de aproximación** (región finita), no incertidumbre experimental.")
     st.latex(r"P\approx|Y_l^m(\theta,\varphi)|^2\,\Delta\Omega,\qquad \Delta\Omega=\sin\theta\,\Delta\theta\,\Delta\varphi")
-    informes.boton_informe(lambda texto: informe_estado_angular(p, texto), "esf_inf", f"esfera_informe_l{p.l}_m{p.m}")
+    lecturas = [(f"Dirección θ = {th:.6g}°, φ = {ph:.6g}°: |Y|²", f"{dens:.8g}", "sr⁻¹"),
+                (f"Región Δθ = {dth:.6g}°, Δφ = {dph:.6g}°: ΔΩ", f"{d_omega:.8g}", "sr"),
+                ("P ≈ |Y|²·ΔΩ", f"{p_aprox:.8g}", ""), ("P por cuadratura", f"{p_num:.8g}", "")]
+    informes.boton_informe(lambda texto: informe_estado_angular(p, texto, lecturas), "esf_inf", f"esfera_informe_l{p.l}_m{p.m}")
 
 
 # ---------------------------------------------------------------------
