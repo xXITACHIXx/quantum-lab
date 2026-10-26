@@ -119,3 +119,18 @@ def test_reto_de_la_esfera_acepta_la_solucion_en_navegador(servidor, pagina):
     pagina.get_by_role("button", name="Verificar").first.click()
     pagina.get_by_text("Solución exacta").first.wait_for(timeout=45_000)
     _sin_excepciones(pagina)
+
+
+@pytest.mark.parametrize("sim", list(SIMULADORES))
+def test_vista_de_celular_sin_desbordamiento_horizontal(servidor, pagina, sim):
+    """En 390 px de ancho las pestañas nuevas no deben provocar desplazamiento horizontal de la página."""
+    pagina.set_viewport_size({"width": 390, "height": 844})
+    try:
+        _abrir(pagina, servidor, sim)
+        for pestana in ("Predice y experimenta", "Laboratorio inverso"):
+            pagina.get_by_role("tab", name=pestana).click()
+            pagina.wait_for_timeout(1200)
+            assert pagina.evaluate("document.documentElement.scrollWidth") <= 390, pestana
+        _sin_excepciones(pagina)
+    finally:
+        pagina.set_viewport_size({"width": 1400, "height": 1000})

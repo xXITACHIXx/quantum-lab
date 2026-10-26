@@ -6,6 +6,7 @@ Los valores esperados vienen de constantes CODATA escritas aquí (no de las cons
 a mano (leyes de escala, ley de Rydberg, E₁ = 0.376030 eV para un electrón en 1 nm), no de repetir la función evaluada.
 """
 import csv
+import dataclasses
 import io
 import math
 from dataclasses import replace
@@ -549,3 +550,20 @@ def test_condicion_del_reto_sin_unidad_no_deja_asteriscos_sueltos():
     at = _abrir("esfera")
     textos = [m.value for m in at.markdown if m.value.startswith("Condición")]
     assert textos and all(not t.rstrip().endswith(" **") for t in textos), textos
+
+
+def test_tabla_larga_repite_encabezado_y_tabla_corta_no_se_parte():
+    """Una tabla de 70 filas continúa en otra página con su encabezado; una tabla corta cerca del final pasa entera."""
+    pypdf = pytest.importorskip("pypdf")
+    base = _informes_de_prueba()["caja"]
+    larga = [(f"Magnitud {i}", f"{i}", "u") for i in range(70)]
+    inf = dataclasses.replace(base, resultados=larga, tablas=[("Tabla corta", ["A", "B"], [["1", "2"], ["3", "4"], ["5", "6"]])])
+    paginas = [p.extract_text() for p in pypdf.PdfReader(io.BytesIO(informes.pdf_informe(inf))).pages]
+    assert len(paginas) >= 3
+    assert any("(continuación)" in p for p in paginas)
+    for p in paginas[1:]:                              # cada página con filas de la tabla larga arranca con título y encabezado
+        lineas = p.strip().splitlines()
+        if any(x.startswith("Magnitud ") and x != "Magnitud Valor Unidad" for x in lineas[:3]):
+            assert lineas[0] == "Resultados (continuación)" and lineas[1] == "Magnitud Valor Unidad", lineas[:3]
+    corta = next(p for p in paginas if "Tabla corta" in p)
+    assert all(fila in corta for fila in ("1 2", "3 4", "5 6"))       # la tabla corta no se parte
