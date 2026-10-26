@@ -157,12 +157,13 @@ class _Lienzo:
         anchos = [0.5, 0.3, 0.2][:columnas] if columnas <= 3 else [1.0 / columnas] * columnas
         s = sum(anchos)
         anchos = [a / s * self.ancho_util for a in anchos]
-        self.texto(titulo, 10, "bold")
+
+        def medir(celdas):
+            envueltas = [textwrap.wrap(str(c), max(8, int(a * 72 / (9 * 0.58)))) or [""] for c, a in zip(celdas, anchos)]
+            return envueltas, max(len(e) for e in envueltas) * 9 * 1.45 / 72 + 0.06
 
         def fila(celdas, peso="normal", fondo=None):
-            envueltas = [textwrap.wrap(str(c), max(8, int(a * 72 / (9 * 0.58)))) or [""] for c, a in zip(celdas, anchos)]
-            n = max(len(e) for e in envueltas)
-            alto = n * 9 * 1.45 / 72 + 0.06
+            envueltas, alto = medir(celdas)
             self._hay_sitio(alto)
             if fondo:
                 self.fig.add_artist(plt.Rectangle((MARGEN / ANCHO_A4, 1 - (self.y + alto) / ALTO_A4),
@@ -175,9 +176,24 @@ class _Lienzo:
                 x += a
             self.y += alto
 
-        fila(encabezados[:columnas] if encabezados else [""] * columnas, "bold", "#DDE3F0")
-        for i, f in enumerate(filas):
-            fila(list(f) + [""] * (columnas - len(f)), fondo="#F4F6FB" if i % 2 else None)
+        cab = encabezados[:columnas] if encabezados else [""] * columnas
+        cuerpo = [list(f) + [""] * (columnas - len(f)) for f in filas]
+        alturas = [medir(f)[1] for f in cuerpo]
+        alto_cab = medir(cab)[1]
+        libre = ALTO_A4 - MARGEN - 0.2 - self.y
+        pagina_util = ALTO_A4 - 2 * MARGEN - 0.2
+        total = 0.25 + alto_cab + sum(alturas)
+        minimo = 0.25 + alto_cab + sum(alturas[:2])          # título + encabezado + al menos dos filas
+        if (total > libre and total <= pagina_util) or minimo > libre:
+            self.nueva()                                        # tabla corta: entera en la página siguiente
+        self.texto(titulo, 10, "bold")
+        fila(cab, "bold", "#DDE3F0")
+        for i, f in enumerate(cuerpo):
+            if self.y + alturas[i] > ALTO_A4 - MARGEN - 0.2:     # tabla larga: continúa con su encabezado
+                self.nueva()
+                self.texto(f"{titulo} (continuación)", 10, "bold")
+                fila(cab, "bold", "#DDE3F0")
+            fila(f, fondo="#F4F6FB" if i % 2 else None)
         self.espacio(0.1)
 
     def imagen(self, figura, ancho: float | None = None) -> None:
@@ -189,7 +205,7 @@ class _Lienzo:
         h_px, w_px = img.shape[:2]
         w = min(ancho or self.ancho_util, self.ancho_util)
         h = w * h_px / w_px
-        tope = ALTO_A4 - 2 * MARGEN - 0.4
+        tope = min(ALTO_A4 - 2 * MARGEN - 0.4, 4.2)          # una figura no ocupa más de ~4 in de alto
         if h > tope:
             h, w = tope, tope * w_px / h_px
         self._hay_sitio(h + 0.1)
