@@ -22,7 +22,9 @@ import re
 import numpy as np
 from numpy.polynomial import hermite as _herm
 
-from quantum_lab_tema import MAGENTA, PALETA as P, SERIES as S
+from quantum_lab_tema import MAGENTA
+from quantum_lab_tema import PALETA as P
+from quantum_lab_tema import SERIES as S
 
 ANCHO, ALTO = 360, 200
 _FUENTE = "'Source Sans', 'QL Simbolos', system-ui, 'Segoe UI', Roboto, sans-serif"
@@ -409,9 +411,20 @@ def guia() -> str:
     return _envolver("".join(partes), "Ilustración conceptual: diagrama de flujo con una decisión y una rama de error")
 
 
+def redactor() -> str:
+    """Hoja con título, una ecuación, tres pasos revisados (✓ ✓ ✗) y una gráfica pequeña."""
+    partes = [_caja_texto(34, 18, 292, 150, P["cian"], 7, P["panel"]),
+              _texto(48, 40, "Cuaderno de informes", P["texto"], 11, "start", 600),
+              _texto(48, 64, "E = p²/(2m)    ✓", P["verde"], 10.5, "start", 500),
+              _texto(48, 86, "p = nπħ/a    ✓", P["verde"], 10.5, "start", 500),
+              _texto(48, 108, "E = nπħ/a / 2m    ✗", P["violeta"], 10.5, "start", 500)]
+    partes.append(_texto(180, 188, "texto, fórmulas, gráficas y PDF sin LaTeX", P["tenue"], 10))
+    return _envolver("".join(partes), "Ilustración conceptual: hoja de informe con tres pasos de desarrollo revisados")
+
+
 ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre,
                  "ruta": ruta, "teoria": teoria, "formulario": formulario, "talleres": talleres, "ejercicios": ejercicios, "examen": examen,
-                 "repaso": repaso, "biblioteca": biblioteca, "solucionador": solucionador, "tutor": tutor, "guia": guia, "verificacion": verificacion, "pruebas": pruebas}
+                 "repaso": repaso, "biblioteca": biblioteca, "solucionador": solucionador, "redactor": redactor, "tutor": tutor, "guia": guia, "verificacion": verificacion, "pruebas": pruebas}
 _CACHE: dict[str, str] = {}
 
 
@@ -478,6 +491,7 @@ _ICONOS = {
     "repaso": '<path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v4l3 2"/>',
     "biblioteca": '<path d="M5 4h4v16H5zM10 4h4v16h-4z"/><path d="M15.5 5.5l3.8-1 3 14.5-3.8 1z"/>',
     "solucionador": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11l3 3M11 11l-3 3M13 15h3M13 18h3"/>',
+    "redactor": '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/>',
     "tutor": '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
     "guia": '<rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="16" width="7" height="5" rx="1"/><path d="M12 9l3 3-3 3-3-3z"/><path d="M6.5 8v4H9M15 12h2.5v4"/>',
     "verificacion": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',

@@ -22,9 +22,8 @@ import sys
 
 import streamlit as st
 
-import quantum_lab_comun as qc
-import efecto_fotoelectrico
 import biblioteca
+import efecto_fotoelectrico
 import ejercicios
 import examen
 import formulario
@@ -34,8 +33,10 @@ import oscilador_armonico
 import particula_caja
 import particula_esfera
 import principio_incertidumbre
+import quantum_lab_comun as qc
 import quantum_lab_escena as escena
 import quantum_lab_portada as portada
+import redactor
 import repaso
 import ruta
 import solucionador
@@ -62,6 +63,7 @@ PAGINAS = {
     "formulario": ("Formulario", ":material/functions:", formulario),
     "biblioteca": ("Biblioteca científica", ":material/local_library:", biblioteca),
     "solucionador": ("Solucionador paso a paso", ":material/function:", solucionador),
+    "redactor": ("Cuaderno de informes", ":material/edit_document:", redactor),
     "tutor": ("Tutor de errores conceptuales", ":material/psychology_alt:", tutor),
     "guia": ("Guía de usuario", ":material/account_tree:", guia),
     "verificacion": ("Verificación", ":material/verified:", verificacion),
@@ -71,7 +73,7 @@ GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
     ("Teoría y repaso", ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
-    ("Herramientas de estudio", ["biblioteca", "solucionador", "tutor", "guia"], True),
+    ("Herramientas de estudio", ["biblioteca", "solucionador", "redactor", "tutor", "guia"], True),
     ("Verificación", ["verificacion", "pruebas"], True),
 ]
 
@@ -83,7 +85,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, tutor, guia, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, redactor, tutor, guia, verificacion)]
 
 
 # ---------------------------------------------------------------------

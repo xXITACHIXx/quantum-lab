@@ -351,10 +351,10 @@ def test_tutor_enlaza_con_la_biblioteca():
 # ------------------------------------------------------------------------------------------------------ Integración global
 def test_la_portada_incluye_el_capitulo_y_las_tres_herramientas():
     assert "Herramientas de estudio" in portada.CATEGORIAS and portada.CAPITULOS["Herramientas de estudio"][0] == "04"
-    assert [m[0] for m in portada.MODULOS if m[2] == "Herramientas de estudio"] == ["biblioteca", "solucionador", "tutor", "guia"]
+    assert [m[0] for m in portada.MODULOS if m[2] == "Herramientas de estudio"] == ["biblioteca", "solucionador", "redactor", "tutor", "guia"]
     at = _abrir("cat4")
     claves = {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")}
-    assert claves == {"ql_menu_biblioteca", "ql_menu_solucionador", "ql_menu_tutor", "ql_menu_guia"}
+    assert claves == {"ql_menu_biblioteca", "ql_menu_solucionador", "ql_menu_redactor", "ql_menu_tutor", "ql_menu_guia"}
 
 
 def test_el_clic_del_capitulo_lleva_a_su_subportada_y_de_ahi_a_la_herramienta():
@@ -376,7 +376,7 @@ def test_el_javascript_recibe_los_totales_reales():
     st = _St()
     assert escena.instalar_efectos(st, len(portada.CATEGORIAS), len(portada.MODULOS))
     js = st.llamadas[0]
-    assert "__NCAP__" not in js and "__NDEST__" not in js and "· 05'" in js and "· 19'" in js
+    assert "__NCAP__" not in js and "__NDEST__" not in js and "· 05'" in js and "· 20'" in js
 
 
 def test_pruebas_globales_incluyen_las_herramientas():
