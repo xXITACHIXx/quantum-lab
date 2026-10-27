@@ -134,3 +134,18 @@ def test_vista_de_celular_sin_desbordamiento_horizontal(servidor, pagina, sim):
         _sin_excepciones(pagina)
     finally:
         pagina.set_viewport_size({"width": 1400, "height": 1000})
+
+
+def test_cuaderno_de_informes_en_navegador(servidor, pagina):
+    """Plantilla de laboratorio → desarrollo con un error marcado → PDF listo para descargar, sin excepciones."""
+    pagina.goto(f"{servidor}/?sim=redactor")
+    pagina.get_by_role("button", name="Plantilla: informe de laboratorio").wait_for(timeout=60_000)
+    pagina.get_by_role("button", name="Plantilla: informe de laboratorio").click()
+    pagina.get_by_text("Vista previa y PDF").wait_for(timeout=60_000)
+    area = pagina.get_by_label("Desarrollo (una línea por paso)").first
+    area.fill("E = p^2/(2 m)\nE = p^2/m")
+    area.press("Control+Enter")
+    pagina.get_by_text("1 con error").first.wait_for(timeout=45_000)
+    pagina.get_by_role("button", name="Preparar el PDF").click()
+    pagina.get_by_role("button", name="Descargar el PDF").wait_for(timeout=90_000)
+    _sin_excepciones(pagina)

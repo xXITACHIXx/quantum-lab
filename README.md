@@ -18,7 +18,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `fuente_simbolos.css` | Fuente de símbolos (subíndices, superíndices, operadores) incrustada y **pregenerada**: evita cuadros vacíos en celulares |
 | `teoria/` | **Centro de teoría**: `__init__.py` (índice por unidades y temas) y un archivo por tema con su teoría, calculadoras y autoevaluación (`postulados.py`, `bohr.py`…); `_util.py` reúne las funciones comunes de figuras |
 | `talleres/` | **Talleres de repaso**: `__init__.py` (índice, página y pruebas), `_calificar.py` (lectura de números y tolerancias), `_modelo.py` (preguntas y calificación por partes), `_fisica.py` (cálculos verificados) y un archivo por taller (`t1_espectros.py`…) |
-| `biblioteca/`, `solucionador/`, `tutor/`, `guia/` | Herramientas de estudio: biblioteca científica, solucionador paso a paso, tutor de errores conceptuales y guía de usuario con diagramas de flujo (ver apartado 11) |
+| `biblioteca/`, `solucionador/`, `redactor/`, `tutor/`, `guia/` | Herramientas de estudio: biblioteca científica, solucionador paso a paso, cuaderno de informes (editor sin LaTeX), tutor de errores conceptuales y guía de usuario con diagramas de flujo (ver apartado 11) |
 | `ruta/`, `formulario/`, `examen/`, `repaso/` | Ruta de estudio, formulario de constantes y fórmulas, modo examen y repaso personalizado (cada uno con su `__init__.py` y módulos de apoyo) |
 | `ejercicios/` | **Ejercicios de práctica**: `__init__.py` (página, filtros y pruebas), `_modelo.py` (ejercicio, fuentes y temas), `_progreso.py`, `_figuras.py`, `_calidad.py` y los ejercicios por fuente: `clase_s1_s5.py`, `clase_s6_s13.py` (diapositivas), `libro.py` y `cuaderno.py` |
 | `particula_caja.py` | 01 · Partícula en una caja 1D: ψₙ, Eₙ, De Broglie, nodos, **superposición e interferencia** |
@@ -39,6 +39,7 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `test_interfaz.py` | Pruebas de interfaz (cada página se ejecuta con `AppTest` sin excepciones) |
 | `test_escena.py`, `test_arte.py`, `test_tema.py`, `test_movil.py`, `test_caja_diseno.py` | Pruebas de la portada y la navegación, las ilustraciones, la paleta y el contraste, el celular y la accesibilidad (texto alternativo, fuente de símbolos, fondo estable) y la figura y la superposición de la caja |
 | `test_herramientas.py` | Pruebas de biblioteca, solucionador y tutor |
+| `test_redactor.py` | Pruebas del cuaderno de informes: expresiones seguras, revisión de pasos, archivo .json, gráficas, PDF e interfaz |
 | `test_esfera_densidad.py`, `test_colab.py` | Densidad |Yₗᵐ|² en coordenadas cartesianas (web) y ejecución de los cuadernos de Colab, con la densidad comparada con la web |
 | `test_ruta.py`, `test_formulario.py`, `test_talleres.py`, `test_ejercicios*.py`, `test_examen.py`, `test_repaso.py`, `test_teoria.py` | Pruebas de las secciones de estudio |
 | `requirements.txt` | Dependencias con límites de versión |
@@ -118,7 +119,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 947 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
+python -m pytest -q          # 1070 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador
@@ -342,7 +343,7 @@ secciones (por ahora solo la ficha de entrada); las gráficas de Plotly se redib
 
 ## 11. Herramientas de estudio
 
-Capítulo 04 de la portada, con cuatro páginas (pruebas en `test_herramientas.py`, `test_guia.py` y en las pruebas globales de la aplicación).
+Capítulo 04 de la portada, con cinco páginas (pruebas en `test_herramientas.py`, `test_guia.py` y en las pruebas globales de la aplicación).
 
 * **Biblioteca científica** (`biblioteca/`): glosario de 48 conceptos con definición, ecuación, advertencia de error frecuente y enlaces a la
   teoría y al simulador; 9 derivaciones paso a paso que terminan con una **comprobación numérica** (el código del laboratorio frente a una
@@ -351,6 +352,19 @@ Capítulo 04 de la portada, con cuatro páginas (pruebas en `test_herramientas.p
 * **Solucionador paso a paso** (`solucionador/`): fotoeléctrico, caja, oscilador, transición de Bohr/Rydberg, De Broglie e incertidumbre.
   Muestra ecuaciones, datos, sustitución numérica con unidades, resultado e interpretación física. Los resultados se comparan en las pruebas con
   las funciones de los simuladores. Admite notación científica y rechaza datos inválidos con un mensaje.
+* **Cuaderno de informes** (`redactor/`): editor de informes y de resoluciones de taller sin LaTeX. Bloques de título, texto con fórmulas
+  `$…$`, ecuación, **desarrollo paso a paso**, gráfica de función y = f(x), gráfica de una tabla de datos (con ajuste lineal e incertidumbre),
+  resultado de cualquiera de los seis simuladores (se guardan los parámetros y se recalcula con el propio simulador), pregunta de un taller con
+  su calificación y tabla. Se guarda y se carga como archivo `.json` (validado campo por campo, nunca se ejecuta) y se exporta a PDF A4.
+  *Revisión de pasos* (`_verificar.py`, SymPy): cada línea se compara con la anterior evaluando ambas en puntos aleatorios a 30 cifras y en tres
+  escalas de magnitud; si no coinciden se intenta despejar y se explica la diferencia (factor, signo, potencia). Estados: ✓ correcto, ✗ error,
+  ? no verificable (introduce un símbolo o una ley que no conozco). Si el paso se deduce con una de las 12 leyes estándar de `_leyes.py`
+  (E = hν, c = λν, p = h/λ, E = p²/2m…) se acepta y se nombra la ley; las igualdades que SymPy demuestra por simplificación exacta se
+  distinguen de las comprobadas solo en puntos. **Unidades** (`_unidades.py`): se escriben entre corchetes (`3.97e-19 [J]`, `500 [nm]`), se
+  convierten a SI y se revisa la coherencia dimensional (ambos lados de una igualdad, sumas, argumentos de sin/exp/ln); una variable sin unidad
+  declarada no se revisa. **Límites:** la comprobación numérica no es una demostración formal, la coherencia dimensional no prueba que la
+  ecuación sea física, las leyes solo se reconocen con los símbolos habituales, la letra `e` es la constante de Euler, los nombres de varias letras son un símbolo (`hbar`, `omega`) y las fórmulas del PDF usan el subconjunto de LaTeX de
+  Matplotlib. Las expresiones pasan por una lista blanca estricta antes de llegar a SymPy. Dependencia nueva: `sympy`.
 * **Tutor de errores conceptuales** (`tutor/`): 22 confusiones frecuentes (amplitud con probabilidad, intensidad con energía del fotón,
   estacionario con reposo…). Dos entradas: un texto libre revisado por un detector **basado en reglas** (solo reconoce formulaciones típicas; que no
   encuentre nada no prueba que la explicación sea correcta) y 19 preguntas de diagnóstico cuyos distractores corresponden a una confusión; al fallar
