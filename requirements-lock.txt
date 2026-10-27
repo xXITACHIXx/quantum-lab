@@ -1,7 +1,7 @@
 # Versiones exactas con las que se probó QUANTUM LAB (Python 3.13, octubre de 2026).
 # Para reproducir ese entorno:  python -m pip install -r requirements-lock.txt
 # Para el uso normal (y para Streamlit Community Cloud) basta requirements.txt.
-numpy==2.5.3
+numpy==2.5.4
 scipy==1.18.1
 matplotlib==3.11.2
 plotly==7.1.0
