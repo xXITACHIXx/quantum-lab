@@ -19,7 +19,15 @@ from copy import deepcopy
 import streamlit as st
 
 import quantum_lab_comun as qc
-from redactor import _graficas, _modelo, _pdf, _simuladores, _talleres, _verificar
+from redactor import (
+    _graficas,
+    _modelo,
+    _pdf,
+    _simuladores,
+    _talleres,
+    _unidades,
+    _verificar,
+)
 from redactor._expr import ErrorExpresion
 from redactor._modelo import TIPOS, ErrorDocumento
 
@@ -30,9 +38,13 @@ AYUDA_NOTACION = (
     "**Cómo escribir las líneas de un desarrollo.** Una línea por paso. Potencias con `^` o `**`; multiplicación con `*` o espacio "
     "(`2 pi r`); funciones `sqrt()`, `sin()`, `cos()`, `exp()`, `ln()`; constantes `pi` y `e` (Euler). Los nombres de varias letras "
     "son un solo símbolo (`hbar`, `omega`, `lam`); para multiplicar letras escribe `m c^2` o `m*c^2`. Una cadena como "
-    "`x = (a+b)^2 = a^2 + 2 a b + b^2` se revisa expresión por expresión. En «Datos conocidos» escribe `h = 6.626e-34` (uno por "
-    "línea) para comprobar pasos con números. **No se revisan unidades** y un paso que introduce una ley o un símbolo nuevo se marca "
-    "con «?» (no verificable), no como error."
+    "`x = (a+b)^2 = a^2 + 2 a b + b^2` se revisa expresión por expresión. En «Datos conocidos» escribe `h = 6.626e-34 [J s]` (uno por "
+    "línea) para comprobar pasos con números. **Unidades:** van entre corchetes al final de una expresión (`E = 3.97e-19 [J]`, `lam = 500 [nm]`) y "
+    "se convierten a SI; declara las de otras variables en «Unidades de otras variables» (`E [J]`). Se revisa que ambos lados de cada "
+    "igualdad tengan la misma dimensión, que solo se sumen magnitudes iguales y que sin, exp, ln… reciban números sin unidades; "
+    "una variable sin unidad declarada no se revisa. En un cociente con varios factores abajo usa paréntesis: `J/(mol K)`. "
+    "Un paso que usa una ley estándar (E = hν, c = λν, p = h/λ…) se acepta indicando cuál; uno que introduce un símbolo o una ley "
+    "que no conozco se marca con «?» (no verificable), no como error."
 )
 
 
@@ -96,9 +108,10 @@ def _w(b: dict, campo: str, fabrica, *args, **kw):
 # Cálculos en caché (las vistas previas se recalculan solo cuando cambian los datos)
 # ---------------------------------------------------------------------
 @functools.lru_cache(maxsize=128)
-def _pasos(lineas: str, datos: str, tol_pct: float):
+def _pasos(lineas: str, datos: str, tol_pct: float, unidades: str = ""):
     tabla = _pdf._leer_datos(datos)
-    return tuple(_verificar.verificar_pasos([ln for ln in lineas.splitlines() if ln.strip()], tabla, tol_pct / 100.0))
+    return tuple(_verificar.verificar_pasos([ln for ln in lineas.splitlines() if ln.strip()], tabla, tol_pct / 100.0,
+                                            _pdf._leer_unidades(unidades)))
 
 
 @st.cache_data(show_spinner=False, max_entries=64)
@@ -157,15 +170,17 @@ def _editor_desarrollo(b):
         _w(b, "lineas", st.text_area, "Desarrollo (una línea por paso)", height=190,
            placeholder="E = p^2/(2 m)\np = n pi hbar/a\nE = (n pi hbar/a)^2/(2 m)\nE = n^2 pi^2 hbar^2/(2 m a^2)")
     with c2:
-        _w(b, "datos", st.text_area, "Datos conocidos (opcional)", height=110, placeholder="h = 6.626e-34\nc = 2.998e8",
-           help="Valores numéricos de las variables para comprobar pasos con números.")
+        _w(b, "datos", st.text_area, "Datos conocidos (opcional)", height=110, placeholder="h = 6.626e-34 [J s]\nc = 2.998e8 [m/s]",
+           help="Valores de las variables para comprobar pasos con números. La unidad va entre corchetes y se convierte a SI.")
+        _w(b, "unidades", st.text_area, "Unidades de otras variables (opcional)", height=80, placeholder="E [J]\np [kg m/s]",
+           help="Unidad de variables sin valor numérico, para revisar la coherencia dimensional de cada línea.")
         _w(b, "tol_pct", st.number_input, "Tolerancia al sustituir números [%]", min_value=0.001, max_value=50.0, step=0.1, format="%.3g")
     _w(b, "marcas", st.checkbox, "Mostrar las marcas de revisión (✓ ✗ ?) en el PDF")
     with st.expander("Cómo escribir un desarrollo"):
         st.markdown(AYUDA_NOTACION)
     if not d["lineas"].strip():
         return
-    pasos = _pasos(d["lineas"], d["datos"], float(d["tol_pct"]))
+    pasos = _pasos(d["lineas"], d["datos"], float(d["tol_pct"]), d["unidades"])
     r = _verificar.resumen(list(pasos))
     st.markdown(f"**Revisión:** :green[{r[_verificar.OK]} correctos] · :red[{r[_verificar.ERROR] + r[_verificar.SINTAXIS]} con error] · "
                 f":orange[{r[_verificar.NO_VERIFICABLE]} no verificables]")
@@ -181,6 +196,12 @@ def _editor_desarrollo(b):
                 st.code(p.texto, language=None)
             if p.mensaje and p.estado != _verificar.INICIO:
                 st.caption(f":{color}[{p.mensaje}]")
+            if p.unidades and p.estado != _verificar.ERROR:
+                st.caption(f":green[{p.unidades}]")
+            if p.prueba == "simbolica":
+                st.caption(":green[Igualdad demostrada por simplificación simbólica exacta.]")
+            elif p.prueba == "numerica" and p.estado == _verificar.OK:
+                st.caption("Comprobada numéricamente en varios puntos (no es una demostración formal).")
             if p.esperado_latex and _pdf.formula_valida(p.esperado_latex):
                 st.caption("Calculado a partir de la línea anterior:")
                 st.latex(p.esperado_latex)
@@ -534,6 +555,9 @@ def ejecutar_pruebas() -> qc.RegistroPruebas:
     r.comprobar("Acepta un despeje correcto", pasos[1].estado == _verificar.OK)
     pasos = _verificar.verificar_pasos(["E = h c/lam", "E = 3.2e-19"], {"h": "6.626e-34", "c": "2.998e8", "lam": "500e-9"})
     r.comprobar("Con datos, una cifra equivocada (3.2e-19 en vez de 3.97e-19) se marca como error", pasos[1].estado == _verificar.ERROR)
+    pasos = _verificar.verificar_pasos(["E = h nu", "E = h lam"], None, 0.01, {"E": "J", "h": "J s", "nu": "Hz", "lam": "m"})
+    r.comprobar("Detecta una ecuación con unidades incoherentes (E = hλ: J ≠ kg·m³/s)", pasos[1].estado == _verificar.ERROR)
+    r.comprobar("1 eV = 1.602176634e-19 J (valor exacto del SI)", math.isclose(_unidades.leer_unidad("eV")[0], 1.602176634e-19, rel_tol=1e-12))
     datos = _graficas.ajuste_lineal([0, 1, 2, 3], [1, 3, 5, 7])
     r.comprobar("Ajuste lineal exacto: y = 2x + 1 con R² = 1", math.isclose(datos["pendiente"], 2.0) and math.isclose(datos["ordenada"], 1.0)
                 and math.isclose(datos["r2"], 1.0))

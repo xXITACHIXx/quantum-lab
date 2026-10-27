@@ -25,7 +25,7 @@ TIPOS: dict[str, tuple[str, dict]] = {
     "titulo": ("Título de sección", {"texto": "Nueva sección", "nivel": 1}),
     "texto": ("Texto", {"texto": ""}),
     "ecuacion": ("Ecuación", {"latex": "E = h\\nu", "etiqueta": ""}),
-    "desarrollo": ("Desarrollo paso a paso", {"lineas": "", "datos": "", "tol_pct": 1.0, "comentario": "", "marcas": False}),
+    "desarrollo": ("Desarrollo paso a paso", {"lineas": "", "datos": "", "unidades": "", "tol_pct": 1.0, "comentario": "", "marcas": False}),
     "grafica_funcion": ("Gráfica de una función", {"expresiones": "sin(x)", "variable": "x", "xmin": 0.0, "xmax": 6.28,
                                                    "constantes": "", "titulo": "", "xlabel": "x", "ylabel": "y", "pie": ""}),
     "grafica_datos": ("Gráfica de datos", {"tabla": "", "tipo": "puntos", "titulo": "", "xlabel": "x", "ylabel": "y", "pie": ""}),

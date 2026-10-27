@@ -72,8 +72,14 @@ def _estados(lineas, datos=None):
 
 def test_derivacion_correcta_de_la_energia_de_la_caja():
     est = _estados(["E = p^2/(2 m)", "p = n pi hbar/a", "E = (n pi hbar/a)^2/(2 m)", "E = n^2 pi^2 hbar^2/(2 m a^2)"])
-    # la 2.ª línea es una ley nueva (condición de frontera): no se puede comprobar, pero NO se marca como error
-    assert est == [INICIO, NO_VERIFICABLE, OK, OK]
+    # la 2.ª línea (p = nπħ/a) se deduce de E = p²/2m y de la energía de la caja E = n²π²ħ²/2ma²: se acepta y se nombra la ley
+    assert est == [INICIO, OK, OK, OK]
+    assert "Partícula en una caja" in verificar_pasos(["E = p^2/(2 m)", "p = n pi hbar/a"])[1].mensaje
+
+
+def test_paso_con_ley_falsa_sigue_sin_aceptarse():
+    # p = n ħ/a (falta π) NO se deduce de ninguna ley: no puede salir OK
+    assert verificar_pasos(["E = p^2/(2 m)", "p = n hbar/a"])[1].estado != OK
 
 
 def test_factor_equivocado_se_marca_y_se_explica_con_el_despeje_correcto():
@@ -367,3 +373,107 @@ def test_pagina_plantillas_y_pdf():
     assert at.session_state["rd_pdf_bytes"].startswith(b"%PDF-")
     at.button(key="rd_pl_taller").click().run()
     assert not at.exception and any(b["tipo"] == "taller" for b in at.session_state["rd_doc"]["bloques"])
+
+
+# =============================================================================================
+# 7. Unidades, leyes y prueba simbólica
+# =============================================================================================
+from redactor import _unidades
+from redactor._unidades import ErrorUnidades
+
+KG, M, S = 0, 1, 2
+
+
+@pytest.mark.parametrize("texto,factor,dim", [
+    ("eV", 1.602176634e-19, {KG: 1, M: 2, S: -2}),             # e exacta en el SI 2019; 1 eV = e·(1 V)
+    ("nm", 1e-9, {M: 1}), ("km", 1e3, {M: 1}), ("g", 1e-3, {KG: 1}), ("kg", 1.0, {KG: 1}), ("µm", 1e-6, {M: 1}),
+    ("J", 1.0, {KG: 1, M: 2, S: -2}), ("kg m^2/s^2", 1.0, {KG: 1, M: 2, S: -2}), ("N m", 1.0, {KG: 1, M: 2, S: -2}),
+    ("J s", 1.0, {KG: 1, M: 2, S: -1}), ("m/s", 1.0, {M: 1, S: -1}), ("Hz", 1.0, {S: -1}), ("Å", 1e-10, {M: 1}), ("cm^2", 1e-4, {M: 2}),
+    ("1/s", 1.0, {S: -1}), ("W", 1.0, {KG: 1, M: 2, S: -3}), ("MeV", 1.602176634e-13, {KG: 1, M: 2, S: -2}),
+])
+def test_unidades_factor_y_dimension_hechos_a_mano(texto, factor, dim):
+    f, d = _unidades.leer_unidad(texto)
+    assert f == pytest.approx(factor, rel=1e-12)
+    esperado = [0] * 7
+    for k, v in dim.items():
+        esperado[k] = v
+    assert list(d) == esperado
+
+
+@pytest.mark.parametrize("texto", ["", "xx", "m^", "(m", "m)", "m^1.5", "J s^", "kgg", "5"])
+def test_unidad_mal_escrita_se_rechaza(texto):
+    with pytest.raises(ErrorUnidades):
+        _unidades.leer_unidad(texto)
+
+
+U = {"E": "J", "h": "J s", "nu": "Hz", "c": "m/s", "lam": "m", "p": "kg m/s", "m": "kg"}
+
+
+def test_unidades_detecta_lados_de_distinta_dimension():
+    p = verificar_pasos(["E = h nu", "E = h lam"], None, 0.01, U)[1]
+    assert p.estado == ERROR and "Unidades" in p.mensaje and p.unidades
+
+
+def test_unidades_acepta_energia_correcta_y_lo_dice():
+    p = verificar_pasos(["E = h nu", "E = h c/lam"], None, 0.01, U)[1]
+    assert p.estado == OK and "coinciden" in p.unidades
+
+
+def test_unidades_suma_de_magnitudes_distintas_y_funcion_con_unidades():
+    assert verificar_pasos(["x = E + p"], None, 0.01, U)[0].estado == ERROR
+    assert verificar_pasos(["x = sin(h)"], None, 0.01, U)[0].estado == ERROR
+    assert verificar_pasos(["x = exp(E/E)"], None, 0.01, U)[0].estado != ERROR
+
+
+def test_unidades_variable_sin_declarar_no_se_revisa():
+    assert verificar_pasos(["y = a + b"], None, 0.01, {})[0].unidades == ""
+
+
+def test_unidades_conversion_a_si_en_datos_y_lineas():
+    # 500 nm y h, c con unidad: E = hc/λ = 6.62607015e-34·2.99792458e8/5e-7 = 3.9728916e-19 J = 2.4796 eV
+    datos = {"h": "6.62607015e-34 [J s]", "c": "2.99792458e8 [m/s]", "lam": "500 [nm]"}
+    ok = verificar_pasos(["E = h c/lam", "E = 3.9729e-19 [J]"], datos, 0.01, {"E": "J"})
+    assert ok[1].estado == OK
+    ev = verificar_pasos(["E = h c/lam", "E = 2.4797 [eV]"], datos, 0.01, {"E": "J"})
+    assert ev[1].estado == OK
+    mal = verificar_pasos(["E = h c/lam", "E = 3.9729e-19 [m]"], datos, 0.01, {"E": "J"})
+    assert mal[1].estado == ERROR and "Unidades" in mal[1].mensaje
+    cifra = verificar_pasos(["E = h c/lam", "E = 2.0 [eV]"], datos, 0.01, {"E": "J"})
+    assert cifra[1].estado == ERROR
+
+
+@pytest.mark.parametrize("linea", ["x = 3 [m] + 2 [s]", "x = 3 [xx]", "x = 3 [m"])
+def test_corchetes_de_unidad_mal_puestos_son_error_de_sintaxis(linea):
+    assert verificar_pasos([linea])[0].estado == SINTAXIS
+
+
+def test_leyes_aceptan_pasos_que_usan_una_ley_estandar_y_la_nombran():
+    p = verificar_pasos(["E = h nu", "E = h c/lam"])[1]
+    assert p.estado == OK and "c = λν" in p.mensaje
+    p = verificar_pasos(["lam = h/p", "nu = c/lam"])[1]
+    assert p.estado == OK
+
+
+def test_leyes_no_validan_un_paso_incorrecto():
+    assert verificar_pasos(["E = h nu", "E = h c/lam^2"])[1].estado != OK
+    assert verificar_pasos(["E = h nu", "E = 5 nu"])[1].estado == ERROR
+
+
+def test_prueba_simbolica_exacta_en_cadenas():
+    assert verificar_pasos(["a = (x+1)^2 = x^2 + 2 x + 1"])[0].prueba == "simbolica"
+    assert verificar_pasos(["a = (x+1)^2 = x^2 + 2 x + 2"])[0].estado == ERROR
+    p = verificar_pasos(["y = (x+1)^2", "x^2 + 2 x + 1"])[1]
+    assert p.estado == OK and p.prueba == "simbolica"
+
+
+def test_con_datos_la_prueba_es_numerica():
+    assert verificar_pasos(["E = h c/lam", "E = 3.97e-19"], {"h": "6.626e-34", "c": "2.998e8", "lam": "500e-9"})[1].prueba == "numerica"
+
+
+def test_pdf_con_unidades_leyes_y_marcas():
+    d = _modelo.documento_vacio("u", "")
+    d["bloques"] = [_modelo.nuevo_bloque("desarrollo", {
+        "lineas": "E = h nu\nE = h c/lam\nE = 3.9729e-19 [J]", "datos": "h = 6.62607015e-34 [J s]\nc = 2.99792458e8 [m/s]\nlam = 500 [nm]",
+        "unidades": "E [J]\nnu [Hz]", "marcas": True})]
+    assert _pdf.pdf_cuaderno(d).startswith(b"%PDF-") and not _pdf.problemas_del_documento(d)
+    assert _pdf._latex_de_linea("E = 3.9729e-19 [J]") and _pdf.formula_valida(_pdf._latex_de_linea("E = 3.9729e-19 [J s]"))

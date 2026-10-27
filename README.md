@@ -119,7 +119,7 @@ actualizar la web basta con subir los archivos modificados: la aplicación se re
 ## 4. Pruebas y mantenimiento
 
 ```powershell
-python -m pytest -q          # 1030 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
+python -m pytest -q          # 1070 pruebas: numéricas, verificación, interfaz y accesibilidad (varios minutos)
 python -m pytest -q test_quantum_lab.py     # solo las numéricas (unos 8 s)
 python quantum_lab.py        # lista todas las comprobaciones y su resultado
 python modelo_bohr.py        # pruebas de un solo simulador
@@ -358,8 +358,12 @@ Capítulo 04 de la portada, con cinco páginas (pruebas en `test_herramientas.py
   su calificación y tabla. Se guarda y se carga como archivo `.json` (validado campo por campo, nunca se ejecuta) y se exporta a PDF A4.
   *Revisión de pasos* (`_verificar.py`, SymPy): cada línea se compara con la anterior evaluando ambas en puntos aleatorios a 30 cifras y en tres
   escalas de magnitud; si no coinciden se intenta despejar y se explica la diferencia (factor, signo, potencia). Estados: ✓ correcto, ✗ error,
-  ? no verificable (introduce una ley o un símbolo nuevo). **Límites:** no es una demostración formal, **no revisa unidades**, la letra `e` es la
-  constante de Euler, los nombres de varias letras son un símbolo (`hbar`, `omega`) y las fórmulas del PDF usan el subconjunto de LaTeX de
+  ? no verificable (introduce un símbolo o una ley que no conozco). Si el paso se deduce con una de las 12 leyes estándar de `_leyes.py`
+  (E = hν, c = λν, p = h/λ, E = p²/2m…) se acepta y se nombra la ley; las igualdades que SymPy demuestra por simplificación exacta se
+  distinguen de las comprobadas solo en puntos. **Unidades** (`_unidades.py`): se escriben entre corchetes (`3.97e-19 [J]`, `500 [nm]`), se
+  convierten a SI y se revisa la coherencia dimensional (ambos lados de una igualdad, sumas, argumentos de sin/exp/ln); una variable sin unidad
+  declarada no se revisa. **Límites:** la comprobación numérica no es una demostración formal, la coherencia dimensional no prueba que la
+  ecuación sea física, las leyes solo se reconocen con los símbolos habituales, la letra `e` es la constante de Euler, los nombres de varias letras son un símbolo (`hbar`, `omega`) y las fórmulas del PDF usan el subconjunto de LaTeX de
   Matplotlib. Las expresiones pasan por una lista blanca estricta antes de llegar a SymPy. Dependencia nueva: `sympy`.
 * **Tutor de errores conceptuales** (`tutor/`): 22 confusiones frecuentes (amplitud con probabilidad, intensidad con energía del fotón,
   estacionario con reposo…). Dos entradas: un texto libre revisado por un detector **basado en reglas** (solo reconoce formulaciones típicas; que no

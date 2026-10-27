@@ -17,7 +17,7 @@ import re
 from datetime import datetime
 
 from informes import ALTO_A4, ANCHO_A4, MARGEN, _Lienzo
-from redactor import _graficas, _modelo, _simuladores, _talleres, _verificar
+from redactor import _graficas, _modelo, _simuladores, _talleres, _unidades, _verificar
 from redactor._expr import ErrorExpresion, a_latex, leer_expresion, partes_de_igualdad
 
 MARCAS = {_verificar.OK: ("✓", "#1E8449"), _verificar.ERROR: ("✗", "#B03A2E"), _verificar.NO_VERIFICABLE: ("?", "#CA6F1E"),
@@ -103,11 +103,23 @@ class Lienzo(_Lienzo):
 # ---------------------------------------------------------------------
 # Bloques
 # ---------------------------------------------------------------------
+def _latex_unidad(unidad: str) -> str:
+    u = re.sub(r"\^\s*(-?\d+)", r"^{\1}", unidad.strip()).replace("·", r"\,").replace(" ", r"\,")
+    return rf"\ \mathrm{{[{u}]}}"
+
+
 def _latex_de_linea(texto: str) -> str | None:
+    """LaTeX de una línea del desarrollo; las unidades «[J s]» se escriben en romana después de la expresión."""
     try:
-        partes = partes_de_igualdad(texto)
-        return " = ".join(a_latex(leer_expresion(p, evaluar=False)) for p in partes)
-    except ErrorExpresion:
+        salida = []
+        for parte in partes_de_igualdad(texto):
+            sin_unidad, unidad = _unidades.separar_unidad(parte)
+            tex = a_latex(leer_expresion(sin_unidad, evaluar=False))
+            if unidad:
+                tex += _latex_unidad(re.search(r"\[([^\]]*)\]\s*$", parte).group(1))
+            salida.append(tex)
+        return " = ".join(salida)
+    except (ErrorExpresion, _unidades.ErrorUnidades):
         return None
 
 
@@ -116,7 +128,8 @@ def _desarrollo(lienzo: Lienzo, datos: dict) -> None:
     if datos.get("comentario", "").strip():
         lienzo.parrafo(datos["comentario"])
     tabla_datos = _leer_datos(datos.get("datos", ""))
-    pasos = _verificar.verificar_pasos(lineas, tabla_datos, datos.get("tol_pct", 1.0) / 100.0) if datos.get("marcas") else None
+    pasos = (_verificar.verificar_pasos(lineas, tabla_datos, datos.get("tol_pct", 1.0) / 100.0, _leer_unidades(datos.get("unidades", "")))
+             if datos.get("marcas") else None)
     if datos.get("datos", "").strip():
         lienzo.parrafo("Datos: " + "; ".join(f"${_latex_nombre(k)} = {v}$" if formula_valida(f"{_latex_nombre(k)} = {v}") else f"{k} = {v}"
                                               for k, v in tabla_datos.items()), 9.5)
@@ -136,6 +149,10 @@ def _desarrollo(lienzo: Lienzo, datos: dict) -> None:
                 lienzo.parrafo(paso.mensaje, 8.5, 0.3, color, "italic")
                 if paso.esperado_latex and formula_valida(paso.esperado_latex):
                     lienzo.parrafo(f"Revisión: se esperaba ${paso.esperado_latex}$", 8.5, 0.3, color, "italic")
+            elif paso.prueba == "simbolica" and not paso.unidades:
+                lienzo.parrafo("Igualdad demostrada por simplificación simbólica exacta.", 8.5, 0.3, "#2E7D32", "italic")
+            if paso.unidades and paso.estado != _verificar.ERROR:
+                lienzo.parrafo(paso.unidades, 8.5, 0.3, "#2E7D32", "italic")
 
 
 def _latex_nombre(nombre: str) -> str:
@@ -152,6 +169,16 @@ def _leer_datos(texto: str) -> dict:
             k, v = (p.strip() for p in ln.split("=", 1))
             if k and v:
                 salida[k] = v
+    return salida
+
+
+def _leer_unidades(texto: str) -> dict:
+    """«E [J]» (una por línea) → {'E': 'J'}: unidad de variables que no tienen un valor numérico."""
+    salida = {}
+    for ln in re.split(r"[\n;]", texto or ""):
+        m = re.match(r"^\s*([^\s\[\]=]+)\s*(?:=\s*)?\[([^\[\]]+)\]\s*$", ln)
+        if m:
+            salida[m.group(1)] = m.group(2)
     return salida
 
 

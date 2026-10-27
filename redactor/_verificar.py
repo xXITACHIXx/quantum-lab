@@ -13,7 +13,8 @@ y, si no coinciden, se intenta despejar con SymPy. Cuando no se puede decidir se
 declara correcto algo que no se comprobó. Si un paso falla, la ayuda sale del propio cálculo (lo que se obtiene al despejar,
 o el factor constante que lo separa de lo escrito), no de una respuesta guardada.
 
-No comprueba unidades ni significado físico.
+Unidades (opcionales, entre corchetes: «3.97e-19 [J]») se revisan con `_unidades`; las leyes de `_leyes` permiten dar por válido
+un paso que usa una relación estándar. No comprueba el significado físico.
 """
 
 from __future__ import annotations
@@ -25,7 +26,9 @@ from dataclasses import dataclass
 
 import sympy as sp
 
+from redactor import _leyes, _unidades
 from redactor._expr import ErrorExpresion, a_latex, leer_expresion, partes_de_igualdad
+from redactor._unidades import ErrorUnidades
 from talleres._calificar import leer_numero
 
 OK, ERROR, NO_VERIFICABLE, SINTAXIS, INICIO = "ok", "error", "no_verificable", "sintaxis", "inicio"
@@ -42,6 +45,8 @@ class Paso:
     estado: str                              # OK | ERROR | NO_VERIFICABLE | SINTAXIS | INICIO
     mensaje: str = ""
     esperado_latex: str = ""                 # expresión que sale del cálculo (despeje) cuando el paso es erróneo
+    prueba: str = ""                         # "simbolica" (simplificación exacta) | "numerica" (puntos aleatorios) | ""
+    unidades: str = ""                       # resultado de la revisión dimensional ("" si no había nada que revisar)
 
 
 # ---------------------------------------------------------------------
@@ -112,12 +117,28 @@ def _razon_constante(f, g, datos=None):
 def _despejar(ecuacion, simbolo) -> list | None:
     if sp.count_ops(ecuacion) > 80 or ecuacion.has(sp.sin, sp.cos, sp.tan, sp.exp, sp.log, sp.Abs):
         return None
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
-        futuro = ex.submit(sp.solve, ecuacion, simbolo)
-        try:
-            return list(futuro.result(timeout=TIEMPO_DESPEJE_S))
-        except (concurrent.futures.TimeoutError, NotImplementedError, ValueError, TypeError):
-            return None
+    return _con_limite(sp.solve, ecuacion, simbolo, conversion=list)
+
+
+def _con_limite(funcion, *args, conversion=None):
+    """Ejecuta `funcion` con límite de tiempo. Si se pasa, devuelve None sin esperar a que termine el cálculo."""
+    ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    futuro = ex.submit(funcion, *args)
+    try:
+        r = futuro.result(timeout=TIEMPO_DESPEJE_S)
+        return conversion(r) if conversion else r
+    except (concurrent.futures.TimeoutError, NotImplementedError, ValueError, TypeError, RecursionError):
+        return None
+    finally:
+        ex.shutdown(wait=False, cancel_futures=True)
+
+
+def _exactas(a, b) -> bool:
+    """True si SymPy demuestra a − b = 0 por simplificación exacta (no por puntos). Falso si no pudo o tardó demasiado."""
+    if sp.count_ops(a) + sp.count_ops(b) > 60:
+        return False
+    r = _con_limite(lambda: sp.simplify(sp.expand(a - b)) == 0)
+    return bool(r)
 
 
 def _describir_factor(k: complex) -> str:
@@ -137,8 +158,13 @@ def _describir_factor(k: complex) -> str:
 # Lectura de líneas
 # ---------------------------------------------------------------------
 def leer_datos(datos: dict | None) -> dict:
-    """{'m': '9.109e-31', ...} → {Symbol('m'): Float}. Lanza ErrorExpresion si algo no se entiende."""
-    salida = {}
+    """{'m': '9.109e-31 [kg]', ...} → {Symbol('m'): Float en SI}. Lanza ErrorExpresion si algo no se entiende."""
+    return _leer_datos_con_unidades(datos)[0]
+
+
+def _leer_datos_con_unidades(datos: dict | None, unidades: dict | None = None) -> tuple[dict, dict]:
+    """(valores en SI, dimensiones). `unidades` {'E': 'J'} declara la unidad de variables sin valor."""
+    valores, dims = {}, {}
     for nombre, valor in (datos or {}).items():
         nombre = str(nombre).strip()
         if not nombre:
@@ -147,18 +173,76 @@ def leer_datos(datos: dict | None) -> dict:
         if not isinstance(simbolo, sp.Symbol):
             raise ErrorExpresion(f"«{nombre}» no es un nombre de variable válido para un dato.")
         try:
-            salida[simbolo] = sp.Float(leer_numero(valor))
+            numero, unidad = _unidades.separar_unidad(str(valor))
+            factor, dim = unidad if unidad else (1.0, None)
+            valores[simbolo] = sp.Float(leer_numero(numero)) * sp.Float(factor)
+            if dim is not None:
+                dims[simbolo] = dim
+        except ErrorUnidades as error:
+            raise ErrorExpresion(f"La unidad de {nombre}: {error}") from None
         except ValueError as error:
             raise ErrorExpresion(f"El valor de {nombre}: {error}") from None
-    return salida
+    for nombre, texto in (unidades or {}).items():
+        simbolo = leer_expresion(str(nombre).strip())
+        if not isinstance(simbolo, sp.Symbol):
+            raise ErrorExpresion(f"«{nombre}» no es un nombre de variable válido para declarar su unidad.")
+        try:
+            dims[simbolo] = _unidades.leer_unidad(texto)[1]
+        except ErrorUnidades as error:
+            raise ErrorExpresion(f"La unidad de {nombre}: {error}") from None
+    return valores, dims
 
 
 def _leer_linea(texto: str):
     """Lista de expresiones de una línea («a = b = c» → [a, b, c]). Lanza ErrorExpresion."""
+    return _leer_linea_con_unidades(texto)[0]
+
+
+def _leer_linea_con_unidades(texto: str):
+    """
+    (expresiones en SI, unidades declaradas por parte, texto sin corchetes). «500 [nm]» se lee como 5e-7 con dimensión m.
+    Lanza ErrorExpresion (también por una unidad mal escrita).
+    """
     partes = partes_de_igualdad(texto)
     if not partes or any(not p for p in partes):
         raise ErrorExpresion("Falta una expresión a un lado del signo «=».")
-    return [leer_expresion(p) for p in partes]
+    expresiones, declaradas, limpias = [], [], []
+    for p in partes:
+        try:
+            sin_unidad, unidad = _unidades.separar_unidad(p)
+        except ErrorUnidades as error:
+            raise ErrorExpresion(f"Unidad: {error}") from None
+        e = leer_expresion(sin_unidad)
+        if unidad and unidad[0] != 1.0:
+            e = e * sp.Float(unidad[0])
+        expresiones.append(e)
+        declaradas.append(unidad[1] if unidad else None)
+        limpias.append(sin_unidad)
+    return expresiones, declaradas, " = ".join(limpias)
+
+
+def _revisar_unidades(partes, declaradas, tabla, texto_limpio) -> tuple[bool, str]:
+    """(hay_error, mensaje). Mensaje vacío si no se pudo revisar nada. Compara la dimensión de todas las partes de la línea."""
+    dims = []
+    for expr, decl in zip(partes, declaradas, strict=True):
+        try:
+            d = _unidades.dimension(expr, tabla)
+        except ErrorUnidades as error:
+            return True, f"Unidades: {error}"
+        if decl is not None:
+            if d is not None and d != _unidades.CERO and d != decl:
+                return True, f"Unidades: la expresión resulta {_unidades.escribir(d)} y la marcaste como {_unidades.escribir(decl)}."
+            d = decl
+        dims.append(d)
+    conocidas = [(i, d) for i, d in enumerate(dims) if d is not None]
+    if len(conocidas) < 2:
+        return False, ""
+    nombres = [p.strip() for p in texto_limpio.split("=")]
+    for i, d in conocidas[1:]:
+        if d != conocidas[0][1]:
+            return True, (f"Unidades: «{nombres[conocidas[0][0]]}» es {_unidades.escribir(conocidas[0][1])} pero "
+                          f"«{nombres[i]}» es {_unidades.escribir(d)}; no pueden ser iguales.")
+    return False, f"Las unidades coinciden ({_unidades.escribir(conocidas[0][1])})."
 
 
 # ---------------------------------------------------------------------
@@ -284,10 +368,52 @@ def _deduce(contexto, actual, tol, datos) -> tuple[str, str, str]:
                             "(por ejemplo, una ley nueva, un cambio de variable o una simplificación con unidades)."), ""
 
 
-def verificar_pasos(lineas: list[str], datos: dict | None = None, tol_rel: float = 0.01) -> list[Paso]:
-    """Revisa un desarrollo. `datos`: valores numéricos de las variables (texto); `tol_rel`: tolerancia al sustituir números."""
+def _prueba(contexto, partes, datos) -> str:
+    """«simbolica» si la igualdad se demuestra por simplificación exacta; «numerica» si solo se comprobó en puntos; «» si no aplica."""
+    if datos:
+        return "numerica"
+    if len(partes) >= 3:
+        return "simbolica" if all(_exactas(partes[k], partes[k + 1]) for k in range(1, len(partes) - 1)) else "numerica"
+    if len(partes) == 1 and contexto:
+        return "simbolica" if _exactas(contexto[-1][-1], partes[0]) else "numerica"
+    return "numerica"
+
+
+def _con_leyes(contexto, partes, tol, datos):
+    """
+    Si el paso se deduce de la línea anterior usando una ley estándar, (OK, mensaje); si no, None. Se prueba (1) la ley como una
+    línea más del contexto y (2) despejar cada símbolo de la ley y sustituirlo en la línea anterior (p. ej. ν = c/λ en E = hν).
+    """
+    simbolos = set().union(*[p.free_symbols for p in partes])
+    anterior = contexto[-1]
+    previos = set().union(*[p.free_symbols for p in anterior])
+    aviso = "Usa la ley «{}» (si tus símbolos tienen su significado habitual)."
+    for nombre, texto in _leyes.LEYES:
+        ley = [leer_expresion(x) for x in partes_de_igualdad(texto)]
+        simbolos_ley = set().union(*[p.free_symbols for p in ley])
+        if not simbolos_ley & (simbolos | previos):
+            continue
+        estado, mensaje, _ = _deduce([*contexto[:-1], ley, anterior], partes, tol, datos)
+        if estado == OK:
+            return OK, f"{mensaje} {aviso.format(nombre)}"
+        for s in sorted(simbolos_ley & previos, key=lambda x: x.name):
+            sols = _despejar(sp.Eq(ley[0], ley[-1]), s)
+            if not sols or len(sols) != 1:
+                continue
+            sustituida = [x.subs(s, sols[0]) for x in anterior]
+            estado, mensaje, _ = _deduce([*contexto[:-1], sustituida], partes, tol, datos)
+            if estado == OK:
+                return OK, f"Sustituyendo {s} = {sols[0]} en la línea anterior se obtiene este paso. {aviso.format(nombre)}"
+    return None
+
+
+def verificar_pasos(lineas: list[str], datos: dict | None = None, tol_rel: float = 0.01, unidades: dict | None = None) -> list[Paso]:
+    """
+    Revisa un desarrollo. `datos`: valores de las variables (texto; con unidad opcional «6.626e-34 [J s]»); `tol_rel`: tolerancia al
+    sustituir números; `unidades`: unidad de variables sin valor ({'E': 'J'}).
+    """
     try:
-        valores = leer_datos(datos)
+        valores, tabla_dims = _leer_datos_con_unidades(datos, unidades)
     except ErrorExpresion as error:
         return [Paso(t, SINTAXIS, f"Datos conocidos: {error}") for t in lineas] or []
     resultados: list[Paso] = []
@@ -297,23 +423,33 @@ def verificar_pasos(lineas: list[str], datos: dict | None = None, tol_rel: float
         if not str(texto).strip():
             continue
         try:
-            partes = _leer_linea(texto)
+            partes, declaradas, limpio = _leer_linea_con_unidades(texto)
         except ErrorExpresion as error:
             resultados.append(Paso(texto, SINTAXIS, str(error)))
+            saltadas += 1
+            continue
+        error_u, msg_u = _revisar_unidades(partes, declaradas, tabla_dims, limpio)
+        if error_u:
+            resultados.append(Paso(texto, ERROR, msg_u, "", "", msg_u))
             saltadas += 1
             continue
         # «x = A = B = C»: el primer «=» es la ecuación; las expresiones A, B, C son una cadena de igualdades que debe cumplirse
         cadena, falla = _cadena_consistente(partes[1:], tol_rel, valores)
         if cadena is False:
-            resultados.append(Paso(texto, ERROR, f"Las expresiones «{_leer_texto(texto, falla + 1)}» y «{_leer_texto(texto, falla + 2)}» "
+            resultados.append(Paso(texto, ERROR, f"Las expresiones «{_leer_texto(limpio, falla + 1)}» y «{_leer_texto(limpio, falla + 2)}» "
                                                  "no son iguales.", ""))
             saltadas += 1
         elif not contexto:
             msg = "Primera línea: no se compara con nada." if cadena is not None else \
                   "Primera línea; no pude comprobar la igualdad interna."
-            resultados.append(Paso(texto, INICIO if cadena is not None else NO_VERIFICABLE, msg))
+            prueba = _prueba(contexto, partes, valores) if cadena and len(partes) >= 3 else ""
+            resultados.append(Paso(texto, INICIO if cadena is not None else NO_VERIFICABLE, msg, "", prueba, msg_u))
         else:
             estado, mensaje, ayuda = _deduce(contexto, partes, tol_rel, valores)
+            if estado == NO_VERIFICABLE:
+                con_ley = _con_leyes(contexto, partes, tol_rel, valores)
+                if con_ley:
+                    estado, mensaje = con_ley
             if saltadas and estado == ERROR:
                 mensaje += " (Se compara con la última línea correcta, no con las que tienen error.)"
             if estado == ERROR:
@@ -323,7 +459,8 @@ def verificar_pasos(lineas: list[str], datos: dict | None = None, tol_rel: float
             saltadas = 0
             if cadena is None and estado == OK:
                 estado, mensaje = NO_VERIFICABLE, "Se deduce de la anterior, pero no pude comprobar la igualdad interna de la línea."
-            resultados.append(Paso(texto, estado, mensaje, ayuda))
+            prueba = _prueba(contexto, partes, valores) if estado == OK else ""
+            resultados.append(Paso(texto, estado, mensaje, ayuda, prueba, msg_u))
         saltadas = 0
         contexto.append(partes)
     return resultados
