@@ -75,7 +75,7 @@ def test_las_lecturas_son_datos_reales():
     import ejercicios
     import formulario
     lect = dict((k, v) for v, k in portada.lecturas())
-    assert lect["simuladores"] == "6"
+    assert lect["simuladores"] == "8"
     assert lect["ejercicios"] == str(len(ejercicios.EJERCICIOS))
     assert lect["fórmulas"] == str(sum(len(s.todas()) for s in formulario.SECCIONES))
 
@@ -87,7 +87,8 @@ def test_ubicacion_escapa_y_numera():
 
 def test_composicion_asimetrica():
     for categoria, (proporciones, mayor) in portada.COMPOSICION.items():
-        assert len(proporciones) == 3 and proporciones[mayor] == max(proporciones)
+        assert len(proporciones) == len([m for m in portada.MODULOS if m[2] == categoria]) >= 2
+        assert proporciones[mayor] == max(proporciones)
         assert proporciones.count(max(proporciones)) == 1
     assert portada.COMPOSICION["Mecánica cuántica"][1] != portada.COMPOSICION["Fundamentos"][1]
 
@@ -115,7 +116,7 @@ def test_portada_destinos_y_observatorio():
     assert 'id="ql-particulas"' in html and 'class="ql-fondo-atomo"' in html and 'class="ql-atomo"' in html
     assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
     etiquetas = {b.key: b.label for b in at.button if b.key and b.key.startswith("ql_abrir_")}
-    assert len(etiquetas) == 20 and etiquetas["ql_abrir_caja"] == "Abrir el simulador: Partícula en una caja"
+    assert len(etiquetas) == 22 and etiquetas["ql_abrir_caja"] == "Abrir el simulador: Partícula en una caja"
     assert not any("ql-ubicacion" in m.value and "role=" in m.value for m in at.markdown)
 
 
@@ -154,8 +155,9 @@ import pytest
 
 
 @pytest.mark.parametrize("archivo", ["particula_caja", "oscilador_armonico", "particula_esfera",
-                                     "efecto_fotoelectrico", "modelo_bohr", "principio_incertidumbre"])
-def test_ficha_en_los_seis_simuladores(archivo):
+                                     "efecto_fotoelectrico", "modelo_bohr", "principio_incertidumbre", "hidrogeno_radial",
+                                     "espin_electrones"])
+def test_ficha_en_los_ocho_simuladores(archivo):
     from streamlit.testing.v1 import AppTest
     at = AppTest.from_file(f"{archivo}.py", default_timeout=90).run()
     assert not at.exception
@@ -200,14 +202,14 @@ def test_emergencia_desde_abajo_y_nube_orbital():
 
 
 
-def test_portada_muestra_solo_los_cuatro_capitulos():
+def test_portada_muestra_solo_los_seis_capitulos():
     at = _abrir(vista=None)
     assert not at.exception, [e.value for e in at.exception]
     claves = {b.key for b in at.button if b.key and b.key.startswith("ql_menu_")}
-    assert claves == {f"ql_menu_{c}" for c in portada.CAT_CLAVE.values()} and len(claves) == 5
+    assert claves == {f"ql_menu_{c}" for c in portada.CAT_CLAVE.values()} and len(claves) == 6
     assert not any(b.key and b.key.startswith("ql_abrir_") for b in at.button)       # las tarjetas quedan en la otra vista
     html = " ".join(m.value for m in at.markdown)
-    assert html.count('class="ql-esc-item ql-esc-') == 5                              # una escena por capítulo
+    assert html.count('class="ql-esc-item ql-esc-') == 6                              # una escena por capítulo
     assert f'id="{portada.ID_SIMULADORES}"' in html and f'id="{portada.ID_ESTUDIO}"' in html
 
 

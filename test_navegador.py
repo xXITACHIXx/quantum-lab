@@ -1,5 +1,5 @@
 """
-test_navegador.py — Recorrido en un navegador real (Chromium + Playwright) de los seis simuladores
+test_navegador.py — Recorrido en un navegador real (Chromium + Playwright) de los ocho simuladores
 ==================================================================================================
 
 Arranca la aplicación con `streamlit run` y recorre las pestañas nuevas. Comprueba que se muestren los resultados y que no

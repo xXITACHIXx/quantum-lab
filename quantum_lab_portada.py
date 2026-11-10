@@ -37,50 +37,56 @@ MODULOS = [
      "Modelo de Bohr: niveles, transiciones y series espectrales. Átomo cuántico en 3D con nubes de probabilidad.", "Eₙ = −13.6 eV / n²"),
     ("incertidumbre", "06", "Fundamentos", SIMULADOR, "Principio de incertidumbre",
      "Paquetes de ondas en posición y momento, límite de Heisenberg, ensanchamiento de una partícula libre y difracción por una rendija.", "Δx · Δp ≥ ħ / 2"),
-    ("ruta", "07", "Teoría y repaso", ESTUDIO, "Ruta de estudio",
+    ("radial", "07", "Estructura atómica", SIMULADOR, "Hidrógeno: función radial",
+     "Función radial R(r), distribución radial r²R², distancia esperada, nodos y energía de cualquier estado (n, l).", "P(r) = r² |R(r)|²"),
+    ("espin", "08", "Estructura atómica", SIMULADOR, "Espín de dos electrones",
+     "Autovalores de S² y S_z de una función de dos electrones en notación de Dirac, singlete y triplete, y antisimetría de Pauli.", "Ŝ² Ψ = s(s+1) ħ² Ψ"),
+    ("ruta", "09", "Teoría y repaso", ESTUDIO, "Ruta de estudio",
      "Recorrido por dominio de cada tema, con prerrequisitos y siguiente paso sugerido.", ""),
-    ("teoria", "08", "Teoría y repaso", ESTUDIO, "Centro de teoría",
+    ("teoria", "10", "Teoría y repaso", ESTUDIO, "Centro de teoría",
      "Teoría de cada tema con enlaces a su simulador, experimentos guiados y autoevaluación.", ""),
-    ("formulario", "09", "Teoría y repaso", ESTUDIO, "Formulario",
+    ("formulario", "11", "Teoría y repaso", ESTUDIO, "Formulario",
      "Constantes con incertidumbre, conversor de unidades, fórmulas por tema y masas isotópicas.", ""),
-    ("talleres", "10", "Teoría y repaso", ESTUDIO, "Talleres de repaso",
+    ("talleres", "12", "Teoría y repaso", ESTUDIO, "Talleres de repaso",
      "Problemas al estilo de los talleres evaluativos, calificados por partes y con solución justificada.", ""),
-    ("ejercicios", "11", "Teoría y repaso", ESTUDIO, "Ejercicios de práctica",
+    ("ejercicios", "13", "Teoría y repaso", ESTUDIO, "Ejercicios de práctica",
      "Problemas de clase y del libro con pistas y solución paso a paso.", ""),
-    ("examen", "12", "Teoría y repaso", ESTUDIO, "Modo examen",
+    ("examen", "14", "Teoría y repaso", ESTUDIO, "Modo examen",
      "Evaluación cronometrada con ejercicios del banco, calificada sobre 5.0.", ""),
-    ("repaso", "13", "Teoría y repaso", ESTUDIO, "Repaso personalizado",
+    ("repaso", "15", "Teoría y repaso", ESTUDIO, "Repaso personalizado",
      "Ejercicios por repasar, temas con menor precisión y errores más frecuentes.", ""),
-    ("biblioteca", "14", "Herramientas de estudio", ESTUDIO, "Biblioteca científica",
+    ("biblioteca", "16", "Herramientas de estudio", ESTUDIO, "Biblioteca científica",
      "Glosario, derivaciones con comprobación numérica, mapa de conexiones entre conceptos y referencias.", ""),
-    ("solucionador", "15", "Herramientas de estudio", ESTUDIO, "Solucionador paso a paso",
+    ("solucionador", "17", "Herramientas de estudio", ESTUDIO, "Solucionador paso a paso",
      "Ecuación, datos, sustitución numérica con unidades, resultado e interpretación física de un problema.", ""),
-    ("redactor", "16", "Herramientas de estudio", ESTUDIO, "Cuaderno de informes",
+    ("redactor", "18", "Herramientas de estudio", ESTUDIO, "Cuaderno de informes",
      "Editor de informes y talleres sin LaTeX: desarrollos con revisión simbólica, gráficas propias, simuladores y PDF.", ""),
-    ("tutor", "17", "Herramientas de estudio", ESTUDIO, "Tutor de errores conceptuales",
+    ("tutor", "19", "Herramientas de estudio", ESTUDIO, "Tutor de errores conceptuales",
      "Detecta confusiones frecuentes, como amplitud con probabilidad, y ofrece una pista y una explicación.", ""),
-    ("guia", "18", "Herramientas de estudio", ESTUDIO, "Guía de usuario",
+    ("guia", "20", "Herramientas de estudio", ESTUDIO, "Guía de usuario",
      "Diagramas de flujo de cada simulador y de sus códigos en la web y en Colab.", ""),
-    ("verificacion", "19", "Verificación", VERIFICACION, "Verificación",
+    ("verificacion", "21", "Verificación", VERIFICACION, "Verificación",
      "Contraste de los resultados con cálculos independientes y con los cuadernos de Colab.", ""),
-    ("pruebas", "20", "Verificación", VERIFICACION, "Pruebas numéricas",
+    ("pruebas", "22", "Verificación", VERIFICACION, "Pruebas numéricas",
      "Ejecución de todas las comprobaciones numéricas de la aplicación.", ""),
 ]
-CATEGORIAS = ("Mecánica cuántica", "Fundamentos", "Teoría y repaso", "Herramientas de estudio", "Verificación")
+CATEGORIAS = ("Mecánica cuántica", "Fundamentos", "Estructura atómica", "Teoría y repaso", "Herramientas de estudio", "Verificación")
 CAPITULOS = {
     "Mecánica cuántica": ("01", "Sistemas modelo", "Soluciones exactas de la ecuación de Schrödinger: confinamiento, oscilación y rotación."),
     "Fundamentos": ("02", "Origen de la teoría", "Los experimentos y modelos que obligaron a abandonar la física clásica."),
-    "Teoría y repaso": ("03", "Estaciones de estudio", "Teoría, fórmulas, práctica y evaluación conectadas con cada simulador."),
-    "Herramientas de estudio": ("04", "Consulta, cálculo y corrección", "Biblioteca, solucionador paso a paso, cuaderno de informes, tutor de errores conceptuales y guía de usuario."),
-    "Verificación": ("05", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
+    "Estructura atómica": ("03", "El átomo de hidrógeno y el espín", "La función radial del electrón y el espín total de dos electrones con el principio de Pauli."),
+    "Teoría y repaso": ("04", "Estaciones de estudio", "Teoría, fórmulas, práctica y evaluación conectadas con cada simulador."),
+    "Herramientas de estudio": ("05", "Consulta, cálculo y corrección", "Biblioteca, solucionador paso a paso, cuaderno de informes, tutor de errores conceptuales y guía de usuario."),
+    "Verificación": ("06", "Control de calidad", "Contraste de los resultados con cálculos independientes."),
 }
-CAT_CLAVE = {c: f"cat{i}" for i, c in enumerate(CATEGORIAS, start=1)}      # página de cada capítulo (sub-portada)
+CAT_CLAVE = {"Mecánica cuántica": "cat1", "Fundamentos": "cat2", "Teoría y repaso": "cat3", "Herramientas de estudio": "cat4",
+             "Verificación": "cat5", "Estructura atómica": "cat6"}      # página de cada capítulo (sub-portada); las claves antiguas no cambian
 CLAVE_CAT = {v: k for k, v in CAT_CLAVE.items()}
 ID_SIMULADORES = "ql-simuladores"
 ID_ESTUDIO = "ql-estudio"
 _CLASE = {SIMULADOR: "ql-dest-sim", ESTUDIO: "ql-dest-est", VERIFICACION: "ql-dest-ver"}
 # Composición asimétrica: proporciones de columna y posición del destino mayor en cada capítulo de simuladores.
-COMPOSICION = {"Mecánica cuántica": ([1.55, 1, 1], 0), "Fundamentos": ([1, 1, 1.55], 2)}
+COMPOSICION = {"Mecánica cuántica": ([1.55, 1, 1], 0), "Fundamentos": ([1, 1, 1.55], 2), "Estructura atómica": ([1.3, 1], 0)}
 
 
 def modulo(clave: str):

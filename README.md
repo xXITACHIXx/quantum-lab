@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.10%20a%203.13-blue)
 ![Versión](https://img.shields.io/badge/versi%C3%B3n-6.0-informational)
 
-Seis simuladores (más una página de verificación) con una identidad visual común (tema oscuro, tipografía científica sin emojis), todo en español.
+Ocho simuladores (más una página de verificación) con una identidad visual común (tema oscuro, tipografía científica sin emojis), todo en español.
 Cada simulador incluye resultados numéricos, visualización, interpretación, ecuaciones o **teoría**, **guía de
 práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace con NumPy y SciPy, sin APIs externas ni claves.
 
@@ -26,6 +26,8 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `particula_esfera.py` | 03 · Densidad de probabilidad |Yₗᵐ|² frente a la posición (x, y, z), armónicos esféricos en 3D, nodos, simetrías, complejos vs reales, partícula confinada |
 | `efecto_fotoelectrico.py` | 04 · Efecto fotoeléctrico: Einstein, umbral, corriente, comparación de metales, **determinación de h**, teoría e historia |
 | `modelo_bohr.py` | 05 · Átomo de hidrógeno: modelo de Bohr (transiciones, series, Rydberg, masa reducida) y **átomo cuántico en 3D** (nubes de probabilidad, orbitales, animación del salto), teoría |
+| `hidrogeno_radial.py` | 07 · Átomo de hidrógeno, parte radial: Rₙₗ(r), P(r)=r²R², ⟨r⟩, nodos, radio más probable, energía y comparación de orbitales, con guía, autoevaluación y 35 pruebas |
+| `espin_electrones.py` | 08 · Espín de dos electrones: Ŝz, Ŝ², singlete y triplete, simetría de intercambio y determinantes de Slater a partir de un estado escrito en notación de Dirac, con 34 pruebas |
 | `principio_incertidumbre.py` | 06 · Principio de incertidumbre: paquetes de ondas en x y p, límite ħ/2, evolución libre, difracción por una rendija, teoría |
 | `predice.py` | Modo **«Predice y experimenta»**: pregunta → predicción → experimento → comparación → explicación. La respuesta correcta se deduce del cálculo del simulador, no se escribe a mano |
 | `inverso.py` | **Laboratorio inverso**: retos con un objetivo; clasifica el intento como exacto, aproximado o incorrecto con las mismas funciones del simulador |
@@ -40,11 +42,12 @@ práctica**, **autoevaluación** y **pruebas numéricas**. El cálculo se hace c
 | `test_escena.py`, `test_arte.py`, `test_tema.py`, `test_movil.py`, `test_caja_diseno.py` | Pruebas de la portada y la navegación, las ilustraciones, la paleta y el contraste, el celular y la accesibilidad (texto alternativo, fuente de símbolos, fondo estable) y la figura y la superposición de la caja |
 | `test_herramientas.py` | Pruebas de biblioteca, solucionador y tutor |
 | `test_redactor.py` | Pruebas del cuaderno de informes: expresiones seguras, revisión de pasos, archivo .json, gráficas, PDF e interfaz |
+| `test_hidrogeno_espin.py` | Pruebas de los simuladores 07 y 08: páginas, validación de entradas, teoría enlazada y cuadernos de Colab comparados con la web |
 | `test_esfera_densidad.py`, `test_colab.py` | Densidad |Yₗᵐ|² en coordenadas cartesianas (web) y ejecución de los cuadernos de Colab, con la densidad comparada con la web |
 | `test_ruta.py`, `test_formulario.py`, `test_talleres.py`, `test_ejercicios*.py`, `test_examen.py`, `test_repaso.py`, `test_teoria.py` | Pruebas de las secciones de estudio |
 | `requirements.txt` | Dependencias con límites de versión |
 | `requirements-lock.txt` | Versiones exactas con las que se probó el proyecto |
-| `colab/` | Los tres cuadernos de Google Colab (caja, oscilador, esfera): implementación independiente de la misma física, y `celda_superposicion_oscilador.py`, una celda suelta con la animación de la superposición de estados del oscilador |
+| `colab/` | Los cinco cuadernos de Google Colab (caja, oscilador, esfera, hidrógeno radial y espín de dos electrones): implementación independiente de la misma física, y `celda_superposicion_oscilador.py`, una celda suelta con la animación de la superposición de estados del oscilador |
 | `docs/img/` | Capturas usadas en este README |
 | `.github/workflows/tests.yml` | Integración continua: ejecuta `pytest` en cada subida y una vez por semana |
 | `.github/dependabot.yml` | Avisos semanales de actualización de dependencias |
@@ -338,7 +341,7 @@ científico: no reproducen el diseño de ningún juego ni son resultados del sim
 menores de «regiones» (landmarks) que dependen de la estructura de Streamlit. Probado en Chromium (escritorio y un Pixel 7 emulado); no se ha
 probado en Safari ni en un teléfono real.
 
-**Pendiente.** Teoría de hidrógeno, espín y aproximados; simulador de orbitales; rediseño interior de los simuladores con la plantilla de diez
+**Pendiente.** Teoría de métodos aproximados; rediseño interior de los simuladores con la plantilla de diez
 secciones (por ahora solo la ficha de entrada); las gráficas de Plotly se redibujan sin transición al mover un control.
 
 ## 11. Herramientas de estudio

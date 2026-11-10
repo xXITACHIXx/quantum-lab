@@ -123,15 +123,20 @@ UNIDADES: tuple[Unidad, ...] = (
              "Partícula en un anillo y en una esfera, armónicos esféricos, momento angular y niveles de rotación molecular.",
              "Eₗ = l(l+1) ħ² / 2I", DISPONIBLE, "esfera", "esfera", "particula_esfera", "esf"),
     )),
+    Unidad("atomo", "El átomo de hidrógeno",
+           "La ecuación radial, las funciones de onda hidrogenoides y la distribución de probabilidad del electrón.", (
+        Tema("hidrogeno", "Átomo de hidrógeno (ecuación radial)",
+             "Ecuación radial, funciones de Laguerre, números cuánticos, distribución radial, ⟨r⟩, nodos y orbitales.",
+             "ψₙₗₘ = Rₙₗ(r) Yₗᵐ(θ, φ)", DISPONIBLE, "hidrogeno", "radial", "hidrogeno_radial", "rad"),
+    )),
+    Unidad("espin", "Espín y átomos de varios electrones",
+           "El espín del electrón, el espín total de dos electrones y el principio de Pauli con determinantes de Slater.", (
+        Tema("espin", "Espín y principio de exclusión",
+             "Funciones α y β, S² y S_z de dos electrones, singlete y triplete, antisimetría y determinante de Slater.",
+             "Ŝ² = s(s+1)ħ², s = 0, 1", DISPONIBLE, "espin", "espin", "espin_electrones", "esp"),
+    )),
     Unidad("pendientes", "Temas en preparación",
            "Títulos provisionales de temas sin diapositivas todavía; se reemplazarán por los del cronograma del curso.", (
-        Tema("hidrogeno", "Átomo de hidrógeno (ecuación radial)",
-             "Funciones radiales, números cuánticos y orbitales.", "ψₙₗₘ = Rₙₗ(r) Yₗᵐ(θ, φ)",
-             previsto=("Funciones de onda radiales y distribuciones radiales", "Orbitales s, p, d en 3D",
-                       "Degeneración y niveles de energía")),
-        Tema("espin", "Espín y principio de exclusión",
-             "Momento angular de espín, estados de dos electrones y configuraciones electrónicas.", "s = ½",
-             previsto=("Espín del electrón", "Principio de Pauli y configuraciones", "Acoplamiento de momentos angulares")),
         Tema("aproximados", "Métodos aproximados",
              "Teoría de perturbaciones y método variacional.", "E_var ≥ E₀",
              previsto=("Método variacional con funciones de prueba", "Perturbaciones independientes del tiempo",
@@ -312,9 +317,9 @@ def ejecutar_pruebas() -> "qc.RegistroPruebas":
     r.comprobar("Cada simulador enlazado tiene guía y preguntas",
                 all(importlib.import_module(t.modulo_sim).GUIA and importlib.import_module(t.modulo_sim).PREGUNTAS
                     for t in disponibles if t.simulador))
-    r.comprobar("Los 6 simuladores y los temas del curso están en el índice",
+    r.comprobar("Los 8 simuladores y los temas del curso están en el índice",
                 {"caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "cuerpo_negro", "de_broglie", "criterios",
-                 "ondas", "schrodinger", "operadores", "postulados", "conmutadores", "libre_pared"} <= set(ids))
+                 "ondas", "schrodinger", "operadores", "postulados", "conmutadores", "libre_pared", "hidrogeno", "espin"} <= set(ids))
     r.comprobar("Todo tema disponible sin simulador tiene autoevaluación propia (≥ 5 preguntas)",
                 all(len(_preguntas(t)[0] or []) >= 5 for t in disponibles if not t.simulador))
     r.comprobar("Las preguntas de autoevaluación tienen la respuesta correcta dentro de las opciones",

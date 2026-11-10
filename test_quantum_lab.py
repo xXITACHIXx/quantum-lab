@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 
 import efecto_fotoelectrico
+import espin_electrones
+import hidrogeno_radial
 import modelo_bohr
 import oscilador_armonico
 import particula_caja
@@ -16,7 +18,7 @@ import teoria
 import verificacion
 
 MODULOS = [particula_caja, oscilador_armonico, particula_esfera, efecto_fotoelectrico, modelo_bohr,
-           principio_incertidumbre, verificacion]
+           principio_incertidumbre, hidrogeno_radial, espin_electrones, verificacion]
 
 
 @pytest.mark.parametrize("modulo", MODULOS, ids=lambda m: m.__name__)
