@@ -204,6 +204,52 @@ def incertidumbre() -> str:
     return _envolver("".join(partes), "Ilustración conceptual: paquete estrecho en posición y ancho en momento, con el límite de Heisenberg")
 
 
+def radial() -> str:
+    """Distribuciones radiales r²R² de 1s, 2s y 2p (hidrógeno, unidades de a₀) con la distancia esperada de 2p."""
+    from scipy.special import eval_genlaguerre, gammaln
+    def dist(n, l, r):
+        rho = 2 * r / n
+        ln = 1.5 * np.log(2 / n) + 0.5 * (gammaln(n - l) - np.log(2 * n) - gammaln(n + l + 1))
+        return (r * np.exp(ln) * np.exp(-rho / 2) * rho ** l * eval_genlaguerre(n - l - 1, 2 * l + 1, rho)) ** 2
+    x0, x1, base, alto = 40, 330, 160, 118
+    r = np.linspace(0, 16, 220)
+    xs = x0 + r / 16 * (x1 - x0)
+    partes = [f'<line x1="{x0}" y1="{base}" x2="{x1}" y2="{base}" stroke="{P["tenue"]}" stroke-width="1.2"/>']
+    maximo = max(dist(1, 0, r).max(), dist(2, 0, r).max(), dist(2, 1, r).max())
+    for (n, l), col, nombre in (((1, 0), S["onda"], "1s"), ((2, 0), S["densidad"], "2s"), ((2, 1), S["energia"], "2p")):
+        y = dist(n, l, r) / maximo * alto
+        partes.append(_area(xs, base - y, base, col, 0.12))
+        partes.append(_linea(xs, base - y, col, 2.2))
+    xm = x0 + 5 / 16 * (x1 - x0)
+    partes.append(f'<line x1="{_n(xm)}" y1="{base}" x2="{_n(xm)}" y2="40" stroke="{P["amarillo"]}" stroke-width="1.4" stroke-dasharray="4 3"/>')
+    partes.append(_texto(xm + 5, 48, "⟨r⟩", P["amarillo"], 11, "start", 600))
+    partes.append(_texto(x0 + 18, 44, "1s", S["onda"], 11, "start", 600))
+    partes.append(_texto(x0 + 52, 142, "2s", S["densidad"], 10, "start", 600))
+    partes.append(_texto(x0 + 98, 58, "2p", S["energia"], 11, "start", 600))
+    partes.append(_texto((x0 + x1) / 2, base + 16, "r / a₀", P["tenue"], 10))
+    partes.append(_texto(180, 194, "P(r) = r² |R(r)|²", P["texto"], 12, peso=600))
+    return _envolver("".join(partes), "Ilustración conceptual: distribuciones radiales de probabilidad de los orbitales 1s, 2s y 2p del hidrógeno con la distancia esperada")
+
+
+def espin() -> str:
+    """Dos espines 1/2 (flechas α y β) y los cuatro estados: un singlete y un triplete."""
+    partes = []
+    for x, arriba, nombre in ((60, True, "α"), (110, False, "β")):
+        y1, y2 = (110, 50) if arriba else (50, 110)
+        partes.append(_flecha(x, y1, x, y2, S["energia"] if arriba else S["onda"], 2.4))
+        partes.append(_texto(x, 132, nombre, P["texto"], 13, peso=600))
+    partes.append(_texto(85, 28, "s = ½", P["tenue"], 11))
+    partes.append(_texto(85, 150, "dos estados", P["tenue"], 9))
+    niveles = ((200, 78, "triplete  s = 1", S["energia"], 3), (200, 118, "singlete  s = 0", S["onda"], 1))
+    for x, y, txt, col, k in niveles:
+        for i in range(k):
+            partes.append(f'<line x1="{x + i * 36}" y1="{y}" x2="{x + i * 36 + 28}" y2="{y}" stroke="{col}" stroke-width="3"/>')
+        partes.append(_texto(x + (k * 36) / 2 - 4, y - 8, txt, col, 10, peso=600))
+    partes.append(_texto(250, 148, "S² = 2ħ² o 0", P["tenue"], 10))
+    partes.append(_texto(180, 192, "Ŝ² Ψ = s(s+1) ħ² Ψ", P["texto"], 12, peso=600))
+    return _envolver("".join(partes), "Ilustración conceptual: dos espines un medio y los niveles de triplete y singlete")
+
+
 def _caja_texto(x, y, w, h, color=None, rx=6, relleno=None) -> str:
     return f'<rect x="{_n(x)}" y="{_n(y)}" width="{_n(w)}" height="{_n(h)}" rx="{rx}" fill="{relleno or "none"}" stroke="{color or P["borde"]}" stroke-width="1.4"/>'
 
@@ -422,7 +468,7 @@ def redactor() -> str:
     return _envolver("".join(partes), "Ilustración conceptual: hoja de informe con tres pasos de desarrollo revisados")
 
 
-ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre,
+ILUSTRACIONES = {"caja": caja, "oscilador": oscilador, "esfera": esfera, "fotoelectrico": fotoelectrico, "bohr": bohr, "incertidumbre": incertidumbre, "radial": radial, "espin": espin,
                  "ruta": ruta, "teoria": teoria, "formulario": formulario, "talleres": talleres, "ejercicios": ejercicios, "examen": examen,
                  "repaso": repaso, "biblioteca": biblioteca, "solucionador": solucionador, "redactor": redactor, "tutor": tutor, "guia": guia, "verificacion": verificacion, "pruebas": pruebas}
 _CACHE: dict[str, str] = {}

@@ -2,7 +2,7 @@
 quantum_lab.py — QUANTUM LAB · menú principal
 =============================================
 
-Laboratorio interactivo de mecánica cuántica con seis simuladores independientes y herramientas de estudio (biblioteca, solucionador, tutor, guía de usuario):
+Laboratorio interactivo de mecánica cuántica con ocho simuladores independientes y herramientas de estudio (biblioteca, solucionador, tutor, guía de usuario):
 
     particula_caja.py       Partícula en una caja 1D (estados, superposición e interferencia)
     oscilador_armonico.py   Oscilador armónico cuántico 1D (energías, virial, límite clásico, dinámica)
@@ -10,6 +10,8 @@ Laboratorio interactivo de mecánica cuántica con seis simuladores independient
     efecto_fotoelectrico.py Efecto fotoeléctrico (ecuación de Einstein, determinación de h)
     modelo_bohr.py          Átomo de hidrógeno: modelo de Bohr y átomo cuántico en 3D
     principio_incertidumbre.py  Principio de incertidumbre de Heisenberg (paquetes de ondas, dispersión, rendija)
+    hidrogeno_radial.py     Átomo de hidrógeno: función radial, distribución radial, ⟨r⟩, nodos y energía
+    espin_electrones.py     Espín total de dos electrones (S² y S_z en notación de Dirac, singlete/triplete, Slater)
 
 Ejecución:      streamlit run quantum_lab.py
 Cada simulador también funciona por separado:  streamlit run particula_caja.py   (etc.)
@@ -26,8 +28,10 @@ import biblioteca
 import efecto_fotoelectrico
 import ejercicios
 import examen
+import espin_electrones
 import formulario
 import guia
+import hidrogeno_radial
 import modelo_bohr
 import oscilador_armonico
 import particula_caja
@@ -54,6 +58,8 @@ PAGINAS = {
     "fotoelectrico": ("Efecto fotoeléctrico", ":material/wb_incandescent:", efecto_fotoelectrico),
     "bohr": ("Átomo de hidrógeno", ":material/radio_button_checked:", modelo_bohr),
     "incertidumbre": ("Principio de incertidumbre", ":material/blur_on:", principio_incertidumbre),
+    "radial": ("Hidrógeno: función radial", ":material/radio_button_checked:", hidrogeno_radial),
+    "espin": ("Espín de dos electrones", ":material/sync_alt:", espin_electrones),
     "teoria": ("Centro de teoría", ":material/menu_book:", teoria),
     "talleres": ("Talleres de repaso", ":material/edit_note:", talleres),
     "ejercicios": ("Ejercicios de práctica", ":material/calculate:", ejercicios),
@@ -72,6 +78,7 @@ PAGINAS = {
 GRUPOS = [
     ("Mecánica cuántica", ["caja", "oscilador", "esfera"], True),
     ("Fundamentos", ["fotoelectrico", "bohr", "incertidumbre"], True),
+    ("Estructura atómica", ["radial", "espin"], True),
     ("Teoría y repaso", ["ruta", "teoria", "formulario", "talleres", "ejercicios", "examen", "repaso"], True),
     ("Herramientas de estudio", ["biblioteca", "solucionador", "redactor", "tutor", "guia"], True),
     ("Verificación", ["verificacion", "pruebas"], True),
@@ -85,7 +92,7 @@ def _ir_a(pagina: str) -> None:
 
 def ejecutar_todas_las_pruebas() -> list[qc.RegistroPruebas]:
     return [m.ejecutar_pruebas() for m in (particula_caja, oscilador_armonico, particula_esfera,
-                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, redactor, tutor, guia, verificacion)]
+                                            efecto_fotoelectrico, modelo_bohr, principio_incertidumbre, hidrogeno_radial, espin_electrones, teoria, talleres, ejercicios, formulario, examen, repaso, ruta, biblioteca, solucionador, redactor, tutor, guia, verificacion)]
 
 
 # ---------------------------------------------------------------------
@@ -96,7 +103,7 @@ def _pie() -> None:
         qc.interruptor_movil()
         escena.instalar_efectos(st, len(portada.CATEGORIAS), len(portada.MODULOS))
         st.markdown(portada.css_navegacion() + '<div class="ql-pie">Cálculo con NumPy y SciPy. La dirección de la página guarda la '
-                    f'configuración: cópiala para compartirla. Versión {qc.VERSION} · 6 simuladores</div>', unsafe_allow_html=True)
+                    f'configuración: cópiala para compartirla. Versión {qc.VERSION} · 8 simuladores</div>', unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------
@@ -117,7 +124,7 @@ def _pagina_inicio() -> None:
 
 def _pagina_pruebas() -> None:
     qc.encabezado_pagina("Verificación", "Pruebas numéricas globales",
-                         "Comprobaciones de los seis simuladores y de la página de verificación. También se ejecutan con «python quantum_lab.py» o con pytest.")
+                         "Comprobaciones de los ocho simuladores y de la página de verificación. También se ejecutan con «python quantum_lab.py» o con pytest.")
     if st.button("Ejecutar todas las pruebas", type="primary", icon=":material/play_arrow:"):
         with st.spinner("Calculando…"):
             registros = ejecutar_todas_las_pruebas()

@@ -8,7 +8,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 APP = str(Path(__file__).parent / "quantum_lab.py")
-PAGINAS = ["inicio", "caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "teoria", "talleres", "ejercicios", "ruta", "formulario", "examen", "repaso", "verificacion",
+PAGINAS = ["inicio", "caja", "oscilador", "esfera", "fotoelectrico", "bohr", "incertidumbre", "radial", "espin", "teoria", "talleres", "ejercicios", "ruta", "formulario", "examen", "repaso", "verificacion",
            "pruebas"]
 
 
@@ -70,7 +70,7 @@ def test_enlace_antiguo_a_la_introduccion():
     assert at.session_state["ql_pagina"] == "teoria" and at.session_state["ql_tema"] == "schrodinger"
 
 
-@pytest.mark.parametrize("tema", ["hidrogeno", "espin", "aproximados", "born_oppenheimer", "orbitales_moleculares", "espectroscopia"])
+@pytest.mark.parametrize("tema", ["aproximados", "born_oppenheimer", "orbitales_moleculares", "espectroscopia"])
 def test_tema_en_preparacion_se_explica(tema):
     at = _abrir("teoria", ql_tema=tema)
     assert not at.exception, [e.value for e in at.exception]

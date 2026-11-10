@@ -1116,10 +1116,11 @@ def enlace_teoria(tema: str) -> None:
 # Tema de teoría → (tema de ejercicios, problema del solucionador). None si no existe esa herramienta para el tema.
 RELACIONES_ESTUDIO = {"caja": ("caja", "caja"), "oscilador": ("oscilador", "oscilador"),
                       "fotoelectrico": ("fotoelectrico", "fotoelectrico"), "bohr": ("bohr", "rydberg"),
-                      "incertidumbre": ("conmutadores", "incertidumbre"), "esfera": ("esfera", None)}
+                      "incertidumbre": ("conmutadores", "incertidumbre"), "esfera": ("esfera", None),
+                      "hidrogeno": ("hidrogeno", None), "espin": ("espin", None)}
 # Prefijo de claves de cada simulador → tema de teoría
 TEMA_DE_PREFIJO = {"caja": "caja", "osc": "oscilador", "foto": "fotoelectrico", "bohr": "bohr", "esf": "esfera",
-                   "inc": "incertidumbre"}
+                   "inc": "incertidumbre", "rad": "hidrogeno", "esp": "espin"}
 
 
 def _ir_a_ejercicios(tema_ej: str) -> None:

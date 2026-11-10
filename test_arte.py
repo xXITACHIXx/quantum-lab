@@ -60,7 +60,7 @@ def test_modulos_cubren_todas_las_paginas_una_vez():
     claves = [m[0] for m in portada.MODULOS]
     esperado = [k for k in quantum_lab.PAGINAS if k != "inicio"]
     assert sorted(claves) == sorted(esperado) and len(set(claves)) == len(claves)
-    assert [m[1] for m in portada.MODULOS] == [f"{i:02d}" for i in range(1, 21)]
+    assert [m[1] for m in portada.MODULOS] == [f"{i:02d}" for i in range(1, 23)]
     assert {m[2] for m in portada.MODULOS} == set(portada.CATEGORIAS)
 
 
